@@ -1,0 +1,11 @@
+node_modules/
+.next/
+out/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+.env*
+!.env.example
+.claude/settings.local.json
+.DS_Store
