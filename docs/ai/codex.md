@@ -64,8 +64,8 @@ references/scripts, into the committed Codex mirror. Edit canonical files, run s
 and commit canonical edits together with regenerated files. Never hand-edit a
 mirrored SKILL.md. No symlinks, extra dependency or global installation is needed.
 `skills:check` is read-only and fails on missing, changed or stale managed files.
-Run it before implementation and before publishing, and after rebasing canonical
-skill changes. It is separate from the app's verification command.
+Run it before implementation and after rebasing canonical skill changes. `pnpm verify`
+starts with `skills:check` and `skills:test`, so stale mirrors block verification.
 
 The `.agents/skills/.health360-skills.json` manifest records generated files. Sync
 removes only stale files listed there, preserves unrelated Codex skills, rejects
@@ -74,8 +74,9 @@ missing/empty. When migrating an independently generated skill with the same nam
 review the collision and resolve it deliberately; sync will not silently replace it.
 
 In Codex use `/skills` or type `$` to inspect/select skills. Invoke the recipes as
-`$design-system`, `$clinical-safety`, `$new-feature`, `$ai-layer` and
-`$workflow-transitions` as appropriate. If changes are not visible, restart Codex.
+`$design-system`, `$clinical-safety`, `$new-feature`, `$ai-layer`,
+`$workflow-transitions`, `$implement-task` and `$verify` as appropriate. If changes
+are not visible, restart Codex.
 Reading the canonical Markdown directly remains available in restricted hosts.
 Claude `CLAUDE.md` imports, slash commands, permissions and subagent metadata are
 not Codex settings.
@@ -127,15 +128,8 @@ Prisma and provider-specific MCP integrations remain deferred to their owning ta
 Follow the adoption decision in [TOOLING.md](TOOLING.md). The canonical product
 backlog/specs belong to the foundation owner; do not create a competing task list.
 OpenSpec CLI **1.14.3** was tested with `init` and `update` in a temporary directory.
-Its Codex target is **repo-local skills-only**:
-
-```sh
-# Upstream native behavior, for an isolated experiment only:
-pnpm dlx @fission-ai/openspec@1.14.3 init --tools codex --profile core
-pnpm dlx @fission-ai/openspec@1.14.3 update
-```
-
-Native init generates `.agents/skills/openspec-*/SKILL.md` and `.openspec-target`,
+Its upstream Codex target is **repo-local skills-only**. Native init generates
+`.agents/skills/openspec-*/SKILL.md` and `.openspec-target`,
 plus `openspec/` project files. It does not need global `~/.codex/prompts` or legacy
 `.codex/skills`. Core includes propose, explore, apply, update, sync and archive;
 verify/new/continue/ff/onboard/bulk-archive depend on profile selection. Update
@@ -143,21 +137,22 @@ refreshes detected integrations; inspect its diff rather than assuming Codex-onl
 changes. Global profile preferences can affect CLI output: pass `--profile core`
 for reproducible initialization.
 
-**Health360's shared-skill policy:** when adopting/updating OpenSpec, have the
-canonical skill owner generate the **Claude** target, then run our sync. Do not run
-Codex-native init/update over the same mirrored skills: tool-specific rendering
-would create two writers. The canonical-owner commands are:
+**Health360's shared-skill policy:** all OpenSpec skills are included in the mirror.
+Only the canonical skill owner generates the **Claude** target. Nobody initializes
+the Codex target in this checkout; `.agents/skills` has no native OpenSpec output.
+Because `update` detects existing integrations and may rewrite mirrored trees,
+generate upgrades in an isolated temporary project, import the Claude-owned
+outputs through their owner, and then sync. For example:
 
 ```sh
-pnpm dlx @fission-ai/openspec@1.14.3 init --tools claude --profile core
-# On later updates, inspect every affected integration and preserve one writer:
-pnpm dlx @fission-ai/openspec@1.14.3 update
+pnpm dlx @fission-ai/openspec@1.14.3 init <temporary-directory> --tools claude --profile core
+# Canonical owner reviews/imports generated .claude output from that directory.
 pnpm skills:sync
 pnpm skills:check
 ```
 
 Do not execute these setup commands as routine feature work or outside your path
-ownership. They can change `.claude/`, `openspec/` and other detected integrations.
+ownership. Native init/update can change `.claude/`, `openspec/` and other detected integrations.
 If native Codex skills were generated separately, reconcile them with the owner
 before sync. This tooling PR does not itself initialize a second OpenSpec project.
 

@@ -6,8 +6,9 @@ sandbox_mode = "read-only"
 developer_instructions = """
 Review only the assigned diff and necessary surrounding code. Read root AGENTS.md,
 applicable nested AGENTS.md, and the relevant canonical .claude/skills/*/SKILL.md.
-Use .claude/agents/clinical-safety-reviewer.md and
-.claude/agents/design-consistency-reviewer.md as engineering review checklists
+Use .claude/agents/clinical-safety-reviewer.md,
+.claude/agents/design-consistency-reviewer.md and
+.claude/agents/spec-conformance-reviewer.md as engineering review checklists
 when present and relevant; their Claude-specific tool/model metadata does not apply.
 Prioritize reproducible correctness, security, clinical publication gates, missing
 negative-path tests, token reuse and accessibility. Distinguish synthetic demo
