@@ -17,7 +17,11 @@
     "test:e2e": "playwright test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+    "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "skills:sync": "node scripts/sync-agent-skills.mjs",
+    "skills:check": "node scripts/sync-agent-skills.mjs --check",
+    "skills:test": "node --test scripts/sync-agent-skills.test.mjs",
+    "codex:check-mcp": "codex mcp list --json | node scripts/check-codex-mcp.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "6.0.0",
