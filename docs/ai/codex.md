@@ -46,6 +46,27 @@ credentials, home directory or absolute machine path is selected by project conf
 Cached web search is the default; use current official sources/live search when
 the task needs fresh API facts. These are defaults, not a clinical safety gate.
 
+## Troubleshooting legacy user config
+
+Codex CLI 0.163.0 rejected an inherited user setting during strict validation:
+
+```text
+unknown configuration field `features.rmcp_client`
+```
+
+This is a legacy user-config key, not a Health360 project requirement. If you see
+this error, inspect the file path reported by Codex. Back up your user config and
+remove only the obsolete `rmcp_client` entry from `[features]` deliberately; keep
+unrelated settings intact. Current MCP setup uses `[mcp_servers.<name>]` as described
+in the [official MCP configuration guide](https://developers.openai.com/codex/mcp/).
+Do not add the legacy flag to this repository or disable strict validation to hide it.
+
+Project maintainers can validate with an isolated temporary `CODEX_HOME` instead
+of modifying a user's configuration. Use a temporary config with explicit trust
+for the actual checkout and perform configuration/skill discovery only. An isolated
+home has separate account/plugin state, so this check does not establish access to
+the user's models or plugins. No user config was changed during this setup.
+
 ## Shared skills: one authoring location
 
 Author every shared skill and its relative assets in **`.claude/skills/`**.
