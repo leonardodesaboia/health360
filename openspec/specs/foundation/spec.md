@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Describe implemented behavior only. The functional MVP is planned in changes/.
+Describe implemented behavior only. The functional MVP is planned in docs/backlog/IMPLEMENTATION.md; per-task changes are created at pickup.
 
 ## Requirements
 
@@ -22,17 +22,6 @@ interface text and explicit demonstration labeling.
 
 - **WHEN** an identifier other than the prepared synthetic review is requested
 - **THEN** the application SHALL return HTTP 404 and a pt-BR not-found page
-
-### Requirement: Explicit administrative workflow
-
-The framework-free workflow SHALL contain all 11 product states, including
-CLARIFICATION_REQUIRED and REASSESSMENT_PENDING, and SHALL reject illegal edges.
-
-#### Scenario: Reject publication before completed review
-
-- **WHEN** a caller attempts a transition from analysis or pending review directly to PLAN_AVAILABLE
-- **THEN** the pure transition function SHALL throw an illegal-transition error
-- **AND** the graph SHALL NOT be interpreted as server authorization or clinical approval
 
 ### Requirement: Foundation excludes functional clinical modules
 

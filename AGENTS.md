@@ -7,18 +7,18 @@ Read this first. This is the canonical guide for Claude Code and Codex.
 This repository currently contains the **foundation**, not the functioning MVP.
 Read [ARCHITECTURE.md](ARCHITECTURE.md) for implemented boundaries,
 [product context](docs/product/PRODUCT_CONTEXT.md) for future requirements, and
-[canonical OpenSpec backlog](openspec/README.md) for ordered implementation tasks.
+[canonical ordered index](docs/backlog/IMPLEMENTATION.md) for ordered implementation tasks.
 Product-context imperatives describe future work; they do not authorize implementing everything.
 Do only the assigned task. Never add database access, LLM calls, persistence or clinical logic incidentally.
 
 ## Pick up a task
 
-1. **Spec:** choose the first authorized OpenSpec change whose dependencies are complete. Read its proposal, specs, design and unchecked tasks; distinguish implemented `openspec/specs` from future `openspec/changes`. Confirm scope and publishing restrictions. ECC `spec-miner` is for extracting existing behavior only, never inventing implemented MVP behavior.
+1. **Backlog → spec:** choose the first authorized entry in docs/backlog/IMPLEMENTATION.md whose dependencies are satisfied. Use its stable change ID to create or resume `openspec/changes/<id>/` with `pnpm exec openspec new change <id>`. Link the proposal to the entry; refine specs/design/tasks without copying long acceptance lists. Mark the index in progress with the actual change link. Baseline specs describe implemented behavior only. ECC spec-miner extracts existing behavior, never future MVP claims.
 2. **Plan:** inspect affected code/tests and use relevant recipes. Use superpowers brainstorming for unresolved requirements, writing-plans or ECC `/plan` for implementation detail. Keep the result in the change's `design.md`/`tasks.md`; no parallel backlog or plan directory. Verify changing APIs against current primary docs.
 3. **TDD:** use ECC `tdd-guide` / `tdd-workflow` or superpowers `test-driven-development`: reproduce a meaningful failure, implement the smallest fix, then refactor. Keep domain logic outside JSX and services server-only. Do not implement unrelated changes.
 4. **Verify:** use ECC `verification-loop` / `e2e-runner` and superpowers `verification-before-completion`. Run focused regressions, `pnpm verify`, `pnpm test:e2e`, format and strict OpenSpec validation. Record real output against completed task checkboxes; do not claim unimplemented scenarios pass.
 5. **Review:** check spec conformance, ECC `code-reviewer` and `typescript-reviewer`, plus `react-reviewer` for TSX; apply `healthcare-reviewer` to clinical data/publication boundaries and `security-reviewer` to trust/secret/auth changes. Review skill guidance inline when delegation is unavailable; never pretend a separate reviewer ran. Clinical review by a qualified human remains mandatory for medical criteria.
-6. Update the change and canonical docs, address findings, publish only as authorized, and archive through OpenSpec only after implementation/verification/review. Keep prior specs and clinical versions traceable. See [workflow mapping and tool fallbacks](docs/ai/WORKFLOW.md).
+6. After implementation, verification and review, archive with `pnpm exec openspec archive <id>` without skipping checks. Mark the ordered index entry done with archive, verification and PR links. Never archive an unimplemented plan or treat CLI planning completeness as delivered functionality. See [workflow mapping and tool fallbacks](docs/ai/WORKFLOW.md).
 
 ## Commands
 

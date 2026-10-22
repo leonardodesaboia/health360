@@ -7,8 +7,8 @@ spec → plan → TDD → verify → review workflow; do not maintain another ba
 | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
 | Claude Code setup, skills, agents, MCP and permissions                                                   | [claude-code.md](claude-code.md)                                                  |
 | Codex setup, skill discovery, MCP and review configuration                                               | [codex.md](codex.md)                                                              |
-| ECC/OpenSpec/superpowers adoption, Spec Kit comparison, specialist map and verified marketplace commands | [WORKFLOW.md](WORKFLOW.md)                                                        |
-| Ordered MVP requirements, dependencies and unchecked implementation tasks                                | [OpenSpec backlog](../../openspec/README.md)                                      |
+| ECC/OpenSpec/superpowers adoption, Spec Kit comparison, specialist map and verified marketplace commands | [ADR0002](../adr/0002-spec-driven-workflow.md), [WORKFLOW.md](WORKFLOW.md)        |
+| Ordered MVP requirements, dependencies and unchecked implementation tasks                                | [Ordered index](../backlog/IMPLEMENTATION.md)                                     |
 | Current implemented behavior                                                                             | [Foundation spec](../../openspec/specs/foundation/spec.md)                        |
 | Product context and exclusions                                                                           | [PRODUCT_CONTEXT.md](../product/PRODUCT_CONTEXT.md)                               |
 | Run and verify the foundation                                                                            | [README.md](../../README.md)                                                      |
