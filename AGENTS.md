@@ -66,6 +66,9 @@ Skills are plain Markdown and can be read by either agent:
 
 Optional Claude reviewers live in `.claude/agents/`. These are engineering reviewers, not medical reviewers.
 Tool activation and sources: [AI tooling](docs/ai/TOOLING.md).
+Harness-specific setup is owned separately: [Claude Code](docs/ai/claude-code.md)
+and [Codex](docs/ai/codex.md). Those documents are delivered by their respective
+tooling PRs; this root guide remains the harness-neutral policy source.
 
 ## Definition of done
 
