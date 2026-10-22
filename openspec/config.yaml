@@ -1,0 +1,48 @@
+schema: spec-driven
+
+context: |
+  Health360 is currently a synthetic-data foundation, not a functioning clinical MVP.
+  openspec/README.md is the only implementation backlog; all planned changes remain unimplemented.
+  Product context: docs/product/PRODUCT_CONTEXT.md. Agent policy: AGENTS.md.
+  UI pt-BR; technical docs and identifiers English. Node24/pnpm; no new runtime dependencies for planning.
+  Never invent clinical evidence, rules or validation. Medical review is mandatory before patient guidance.
+  Unknown is not negative. Preserve provenance and immutable profile/context/analysis/review/plan versions.
+  Follow spec -> plan -> TDD -> verify -> review. Keep plans/tasks inside their OpenSpec change.
+rules:
+  proposal:
+    - State dependencies, affected areas, scope exclusions and whether behavior is implemented or planned.
+  specs:
+    - Use SHALL requirements and concrete WHEN/THEN scenarios including failure and publication boundaries.
+  tasks:
+    - Keep future implementation tasks unchecked; record real test/review evidence before completion.
+
+# Project context (optional)
+# Add only constraints that should guide OpenSpec artifacts and workflows.
+# Include constraints an agent cannot infer by reading the code.
+# Keep general project documentation and discoverable codebase facts out.
+# Example:
+#   context: |
+#     Designs and tasks must cover Windows, macOS, and Linux
+#     Write all artifacts in Spanish
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

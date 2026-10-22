@@ -1,0 +1,123 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+:root {
+  --background: #f8faf9;
+  --foreground: #163b44;
+  --card: #ffffff;
+  --card-foreground: #163b44;
+  --primary: #167d75;
+  --primary-foreground: #ffffff;
+  --secondary: #eaf3ef;
+  --secondary-foreground: #163b44;
+  --muted: #f0f4f2;
+  --muted-foreground: #52655f;
+  --accent: #eaf3ef;
+  --accent-foreground: #163b44;
+  --border: #d9e2df;
+  --input: #71847e;
+  --ring: #167d75;
+  --destructive: #a52b36;
+  --destructive-foreground: #ffffff;
+  --success: #eaf3ef;
+  --success-foreground: #236349;
+  --warning: #fff4db;
+  --warning-foreground: #795012;
+  --information: #edf3f8;
+  --information-foreground: #305a7d;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #163b44;
+  --navigation-active: #eaf3ef;
+  --navigation-active-foreground: #163b44;
+  --navigation-hover: #f0f4f2;
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-information: var(--information);
+  --color-information-foreground: var(--information-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-navigation-active: var(--navigation-active);
+  --color-navigation-active-foreground: var(--navigation-active-foreground);
+  --color-navigation-hover: var(--navigation-hover);
+  --radius-sm: 0.375rem;
+  --radius-md: var(--radius);
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --font-sans: var(--font-geist-sans), sans-serif;
+  --container-form: 40rem;
+  --container-patient: 64rem;
+  --container-workspace: 90rem;
+  --container-record: 72rem;
+  --container-dialog: 32rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background font-sans text-base text-foreground antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-semibold tracking-tight;
+  }
+  h1 {
+    @apply text-[1.75rem] leading-tight md:text-[2rem];
+  }
+  h2 {
+    @apply text-xl leading-snug;
+  }
+  h3 {
+    @apply text-base leading-snug;
+  }
+  p {
+    @apply leading-relaxed;
+  }
+  button,
+  a,
+  input,
+  select,
+  summary {
+    -webkit-tap-highlight-color: transparent;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-4 outline-ring;
+  }
+  ::selection {
+    @apply bg-secondary text-secondary-foreground;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+}
