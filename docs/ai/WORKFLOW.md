@@ -1,6 +1,6 @@
 # Spec-driven implementation workflow
 
-Decision: adopt **OpenSpec as the single backlog**, supported by selected ECC and
+Decision: adopt **OpenSpec 1.14.3 as the per-task spec workflow**, supported by selected ECC and
 superpowers practices. Research verified against the primary sources linked below
 on 2026-10-22. Existing code remains the foundation; these workflow artifacts do not
 implement the MVP.
@@ -9,7 +9,7 @@ implement the MVP.
 
 | Tool                         | Decision for Health360                                       | Reason                                                                                                                                                                   |
 | ---------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| OpenSpec                     | Canonical changes/specs/design/tasks                         | Reviewable changes fit the existing Node toolchain and work across coding agents.                                                                                        |
+| OpenSpec                     | Per-task changes/specs/design/tasks                          | Reviewable changes fit the existing Node toolchain and work across coding agents.                                                                                        |
 | ECC / everything-claude-code | Selective stack, clinical-boundary and review recipes        | Complements the spec workflow; does not own another backlog or prescribe clinical criteria.                                                                              |
 | superpowers                  | Brainstorming, planning, TDD and evidence-based verification | Useful execution discipline around the same OpenSpec artifacts.                                                                                                          |
 | GitHub Spec Kit              | Compared, not initialized                                    | Supports structured specs/plans/tasks and agent integrations, but introducing another process tree would duplicate our source of truth and adds Python/uv prerequisites. |
@@ -20,24 +20,13 @@ is required for any of these planning tools.
 
 ## Canonical artifacts and status
 
-[openspec/README.md](../../openspec/README.md) indexes P0/P1 in dependency order.
-Each change contains `proposal.md`, delta `specs/`, `design.md`, `tasks.md` and
-`.openspec.yaml`. All future implementation checkboxes start unchecked.
-`openspec/specs/foundation/spec.md` describes only current implemented behavior.
-Flows A–E belong to the prepared-demonstration change. The old backlog document is
-a redirect, without copied acceptance criteria or task status.
+The [ordered index](../backlog/IMPLEMENTATION.md) owns task order, stable change IDs, dependencies, acceptance criteria, required tests and completion links. All 18 entries remain planned. [ADR0002](../adr/0002-spec-driven-workflow.md) records this hybrid decision; OpenSpec is not a second backlog.
 
-Use the change's design/tasks for refinement and execution evidence. If a planning
-plugin defaults to a separate plan directory, direct it to these existing artifacts.
-Do not maintain both a plugin task list and a separate authoritative backlog.
-Planning artifacts can be complete while implementation remains entirely pending.
-Archive after implementation and review, so future requirements become baseline
-specs only when delivered.
+At pickup, create/resume the assigned `openspec/changes/<stable-id>/` proposal, specs, design and unchecked tasks from that entry. The proposal links its stable index anchor; reference long acceptance criteria rather than duplicate them. Mark the index in progress with the actual change link. Keep planning and implementation evidence within the change; plugin defaults must not create another authoritative plan directory.
 
-In pinned OpenSpec 1.14.3, `status --json` reports `isComplete` for **planning
-artifacts**. Use `instructions apply --change <id> --json` to inspect implementation
-checkbox progress. The repository's planned changes are not completed features,
-and dependency/medical-owner preconditions are not enforced by that status flag.
+Implement with TDD, run the entry's required tests and full verification, then review. Archive the completed change through OpenSpec and mark the index done with archive/test/PR links. `openspec/specs/` describes implemented foundation behavior only. Flows A–E remain future acceptance specs in the index until their task is picked up.
+
+In pinned OpenSpec1.14.3, `status --json` `isComplete` means **planning artifact completeness**. Inspect `instructions apply --change <id> --json` for implementation checkboxes. Dependencies and medical-owner inputs are not enforced by CLI readiness; never archive unimplemented work or use foundation smoke as proof of future MVP completion.
 
 OpenSpec core was originally initialized for real with
 `npx -y @fission-ai/openspec@1.14.3 init --tools none`. The exact package is now a
@@ -46,12 +35,13 @@ metadata. After `pnpm install --frozen-lockfile`, every agent uses the project C
 
 ```sh
 pnpm exec openspec list
-pnpm exec openspec status --change p0-01-persistence
-pnpm exec openspec instructions apply --change p0-01-persistence
+pnpm exec openspec new change p0-03-intake-draft
+pnpm exec openspec status --change p0-03-intake-draft
+pnpm exec openspec instructions apply --change p0-03-intake-draft
 pnpm exec openspec validate --all --strict --no-interactive
 ```
 
-For a fresh setup that needs initialization, `pnpm exec openspec init --tools none`
+Run the change-creation example only when that task is assigned and its dependencies are satisfied. For a fresh setup that needs initialization, `pnpm exec openspec init --tools none`
 creates only core files. Existing clones already contain them; do not rerun init
 or generate integrations belonging to another worker. Core-only initialization
 avoids overwriting project-specific agent integrations.
