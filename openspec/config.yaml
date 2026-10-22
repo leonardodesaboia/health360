@@ -1,32 +1,26 @@
-schema: spec-driven
+﻿schema: spec-driven
 
-# Project context (optional)
-# Add only constraints that should guide OpenSpec artifacts and workflows.
-# Include constraints an agent cannot infer by reading the code.
-# Keep general project documentation and discoverable codebase facts out.
-# Example:
-#   context: |
-#     Designs and tasks must cover Windows, macOS, and Linux
-#     Write all artifacts in Spanish
-
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always state what is out of scope
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
-
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+context: |
+  Health360 is a synthetic-data prototype; no real-patient use or clinical validation is authorized.
+  UI copy is pt-BR; code identifiers and technical documentation are English.
+  Physician review is mandatory before patient guidance; no automatic publication of model output.
+  Never fabricate evidence, clinical criteria or negative findings from unknown information.
+  Use centralized semantic design tokens and shared components, not arbitrary feature colors.
+  Support Windows development with Node24 and pnpm; run the locked CLI through pnpm exec openspec.
+  docs/backlog/IMPLEMENTATION.md is the canonical ordered task index and acceptance source.
+  At task pickup create/resume changes/<stable-id>; proposals reference the index entry.
+  Keep design/tasks/spec deltas within that change; no parallel backlog or copied acceptance lists.
+  Preserve provenance, immutable clinical versions and fail-closed analysis/review/publication boundaries.
+rules:
+  proposal:
+    - Link the stable backlog entry and state dependencies, affected areas and explicit out-of-scope work.
+    - Identify required tests, clinical-safety checks and canonical documentation that must change.
+    - Reference existing acceptance criteria rather than duplicating long lists; distinguish planned from implemented behavior.
+  specs:
+    - Use SHALL requirements and concrete WHEN/THEN scenarios, including failures, unknown data and review/publication gates.
+    - Baseline specs describe implemented behavior only; future deltas remain in the selected active change until archive.
+  tasks:
+    - Start implementation steps unchecked; include the backlog entry's required tests and meaningful red/green regression evidence.
+    - Include clinical-safety/provenance/publication-boundary review and applicable TypeScript/React/security review.
+    - List docs to update, run pnpm verify plus e2e/format/strict spec validation, and record actual results before completion.
+    - Archive only after implementation and review; update the ordered index to done with archive, test and PR links.

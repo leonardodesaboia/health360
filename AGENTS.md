@@ -7,18 +7,18 @@ Read this first. This is the canonical guide for Claude Code and Codex.
 This repository currently contains the **foundation**, not the functioning MVP.
 Read [ARCHITECTURE.md](ARCHITECTURE.md) for implemented boundaries,
 [product context](docs/product/PRODUCT_CONTEXT.md) for future requirements, and
-[backlog](docs/backlog/IMPLEMENTATION.md) for ordered implementation tasks.
+[canonical ordered index](docs/backlog/IMPLEMENTATION.md) for ordered implementation tasks.
 Product-context imperatives describe future work; they do not authorize implementing everything.
 Do only the assigned task. Never add database access, LLM calls, persistence or clinical logic incidentally.
 
 ## Pick up a task
 
-1. Select the earliest uncompleted backlog task whose dependencies are complete. Confirm the user's assigned scope and publishing restrictions.
-2. Inspect the affected code and tests; read the relevant skill below. Verify changing APIs against installed types, Context7 or official docs.
-3. State a short implementation plan, including server boundaries and failure behavior. Add dependencies only when needed and verify package names and peers.
-4. Implement a thin vertical slice in `src/features/<feature>`. Keep routes as composition. Default to Server Components; add `use client` only for interaction.
-5. Add meaningful tests for the acceptance criteria and negative paths. Never weaken clinical gates to make a test pass.
-6. Update the relevant canonical doc and mark backlog status with evidence. Run the definition of done and summarize limitations honestly.
+1. **Backlog → spec:** choose the first authorized entry in docs/backlog/IMPLEMENTATION.md whose dependencies are satisfied. Use its stable change ID to create or resume `openspec/changes/<id>/` with `pnpm exec openspec new change <id>`. Link the proposal to the entry; refine specs/design/tasks without copying long acceptance lists. Mark the index in progress with the actual change link. Baseline specs describe implemented behavior only. ECC spec-miner extracts existing behavior, never future MVP claims.
+2. **Plan:** inspect affected code/tests and use relevant recipes. Use superpowers brainstorming for unresolved requirements, writing-plans or ECC `/plan` for implementation detail. Keep the result in the change's `design.md`/`tasks.md`; no parallel backlog or plan directory. Verify changing APIs against current primary docs.
+3. **TDD:** use ECC `tdd-guide` / `tdd-workflow` or superpowers `test-driven-development`: reproduce a meaningful failure, implement the smallest fix, then refactor. Keep domain logic outside JSX and services server-only. Do not implement unrelated changes.
+4. **Verify:** use ECC `verification-loop` / `e2e-runner` and superpowers `verification-before-completion`. Run focused regressions, `pnpm verify`, `pnpm test:e2e`, format and strict OpenSpec validation. Record real output against completed task checkboxes; do not claim unimplemented scenarios pass.
+5. **Review:** check spec conformance, ECC `code-reviewer` and `typescript-reviewer`, plus `react-reviewer` for TSX; apply `healthcare-reviewer` to clinical data/publication boundaries and `security-reviewer` to trust/secret/auth changes. Review skill guidance inline when delegation is unavailable; never pretend a separate reviewer ran. Clinical review by a qualified human remains mandatory for medical criteria.
+6. After implementation, verification and review, archive with `pnpm exec openspec archive <id>` without skipping checks. Mark the ordered index entry done with archive, verification and PR links. Never archive an unimplemented plan or treat CLI planning completeness as delivered functionality. See [workflow mapping and tool fallbacks](docs/ai/WORKFLOW.md).
 
 ## Commands
 
@@ -30,6 +30,7 @@ Use Node 24 and pnpm 10.34.5. On restricted Windows PowerShell use `pnpm.cmd`.
 - `pnpm exec playwright install chromium` — one-time browser installation
 - `pnpm test:e2e` — desktop/mobile Chromium against production build on port 3100
 - `pnpm format` / `pnpm format:check`
+- `pnpm exec openspec validate --all --strict --no-interactive` — locked OpenSpec 1.14.3; use `pnpm exec openspec` for all project CLI operations, no global install
 
 ## Design and code conventions
 
@@ -66,10 +67,13 @@ Skills are plain Markdown and can be read by either agent:
 
 Optional Claude reviewers live in `.claude/agents/`. These are engineering reviewers, not medical reviewers.
 Tool activation and sources: [AI tooling](docs/ai/TOOLING.md).
+Harness-specific setup is owned separately: [Claude Code](docs/ai/claude-code.md)
+and [Codex](docs/ai/codex.md). Those documents are delivered by their respective
+tooling PRs; this root guide remains the harness-neutral policy source.
 
 ## Definition of done
 
 Acceptance and failure paths are covered, no scope creep, no sensitive data. `pnpm verify`, `pnpm test:e2e` and `pnpm format:check` pass.
 For UI changes inspect mobile/desktop, keyboard focus, empty/error/disabled states and pt-BR copy.
 Review clinical publication gates and provenance when touched. Update docs and report exact validation plus unverified aspects.
-Commits use conventional messages. Publish only within the current user's authorization; this foundation task is local-only.
+Commits use conventional messages. Publish only within the current user's authorization. The foundation PR is authorized; do not merge it. Respect the active environment's delegation and review policies over optional plugin automation.
