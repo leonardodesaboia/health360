@@ -15,7 +15,7 @@ Run them in this order and stop at the first failure.
 pnpm verify          # eslint --max-warnings=0, next typegen + tsc --noEmit, vitest run, next build
 pnpm test:e2e        # Playwright desktop + mobile Chromium against a production build (port 3100)
 pnpm format:check    # Prettier
-npx -y @fission-ai/openspec@1.14.3 validate --all --strict --no-interactive   # OpenSpec artifacts
+pnpm exec openspec validate --all --strict --no-interactive   # OpenSpec artifacts
 ```
 
 - One-time setup when Playwright browsers are missing: `pnpm exec playwright install chromium`.

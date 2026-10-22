@@ -10,15 +10,13 @@ One change per session. Do only the assigned scope. The product context describe
 ## 0. Select the change
 
 - **OpenSpec is the only backlog.** `openspec/README.md` lists the P0 and P1 changes in dependency order. Each `openspec/changes/<id>/` holds `proposal.md`, `specs/` (requirements and scenarios), `design.md`, `tasks.md`, and an "Evidence" section, and together they are the contract. `docs/backlog/IMPLEMENTATION.md` is only a redirect.
-- Use the pinned CLI (no global install needed):
+- Use the locked CLI: `pnpm exec openspec ...` (devDependency, 1.14.3). The generated `openspec-*` skills write bare `openspec ...`. Run those commands as `pnpm exec openspec ...` too, because a global `openspec` may be a different version.
 
   ```sh
-  npx -y @fission-ai/openspec@1.14.3 list
-  npx -y @fission-ai/openspec@1.14.3 instructions apply --change <id> --json   # implementation checkbox progress
-  npx -y @fission-ai/openspec@1.14.3 validate --all --strict --no-interactive
+  pnpm exec openspec list
+  pnpm exec openspec instructions apply --change <id> --json   # implementation checkbox progress
+  pnpm exec openspec validate --all --strict --no-interactive
   ```
-
-  If a bare `openspec` is on PATH, check that `openspec --version` reports 1.14.3 before using it.
 
 - If no change was named, pick the first P0 change (then P1) whose dependencies are **implemented**, and say which one you picked.
 - **`status --json` reporting `isComplete: true` means only that the planning artifacts exist**, not that anything is implemented. Judge progress by the unchecked boxes in `tasks.md`.
@@ -82,7 +80,7 @@ If your harness offers dedicated review agents (in Claude Code: `spec-conformanc
   - the PR link once it exists;
   - any follow-ups.
 - Never tick boxes based on foundation smoke tests or planning completeness.
-- Run `npx -y @fission-ai/openspec@1.14.3 validate --all --strict --no-interactive`.
+- Run `pnpm exec openspec validate --all --strict --no-interactive`.
 - Archive (`openspec-archive-change`) only after the implementation is merged, reviewed, and every required task is done. Archiving promotes the specs to the baseline. Never use force or skip-validation flags, and never bulk-archive.
 - Update the canonical docs your change affects (see `new-feature` §6).
 

@@ -83,9 +83,7 @@ Prerequisites: Node 24, pnpm 10.34.5, Claude Code ≥ 2.1.277.
 ```sh
 pnpm install --frozen-lockfile
 pnpm exec playwright install chromium     # e2e browsers
-npx -y @fission-ai/openspec@1.14.3 list   # pinned OpenSpec CLI; no global install needed
-# Optional: the generated openspec-* skills call a bare `openspec`. To run them as written,
-# install the same pinned version globally: npm install -g @fission-ai/openspec@1.14.3
+pnpm exec openspec list                  # OpenSpec 1.14.3 is a locked devDependency; no global install
 claude                                    # accept workspace trust, then /mcp to confirm the 4 servers
 ```
 
@@ -107,7 +105,7 @@ Then run `claude plugin list` and `/reload-plugins` (or restart). ECC ships its 
 Regenerate the OpenSpec Claude skills after upgrading OpenSpec. This rewrites only `.claude/skills/openspec-*` and leaves `openspec/` untouched:
 
 ```sh
-npx -y @fission-ai/openspec@1.14.3 init --tools claude --no-animation .
+pnpm exec openspec init --tools claude --no-animation .
 pnpm format   # generated files are committed Prettier-formatted
 ```
 
