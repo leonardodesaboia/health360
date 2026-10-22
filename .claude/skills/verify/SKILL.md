@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Runs the Health360 definition-of-done checks (pnpm verify, pnpm test:e2e, pnpm format:check) and reports the real results. Use before claiming any Health360 task is done, before committing or opening or updating a PR, after rebasing, and whenever asked to verify, check, or validate the repo.
+description: Runs the Health360 definition-of-done checks (pnpm verify, pnpm test:e2e, pnpm format:check, strict OpenSpec validation) and reports the real results. Use before claiming any Health360 task is done, before committing or opening or updating a PR, after rebasing, and whenever asked to verify, check, or validate the repo.
 ---
 
 # Health360 verification
@@ -15,6 +15,7 @@ Run them in this order and stop at the first failure.
 pnpm verify          # eslint --max-warnings=0, next typegen + tsc --noEmit, vitest run, next build
 pnpm test:e2e        # Playwright desktop + mobile Chromium against a production build (port 3100)
 pnpm format:check    # Prettier
+npx -y @fission-ai/openspec@1.14.3 validate --all --strict --no-interactive   # OpenSpec artifacts
 ```
 
 - One-time setup when Playwright browsers are missing: `pnpm exec playwright install chromium`.
@@ -45,6 +46,7 @@ Verification (<branch> @ <short sha>)
 - pnpm verify: PASS | FAIL (<first error excerpt>)
 - pnpm test:e2e: PASS (N passed) | FAIL (...)
 - pnpm format:check: PASS | FAIL
+- openspec validate --strict: PASS | FAIL
 - Manual checks performed: <list, or "none">
 - Not verified: <anything skipped, and why>
 ```

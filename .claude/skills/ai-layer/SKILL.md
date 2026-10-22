@@ -5,7 +5,7 @@ description: Recipe for the Health360 server-side AI layer: the replaceable LLM 
 
 # Health360 AI-layer recipe
 
-Only implement this layer when the assigned task authorizes it (backlog P0-06 and P0-07 or the matching spec change). The product rule: **no proprietary AI**. Use an established external LLM through an API with a configurable provider and model, plus deterministic rules and mandatory physician review. Read `docs/product/PRODUCT_CONTEXT.md` §3–4 and §9–11, and `ARCHITECTURE.md` "Future server boundaries". Apply the `clinical-safety` skill throughout.
+Only implement this layer when the assigned task authorizes it (OpenSpec changes `p0-06-llm-adapter` and `p0-07-analysis-validation`). The product rule: **no proprietary AI**. Use an established external LLM through an API with a configurable provider and model, plus deterministic rules and mandatory physician review. Read `docs/product/PRODUCT_CONTEXT.md` §3–4 and §9–11, and `ARCHITECTURE.md` "Future server boundaries". Apply the `clinical-safety` skill throughout.
 
 ## Layout (create only what the task needs)
 

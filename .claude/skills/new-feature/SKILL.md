@@ -50,7 +50,7 @@ Don't create empty directories, placeholder services, speculative abstractions, 
 - `USER_FLOWS.md` when you change a journey or state.
 - `COMPONENT_GUIDELINES.md` and `/showcase` for a new or changed shared component.
 - `DESIGN_GUIDELINES.md` for a new token, with its contrast ratio.
-- Backlog or spec status with evidence (see `implement-task`).
+- The OpenSpec change's `tasks.md` checkboxes and Evidence section (see `implement-task`).
 
 ## 7. Finish
 

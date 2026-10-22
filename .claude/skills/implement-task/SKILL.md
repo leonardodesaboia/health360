@@ -1,21 +1,33 @@
 ---
 name: implement-task
-description: End-to-end loop for implementing one Health360 backlog task or OpenSpec change: select and scope, plan, write tests first, implement, verify, self-review against the clinical, design, and spec checklists, update status, commit, and open a PR within the authorized publishing scope. Use when asked to implement, pick up, continue, or finish a backlog item (e.g. P0-03), an OpenSpec change, or "the next task" in Health360.
+description: End-to-end loop for implementing one Health360 OpenSpec change (the backlog, e.g. P0-03 / p0-03-intake-draft): check dependencies, plan in the change's design/tasks, write tests first, implement, verify, self-review against the spec, clinical, and design checklists, record evidence in tasks.md, commit, and open a PR within the authorized publishing scope. Use when asked to implement, pick up, continue, or finish a backlog item, an OpenSpec change, or "the next task" in Health360.
 ---
 
-# Implement a Health360 task end to end
+# Implement a Health360 OpenSpec change end to end
 
-One task per session. Do only the assigned scope. The product context describes the whole MVP, but that doesn't authorize building all of it.
+One change per session. Do only the assigned scope. The product context describes the whole MVP, but that doesn't authorize building all of it.
 
-## 0. Identify the task source
+## 0. Select the change
 
-- **OpenSpec change:** when `openspec/` exists and the task names a change (or the user asks for a new one), the change folder `openspec/changes/<change-id>/` (`proposal.md`, `design.md`, `tasks.md`, spec deltas) is the contract. Use the OpenSpec workflow: propose, apply, archive. The CLI is `openspec` (`openspec list`, `openspec show <id>`, `openspec validate <id>`).
-- **Backlog task:** otherwise the task is an item in `docs/backlog/IMPLEMENTATION.md`, for example `P0-03`. If no ID was given, pick the earliest unfinished P0 task whose dependencies are complete, and state which one you picked.
-- If the task depends on a human decision (medical criteria, provider choice, DB environment, secrets), stop and ask before building around it.
+- **OpenSpec is the only backlog.** `openspec/README.md` lists the P0 and P1 changes in dependency order. Each `openspec/changes/<id>/` holds `proposal.md`, `specs/` (requirements and scenarios), `design.md`, `tasks.md`, and an "Evidence" section, and together they are the contract. `docs/backlog/IMPLEMENTATION.md` is only a redirect.
+- Use the pinned CLI (no global install needed):
+
+  ```sh
+  npx -y @fission-ai/openspec@1.14.3 list
+  npx -y @fission-ai/openspec@1.14.3 instructions apply --change <id> --json   # implementation checkbox progress
+  npx -y @fission-ai/openspec@1.14.3 validate --all --strict --no-interactive
+  ```
+
+  If a bare `openspec` is on PATH, check that `openspec --version` reports 1.14.3 before using it.
+
+- If no change was named, pick the first P0 change (then P1) whose dependencies are **implemented**, and say which one you picked.
+- **`status --json` reporting `isComplete: true` means only that the planning artifacts exist**, not that anything is implemented. Judge progress by the unchecked boxes in `tasks.md`.
+- Dependencies aren't enforced by the CLI. Check them yourself. If a change needs a human input (medical criteria, evidence IDs, expected outcomes, provider choice, DB environment, secrets), stop and ask. Never fabricate it.
+- A new change (not in the README) starts with the `openspec-propose` workflow, and only when the user asks for one.
 
 ## 1. Scope and plan
 
-1. Read `AGENTS.md`, `ARCHITECTURE.md`, the task (goal, dependencies, areas, acceptance criteria, required tests), and the relevant `docs/product/PRODUCT_CONTEXT.md` sections.
+1. Read `AGENTS.md`, `ARCHITECTURE.md`, `docs/ai/WORKFLOW.md`, the change (proposal → specs → design → tasks), and the relevant `docs/product/PRODUCT_CONTEXT.md` sections.
 2. Load the recipes that apply:
    - `new-feature` (code structure), always;
    - `design-system` for any UI;
@@ -23,15 +35,13 @@ One task per session. Do only the assigned scope. The product context describes 
    - `ai-layer` for LLM work;
    - `workflow-transitions` for state changes.
 3. Inspect the existing code and tests in the affected areas. Verify any changing library APIs against installed types, `node_modules/next/dist/docs/`, or Context7. Never trust memory for versions or APIs.
-4. Write a short plan:
-   - the acceptance criteria restated as checkable items;
-   - the files to touch;
-   - server and client boundaries;
-   - the failure behavior;
-   - the tests you will add;
-   - what is explicitly out of scope.
+4. Plan **inside the change**. Refine `design.md` with:
+   - concrete boundaries and file paths;
+   - server and client responsibilities;
+   - failure behavior;
+   - out-of-scope items.
 
-   For an OpenSpec change, `tasks.md` is the plan. Update it rather than writing a separate one.
+   Then map every spec scenario to the test that will prove it, and refine `tasks.md` where needed. Don't keep a parallel plan file (superpowers or ECC planners included). Point them at these artifacts.
 
 5. Work on a feature branch, never the default branch.
 
@@ -50,7 +60,7 @@ Keep the change a thin vertical slice. Don't add unrequested dependencies, abstr
 
 ## 3. Verify
 
-Run the `verify` skill (`pnpm verify`, `pnpm test:e2e`, `pnpm format:check`) and fix the root causes. For UI, do the manual responsive and keyboard checks.
+Run the `verify` skill (`pnpm verify`, `pnpm test:e2e`, `pnpm format:check`, strict OpenSpec validation) and fix the root causes. For UI, do the manual responsive and keyboard checks.
 
 ## 4. Self-review before publishing
 
@@ -65,8 +75,15 @@ If your harness offers dedicated review agents (in Claude Code: `spec-conformanc
 
 ## 5. Record status and docs
 
-- **Backlog:** mark the task done in `docs/backlog/IMPLEMENTATION.md` with brief evidence (tests added, commands passed, PR link once it exists) and any follow-ups.
-- **OpenSpec:** tick the completed items in `tasks.md`, then run `openspec validate <id>`. Archive the change only after it is merged or the user approves archiving.
+- Tick **only** the `tasks.md` items you actually completed. Replace the change's "Evidence" section with:
+  - the tests added;
+  - the real command results;
+  - the review performed;
+  - the PR link once it exists;
+  - any follow-ups.
+- Never tick boxes based on foundation smoke tests or planning completeness.
+- Run `npx -y @fission-ai/openspec@1.14.3 validate --all --strict --no-interactive`.
+- Archive (`openspec-archive-change`) only after the implementation is merged, reviewed, and every required task is done. Archiving promotes the specs to the baseline. Never use force or skip-validation flags, and never bulk-archive.
 - Update the canonical docs your change affects (see `new-feature` §6).
 
 ## 6. Commit and publish (within scope)
