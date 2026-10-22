@@ -39,17 +39,22 @@ artifacts**. Use `instructions apply --change <id> --json` to inspect implementa
 checkbox progress. The repository's planned changes are not completed features,
 and dependency/medical-owner preconditions are not enforced by that status flag.
 
-OpenSpec core was initialized for real using the verified pinned CLI:
+OpenSpec core was originally initialized for real with
+`npx -y @fission-ai/openspec@1.14.3 init --tools none`. The exact package is now a
+locked development dependency (`@fission-ai/openspec`: `1.14.3`), verified with npm
+metadata. After `pnpm install --frozen-lockfile`, every agent uses the project CLI:
 
 ```sh
-npx -y @fission-ai/openspec@1.14.3 init --tools none
-npx -y @fission-ai/openspec@1.14.3 list
-npx -y @fission-ai/openspec@1.14.3 status --change p0-01-persistence
-npx -y @fission-ai/openspec@1.14.3 instructions apply --change p0-01-persistence
-npx -y @fission-ai/openspec@1.14.3 validate --all --strict --no-interactive
+pnpm exec openspec list
+pnpm exec openspec status --change p0-01-persistence
+pnpm exec openspec instructions apply --change p0-01-persistence
+pnpm exec openspec validate --all --strict --no-interactive
 ```
 
-Core-only initialization avoids overwriting project-specific agent integrations.
+For a fresh setup that needs initialization, `pnpm exec openspec init --tools none`
+creates only core files. Existing clones already contain them; do not rerun init
+or generate integrations belonging to another worker. Core-only initialization
+avoids overwriting project-specific agent integrations.
 Use the companion tooling instructions in [TOOLING.md](TOOLING.md) for the installed
 Claude/Codex integration. OpenSpec's default agent operations are explore, propose,
 apply and archive; upstream spells them `/opsx:propose` in Claude and

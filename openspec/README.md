@@ -33,13 +33,13 @@ Choose the first authorized change whose dependencies are satisfied; P0 precedes
 
 Read proposal.md → specs/ → design.md → tasks.md. Use spec → plan → TDD → verify → review; refine the existing design/task artifacts rather than creating a parallel plan. See [workflow adoption and specialist map](../docs/ai/WORKFLOW.md) and [AGENTS.md](../AGENTS.md).
 
-CLI (no global installation required):
+CLI (locked dev dependency; run `pnpm install --frozen-lockfile` first, no global installation required):
 
 ```sh
-npx -y @fission-ai/openspec@1.14.3 list
-npx -y @fission-ai/openspec@1.14.3 status --change p0-01-persistence
-npx -y @fission-ai/openspec@1.14.3 instructions apply --change p0-01-persistence
-npx -y @fission-ai/openspec@1.14.3 validate --all --strict --no-interactive
+pnpm exec openspec list
+pnpm exec openspec status --change p0-01-persistence
+pnpm exec openspec instructions apply --change p0-01-persistence
+pnpm exec openspec validate --all --strict --no-interactive
 ```
 
 A complete set of planning artifacts does not mean implementation tasks are complete. Archive only after actual implementation, passing tests and review; archive updates the baseline specs.

@@ -18,6 +18,6 @@ jobs:
       - run: pnpm run --if-present skills:test
       - run: pnpm verify
       - run: pnpm format:check
-      - run: npx -y @fission-ai/openspec@1.14.3 validate --all --strict --no-interactive
+      - run: pnpm exec openspec validate --all --strict --no-interactive
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e

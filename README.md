@@ -27,6 +27,7 @@ pnpm exec playwright install chromium
 pnpm test:e2e
 pnpm format:check
 node scripts/contrast.mjs
+pnpm exec openspec validate --all --strict --no-interactive
 ```
 
 `verify` runs lint → route type generation / strict TypeScript → Vitest → production

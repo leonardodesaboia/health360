@@ -30,6 +30,7 @@ Use Node 24 and pnpm 10.34.5. On restricted Windows PowerShell use `pnpm.cmd`.
 - `pnpm exec playwright install chromium` — one-time browser installation
 - `pnpm test:e2e` — desktop/mobile Chromium against production build on port 3100
 - `pnpm format` / `pnpm format:check`
+- `pnpm exec openspec validate --all --strict --no-interactive` — locked OpenSpec 1.14.3; use `pnpm exec openspec` for all project CLI operations, no global install
 
 ## Design and code conventions
 
