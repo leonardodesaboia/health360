@@ -1,7 +1,9 @@
 # Acceptance tests
 
 Apply root AGENTS.md. `tests/e2e/` covers the implemented foundation; product flows
-A–E in the backlog are future acceptance specifications, not existing functionality.
+A–E under `openspec/changes/p0-14-demo-acceptance/specs/end-to-end-flows/` are future
+acceptance specifications, not existing functionality. Map an assigned change's
+scenarios to tests in that change's design/tasks; planning status is not test evidence.
 
 - Exercise observable behavior with accessible locators and synthetic fixtures.
   Do not depend on external LLMs, real records, arbitrary timeouts or test ordering.

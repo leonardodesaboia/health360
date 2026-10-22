@@ -146,8 +146,25 @@ Prisma and provider-specific MCP integrations remain deferred to their owning ta
 
 ## OpenSpec integration
 
-Follow the adoption decision in [TOOLING.md](TOOLING.md). The canonical product
-backlog/specs belong to the foundation owner; do not create a competing task list.
+**OpenSpec is the only backlog.** Follow [WORKFLOW.md](WORKFLOW.md) and select the
+existing change from [openspec/README.md](../../openspec/README.md). The canonical
+proposal, specs, design, tasks and execution evidence belong in
+`openspec/changes/<id>/`; the former backlog document is a redirect. Do not create
+a competing ECC/superpowers plan or task list. The foundation owner maintains the
+canonical OpenSpec tree; routine Codex tasks change only their assigned change.
+
+Use the pinned CLI without assuming a global installation:
+
+```sh
+npx -y @fission-ai/openspec@1.14.3 list
+npx -y @fission-ai/openspec@1.14.3 instructions apply --change <id> --json
+npx -y @fission-ai/openspec@1.14.3 validate --all --strict --no-interactive
+```
+
+`status --json` with `isComplete: true` means planning artifacts exist. Inspect
+`tasks.md` and implementation evidence to judge delivery; the CLI does not enforce
+task dependencies or medical-owner prerequisites.
+
 OpenSpec CLI **1.14.3** was tested with `init` and `update` in a temporary directory.
 Its upstream Codex target is **repo-local skills-only**. Native init generates
 `.agents/skills/openspec-*/SKILL.md` and `.openspec-target`,
@@ -166,7 +183,7 @@ generate upgrades in an isolated temporary project, import the Claude-owned
 outputs through their owner, and then sync. For example:
 
 ```sh
-pnpm dlx @fission-ai/openspec@1.14.3 init <temporary-directory> --tools claude --profile core
+npx -y @fission-ai/openspec@1.14.3 init <temporary-directory> --tools claude --profile core
 # Canonical owner reviews/imports generated .claude output from that directory.
 pnpm skills:sync
 pnpm skills:check
@@ -177,12 +194,22 @@ ownership. Native init/update can change `.claude/`, `openspec/` and other detec
 If native Codex skills were generated separately, reconcile them with the owner
 before sync. This tooling PR does not itself initialize a second OpenSpec project.
 
-Invoke mirrored OpenSpec skills in Codex with `$openspec-propose`,
-`$openspec-explore`, `$openspec-apply-change`, `$openspec-update-change`,
-`$openspec-sync-specs` and `$openspec-archive-change`. Claude-rendered skill bodies
-may suggest `/opsx:*` handoffs; select the corresponding `$openspec-*` skill in
-Codex instead. For example `/opsx:apply` maps to `$openspec-apply-change`.
+Claude-rendered skill bodies may suggest `/opsx:*` handoffs. Select the corresponding
+mirrored skill in Codex instead:
+
+| Claude handoff  | Codex invocation           |
+| --------------- | -------------------------- |
+| `/opsx:propose` | `$openspec-propose`        |
+| `/opsx:explore` | `$openspec-explore`        |
+| `/opsx:apply`   | `$openspec-apply-change`   |
+| `/opsx:update`  | `$openspec-update-change`  |
+| `/opsx:sync`    | `$openspec-sync-specs`     |
+| `/opsx:archive` | `$openspec-archive-change` |
+
 Only use `$openspec-verify-change` if that optional workflow is actually installed.
+For a preplanned MVP change, start with `$implement-task` and the existing change ID;
+do not propose a duplicate. Archive only after implementation is merged, reviewed,
+verified and all required tasks are complete. Never force archive or skip validation.
 
 ## ECC: selective adoption and optional user install
 
@@ -225,27 +252,32 @@ of this repo; recheck upstream instructions before upgrading.
 
 ## Implementation workflow
 
-1. **Spec:** read root instructions, the assigned backlog item, product boundaries
-   and relevant canonical skills. If OpenSpec is adopted, use the existing change
-   and its specs; use explore/propose only within the task's authorized scope.
-2. **Plan:** inspect implementation/tests and version-matched docs. State touched
-   paths, acceptance criteria, dependencies and failure/publication boundaries.
-   Read nested instructions when entering `src/features/` or `tests/`.
+1. **Spec:** read root instructions, [WORKFLOW.md](WORKFLOW.md), the assigned
+   OpenSpec change and relevant canonical skills. Check dependencies are implemented.
+   Use explore/propose only within authorized scope; request human-owned clinical
+   criteria rather than inventing them.
+2. **Plan:** inspect implementation/tests and version-matched docs. Refine the
+   change's `design.md` and `tasks.md` with touched paths, acceptance criteria,
+   test mappings and failure/publication boundaries. Read nested instructions when
+   entering `src/features/` or `tests/`. Keep the plan in the existing change.
 3. **TDD:** reproduce the acceptance behavior or failure with a focused test before
    the fix. Test illegal transitions, unknown facts and blocked publication where
    relevant. Use `$new-feature`, `$workflow-transitions` or `$ai-layer`; add no LLM
    calls or clinical criteria as incidental scaffolding.
 4. **Implement:** make one reviewable slice, reuse tokens/components, keep secrets
    server-only, and preserve synthetic-data labels and mandatory physician review.
-5. **Verify:** run `pnpm skills:check`, `pnpm skills:test`, `pnpm verify`,
-   `pnpm test:e2e` and `pnpm format:check`. Investigate failures in your scope and
-   report unrelated blockers. If an optional OpenSpec verify skill is absent,
-   compare acceptance criteria/tasks to actual diff and test evidence directly.
+5. **Verify:** use `$verify`: run `pnpm verify` (including skill checks/tests),
+   `pnpm test:e2e`, `pnpm format:check` and
+   `npx -y @fission-ai/openspec@1.14.3 validate --all --strict --no-interactive`.
+   Investigate failures in your scope and report unrelated blockers. If an optional
+   OpenSpec verify skill is absent, compare acceptance criteria/tasks to actual
+   diff and test evidence directly.
 6. **Review:** inspect `git diff`, apply clinical-safety/design checklists to touched
    behavior and use the authorized reviewer. Address concrete findings, re-run
    affected checks and preserve honest unverified limitations.
-7. **PR:** update the canonical task/spec status with evidence when authorized,
-   commit focused conventional changes, and publish only within the user's scope.
+7. **PR:** tick only tasks actually implemented and record real evidence in the
+   change's `tasks.md`; planning completeness or foundation smoke tests do not
+   prove MVP delivery. Commit focused changes and publish within the user's scope.
    Describe behavior, tests and risks. Under AO, request native review and address
    findings on the same PR; never treat its approval as permission to merge.
 
