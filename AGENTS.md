@@ -7,18 +7,18 @@ Read this first. This is the canonical guide for Claude Code and Codex.
 This repository currently contains the **foundation**, not the functioning MVP.
 Read [ARCHITECTURE.md](ARCHITECTURE.md) for implemented boundaries,
 [product context](docs/product/PRODUCT_CONTEXT.md) for future requirements, and
-[backlog](docs/backlog/IMPLEMENTATION.md) for ordered implementation tasks.
+[canonical OpenSpec backlog](openspec/README.md) for ordered implementation tasks.
 Product-context imperatives describe future work; they do not authorize implementing everything.
 Do only the assigned task. Never add database access, LLM calls, persistence or clinical logic incidentally.
 
 ## Pick up a task
 
-1. Select the earliest uncompleted backlog task whose dependencies are complete. Confirm the user's assigned scope and publishing restrictions.
-2. Inspect the affected code and tests; read the relevant skill below. Verify changing APIs against installed types, Context7 or official docs.
-3. State a short implementation plan, including server boundaries and failure behavior. Add dependencies only when needed and verify package names and peers.
-4. Implement a thin vertical slice in `src/features/<feature>`. Keep routes as composition. Default to Server Components; add `use client` only for interaction.
-5. Add meaningful tests for the acceptance criteria and negative paths. Never weaken clinical gates to make a test pass.
-6. Update the relevant canonical doc and mark backlog status with evidence. Run the definition of done and summarize limitations honestly.
+1. **Spec:** choose the first authorized OpenSpec change whose dependencies are complete. Read its proposal, specs, design and unchecked tasks; distinguish implemented `openspec/specs` from future `openspec/changes`. Confirm scope and publishing restrictions. ECC `spec-miner` is for extracting existing behavior only, never inventing implemented MVP behavior.
+2. **Plan:** inspect affected code/tests and use relevant recipes. Use superpowers brainstorming for unresolved requirements, writing-plans or ECC `/plan` for implementation detail. Keep the result in the change's `design.md`/`tasks.md`; no parallel backlog or plan directory. Verify changing APIs against current primary docs.
+3. **TDD:** use ECC `tdd-guide` / `tdd-workflow` or superpowers `test-driven-development`: reproduce a meaningful failure, implement the smallest fix, then refactor. Keep domain logic outside JSX and services server-only. Do not implement unrelated changes.
+4. **Verify:** use ECC `verification-loop` / `e2e-runner` and superpowers `verification-before-completion`. Run focused regressions, `pnpm verify`, `pnpm test:e2e`, format and strict OpenSpec validation. Record real output against completed task checkboxes; do not claim unimplemented scenarios pass.
+5. **Review:** check spec conformance, ECC `code-reviewer` and `typescript-reviewer`, plus `react-reviewer` for TSX; apply `healthcare-reviewer` to clinical data/publication boundaries and `security-reviewer` to trust/secret/auth changes. Review skill guidance inline when delegation is unavailable; never pretend a separate reviewer ran. Clinical review by a qualified human remains mandatory for medical criteria.
+6. Update the change and canonical docs, address findings, publish only as authorized, and archive through OpenSpec only after implementation/verification/review. Keep prior specs and clinical versions traceable. See [workflow mapping and tool fallbacks](docs/ai/WORKFLOW.md).
 
 ## Commands
 
@@ -72,4 +72,4 @@ Tool activation and sources: [AI tooling](docs/ai/TOOLING.md).
 Acceptance and failure paths are covered, no scope creep, no sensitive data. `pnpm verify`, `pnpm test:e2e` and `pnpm format:check` pass.
 For UI changes inspect mobile/desktop, keyboard focus, empty/error/disabled states and pt-BR copy.
 Review clinical publication gates and provenance when touched. Update docs and report exact validation plus unverified aspects.
-Commits use conventional messages. Publish only within the current user's authorization; this foundation task is local-only.
+Commits use conventional messages. Publish only within the current user's authorization. The foundation PR is authorized; do not merge it. Respect the active environment's delegation and review policies over optional plugin automation.

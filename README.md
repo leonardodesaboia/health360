@@ -37,7 +37,7 @@ On Linux, install browser OS dependencies with `pnpm exec playwright install --w
 ## Start an implementation task
 
 Read [AGENTS.md](AGENTS.md), then choose an authorized task from the
-[ordered backlog](docs/backlog/IMPLEMENTATION.md). Claude reads the same instructions
+[canonical OpenSpec backlog](openspec/README.md). Claude reads the same instructions
 through [CLAUDE.md](CLAUDE.md). Recipes and MCP activation are in
 [AI tooling](docs/ai/TOOLING.md).
 
@@ -59,6 +59,7 @@ There is no persistence, LLM provider, rules engine, timeline engine or medical 
 - [Shared components and composition](COMPONENT_GUIDELINES.md)
 - [Navigation and workflow transitions](USER_FLOWS.md)
 - [Full original product context, future work](docs/product/PRODUCT_CONTEXT.md)
-- [Backlog and flows A–E acceptance specs](docs/backlog/IMPLEMENTATION.md)
+- [Canonical OpenSpec backlog and flows A–E](openspec/README.md)
+- [Spec → plan → TDD → verify → review workflow](docs/ai/WORKFLOW.md)
 - [Tooling sources, plugin inventory and enablement](docs/ai/TOOLING.md)
 - [Foundation decisions](docs/adr/0001-foundation.md)

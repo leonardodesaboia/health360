@@ -50,5 +50,5 @@ publication until a safe retry succeeds.
 
 Executable foundation tests are in `tests/e2e/foundation.spec.ts`. Full A–E Given /
 When / Then acceptance specs and prerequisites are in
-[the implementation backlog](docs/backlog/IMPLEMENTATION.md); they are not claimed
+[the canonical OpenSpec flow specs](openspec/changes/p0-14-demo-acceptance/specs/end-to-end-flows/spec.md); they are not claimed
 as functioning flows in this setup.
