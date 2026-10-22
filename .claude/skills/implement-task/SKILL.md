@@ -32,6 +32,7 @@ One task per session. Do only the assigned scope. The product context describes 
    - what is explicitly out of scope.
 
    For an OpenSpec change, `tasks.md` is the plan. Update it rather than writing a separate one.
+
 5. Work on a feature branch, never the default branch.
 
 ## 2. Test first, then implement

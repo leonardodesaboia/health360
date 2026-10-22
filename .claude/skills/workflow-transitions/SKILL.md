@@ -25,7 +25,7 @@ The workflow graph in `src/features/workflow/workflow.ts` is **administrative ad
    - status UI (`StatusIndicator` and any status copy);
    - `USER_FLOWS.md`, including the state diagram and tables.
 3. **Test exhaustively.**
-   - Keep the test that checks *every* (from, to) pair against an explicit expected-legal list written independently of the implementation map. Don't derive the expectations from `transitions` itself.
+   - Keep the test that checks _every_ (from, to) pair against an explicit expected-legal list written independently of the implementation map. Don't derive the expectations from `transitions` itself.
    - Add tests for each invariant above, for example that no path reaches `PLAN_AVAILABLE` without `MEDICAL_REVIEW_COMPLETED` (graph reachability).
    - Update the e2e flows affected (failure and retry, clarification, reassessment).
 4. **Persisted data.** If states are already persisted (after P0-01), describe the migration and compatibility for existing records in the change and PR description.

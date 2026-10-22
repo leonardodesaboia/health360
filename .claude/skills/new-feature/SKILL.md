@@ -5,7 +5,7 @@ description: Recipe for building a feature slice in the Health360 Next.js app, c
 
 # Health360 new-feature recipe
 
-Use this skill for *how to structure* code. For the end-to-end task loop (pick a task, plan, TDD, verify, review, PR), use the `implement-task` skill. It calls this one.
+Use this skill for _how to structure_ code. For the end-to-end task loop (pick a task, plan, TDD, verify, review, PR), use the `implement-task` skill. It calls this one.
 
 ## 1. Orient
 
@@ -15,13 +15,13 @@ Use this skill for *how to structure* code. For the end-to-end task loop (pick a
 
 ## 2. Place code by responsibility
 
-| Concern | Location | Rule |
-| --- | --- | --- |
-| Route composition, metadata, layouts | `src/app/**` | Thin. Composes features and components. No domain logic. |
-| Domain contracts, pure logic, feature UI | `src/features/<feature>/` | Zod schemas and inferred types, pure functions, colocated `*.test.ts`. Create the folder only when it holds real code. |
-| Shared UI | `src/components/{ui,layout,shared}` | Presentational only. No DB access, provider calls, or clinical decisions. |
-| Server-only adapters (DB, LLM, clinical rules) | `src/server/<area>/` | First line `import "server-only";`. Never imported by a client component. Create only when the task authorizes that layer. |
-| Small utilities | `src/lib/` | Generic helpers only. |
+| Concern                                        | Location                            | Rule                                                                                                                       |
+| ---------------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Route composition, metadata, layouts           | `src/app/**`                        | Thin. Composes features and components. No domain logic.                                                                   |
+| Domain contracts, pure logic, feature UI       | `src/features/<feature>/`           | Zod schemas and inferred types, pure functions, colocated `*.test.ts`. Create the folder only when it holds real code.     |
+| Shared UI                                      | `src/components/{ui,layout,shared}` | Presentational only. No DB access, provider calls, or clinical decisions.                                                  |
+| Server-only adapters (DB, LLM, clinical rules) | `src/server/<area>/`                | First line `import "server-only";`. Never imported by a client component. Create only when the task authorizes that layer. |
+| Small utilities                                | `src/lib/`                          | Generic helpers only.                                                                                                      |
 
 Don't create empty directories, placeholder services, speculative abstractions, or global stores.
 
