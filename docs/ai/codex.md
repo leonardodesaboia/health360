@@ -146,20 +146,27 @@ Prisma and provider-specific MCP integrations remain deferred to their owning ta
 
 ## OpenSpec integration
 
-**OpenSpec is the only backlog.** Follow [WORKFLOW.md](WORKFLOW.md) and select the
-existing change from [openspec/README.md](../../openspec/README.md). The canonical
-proposal, specs, design, tasks and execution evidence belong in
-`openspec/changes/<id>/`; the former backlog document is a redirect. Do not create
-a competing ECC/superpowers plan or task list. The foundation owner maintains the
-canonical OpenSpec tree; routine Codex tasks change only their assigned change.
+Follow the hybrid workflow in [WORKFLOW.md](WORKFLOW.md). The
+[ordered index](../backlog/IMPLEMENTATION.md) owns task order, stable change IDs,
+dependencies, acceptance criteria and completion links. At pickup, create or resume
+`openspec/changes/<stable-id>/` for the assigned entry; link its proposal to the
+index instead of copying long acceptance lists. Keep specs, design, tasks and
+execution evidence in that change. OpenSpec is not a second backlog, and baseline
+specs describe implemented behavior only. Do not create a competing ECC/superpowers
+plan or task list. [openspec/README.md](../../openspec/README.md) explains the layout.
 
 Use the pinned CLI without assuming a global installation:
 
 ```sh
-npx -y @fission-ai/openspec@1.14.3 list
-npx -y @fission-ai/openspec@1.14.3 instructions apply --change <id> --json
-npx -y @fission-ai/openspec@1.14.3 validate --all --strict --no-interactive
+pnpm exec openspec list
+pnpm exec openspec new change <stable-id>
+pnpm exec openspec instructions apply --change <stable-id> --json
+pnpm exec openspec validate --all --strict --no-interactive
 ```
+
+The CLI is locked to **1.14.3** in devDependencies and pnpm-lock. Run change creation
+only for an authorized entry with satisfied dependencies; reuse an existing active
+change. No global CLI installation or on-demand package download is required.
 
 `status --json` with `isComplete: true` means planning artifacts exist. Inspect
 `tasks.md` and implementation evidence to judge delivery; the CLI does not enforce
@@ -183,7 +190,7 @@ generate upgrades in an isolated temporary project, import the Claude-owned
 outputs through their owner, and then sync. For example:
 
 ```sh
-npx -y @fission-ai/openspec@1.14.3 init <temporary-directory> --tools claude --profile core
+pnpm exec openspec init <temporary-directory> --tools claude --profile core
 # Canonical owner reviews/imports generated .claude output from that directory.
 pnpm skills:sync
 pnpm skills:check
@@ -207,8 +214,9 @@ mirrored skill in Codex instead:
 | `/opsx:archive` | `$openspec-archive-change` |
 
 Only use `$openspec-verify-change` if that optional workflow is actually installed.
-For a preplanned MVP change, start with `$implement-task` and the existing change ID;
-do not propose a duplicate. Archive only after implementation is merged, reviewed,
+For an indexed MVP task, start with `$implement-task` and its stable change ID;
+create or resume its change at pickup, rather than another backlog. Archive only
+after implementation is merged, reviewed,
 verified and all required tasks are complete. Never force archive or skip validation.
 
 ## ECC: selective adoption and optional user install
@@ -253,7 +261,8 @@ of this repo; recheck upstream instructions before upgrading.
 ## Implementation workflow
 
 1. **Spec:** read root instructions, [WORKFLOW.md](WORKFLOW.md), the assigned
-   OpenSpec change and relevant canonical skills. Check dependencies are implemented.
+   index entry and relevant canonical skills. Check dependencies are implemented,
+   create or resume its OpenSpec change, and mark the index in progress with its link.
    Use explore/propose only within authorized scope; request human-owned clinical
    criteria rather than inventing them.
 2. **Plan:** inspect implementation/tests and version-matched docs. Refine the
@@ -268,7 +277,7 @@ of this repo; recheck upstream instructions before upgrading.
    server-only, and preserve synthetic-data labels and mandatory physician review.
 5. **Verify:** use `$verify`: run `pnpm verify` (including skill checks/tests),
    `pnpm test:e2e`, `pnpm format:check` and
-   `npx -y @fission-ai/openspec@1.14.3 validate --all --strict --no-interactive`.
+   `pnpm exec openspec validate --all --strict --no-interactive`.
    Investigate failures in your scope and report unrelated blockers. If an optional
    OpenSpec verify skill is absent, compare acceptance criteria/tasks to actual
    diff and test evidence directly.
@@ -277,7 +286,9 @@ of this repo; recheck upstream instructions before upgrading.
    affected checks and preserve honest unverified limitations.
 7. **PR:** tick only tasks actually implemented and record real evidence in the
    change's `tasks.md`; planning completeness or foundation smoke tests do not
-   prove MVP delivery. Commit focused changes and publish within the user's scope.
+   prove MVP delivery. After implementation, verification, review and archive,
+   mark the ordered index done with archive/test/PR links. Commit focused changes
+   and publish within the user's scope.
    Describe behavior, tests and risks. Under AO, request native review and address
    findings on the same PR; never treat its approval as permission to merge.
 
