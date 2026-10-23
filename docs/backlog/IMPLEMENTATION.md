@@ -106,7 +106,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-06 — Replaceable server LLM adapter
 
 - Stable OpenSpec change ID: `p0-06-llm-adapter`.
-- Status: **planned**; change not yet picked up.
+- Status: **in progress**; [active change](../../openspec/changes/p0-06-llm-adapter/).
 - Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
 
 - Goal: introduce a provider interface and one external API adapter using configurable provider/model.
