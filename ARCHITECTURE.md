@@ -193,3 +193,38 @@ and the installed SDK declarations (OpenAI 7.43.0).
 
 For shared-machine e2e verification, Playwright honors PORT (default 3100) for both
 the production server and test base URL. A busy port is never reused or stopped.
+
+## Demonstration session module (P0-02 phase A)
+
+Server-only src/server/demo/session.ts resolves an opaque httpOnly cookie to one
+synthetic dataset. getDemoSession returns null for absent/malformed/unknown sessions
+and otherwise returns datasetId, patientId, caseId, patient, latest profile and
+linked examinations, plus the stored canonical clinicalContext (including id/version,
+evidence metadata, rules and demonstrative labels). Patient status comes from the authoritative workflow API.
+Page reads never seed data; database/incomplete-record errors propagate.
+
+selectDemoCaseForSession(caseId: unknown): Promise<void> validates a prepared case,
+transactionally replaces only the cookie-derived dataset, then sets the cookie.
+resetDemoSession(): Promise<boolean> resets that dataset's current stored case,
+returning false for no selection. Invoke mutations only from Server Actions or
+Route Handlers; they are not public endpoints or authentication.
+
+Storage helpers in store.ts accept (db: PrismaClient, datasetId: string):
+loadDemoCase returns Promise<StoredDemoCase | null>; resetDemoDataset returns
+Promise<boolean>; replaceDemoDataset adds caseId: DemoCaseId and returns Promise<void>.
+These are internal APIs: request handlers derive dataset scope through getDemoSession,
+never from client-supplied record IDs. Reads use one repeatable-read snapshot; reset
+serializes the dataset and current patient workflow locks before replacing records.
+No analysis, decision or plan is fabricated by selection/reset.
+
+Case IDs are first-screening and repeat-screening, reusing P0-05 fixtures.
+DEMO_COOKIE_SECURE=true enables Secure cookies for HTTPS deployment; local HTTP
+preview and CI leave it false. getDatabase lazily creates one server-only Prisma
+pool per process. This phase has no route changes: case-selection UI and shell
+integration remain planned. Intake and plan workers own their session wiring.
+
+Selection/reset also persists loadClinicalContext(caseId, 1) as a validated P0-05
+context snapshot. This uses the extended P0-05 schema directly so its issuer/year,
+rule versions and demonstrative labels survive the narrower legacy core context
+repository parser. The session returns that stored snapshot; analysis can reference
+clinicalContext.id/version through its dataset-scoped foreign key.
