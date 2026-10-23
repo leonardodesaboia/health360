@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 const routes = [
   ["/patient", "Hello, Marina"],
-  ["/patient/intake", "Example information"],
+  ["/patient/intake", "Guided health intake"],
   ["/patient/plan", "Preventive follow-up"],
   ["/doctor", "Review queue"],
   ["/doctor/reviews/demo-review-01", "Marina Example"],
