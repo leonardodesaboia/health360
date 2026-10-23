@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Dataset {
+  id       String            @id
+  patients Patient[]
+  contexts ClinicalContext[]
+}
+
+model Patient {
+  datasetId    String
+  id           String
+  payload      Json
+  dataset      Dataset               @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  profiles     HealthProfile[]
+  examinations PreviousExamination[]
+  intakes      IntakeResponse[]
+  analyses     AIAnalysis[]
+  reviews      MedicalReview[]
+  plans        PreventivePlan[]
+  events       TimelineEvent[]
+
+  @@id([datasetId, id])
+}
+
+model HealthProfile {
+  datasetId    String
+  id           String
+  patientId    String
+  version      Int
+  payload      Json
+  patient      Patient              @relation(fields: [datasetId, patientId], references: [datasetId, id], onDelete: Cascade)
+  analyses     AIAnalysis[]
+  intakes      IntakeResponse[]
+  plans        PreventivePlan[]
+  examinations ProfileExamination[]
+
+  @@id([datasetId, id])
+  @@unique([datasetId, patientId, version])
+}
+
+model PreviousExamination {
+  datasetId String
+  id        String
+  patientId String
+  payload   Json
+  patient   Patient              @relation(fields: [datasetId, patientId], references: [datasetId, id], onDelete: Cascade)
+  profiles  ProfileExamination[]
+
+  @@id([datasetId, id])
+  @@unique([datasetId, patientId, id])
+}
+
+model ProfileExamination {
+  datasetId      String
+  patientId      String
+  profileVersion Int
+  examinationId  String
+  profile        HealthProfile       @relation(fields: [datasetId, patientId, profileVersion], references: [datasetId, patientId, version], onDelete: Cascade)
+  examination    PreviousExamination @relation(fields: [datasetId, patientId, examinationId], references: [datasetId, patientId, id], onDelete: Cascade)
+
+  @@id([datasetId, patientId, profileVersion, examinationId])
+}
+
+model IntakeResponse {
+  datasetId      String
+  id             String
+  patientId      String
+  profileVersion Int
+  payload        Json
+  patient        Patient       @relation(fields: [datasetId, patientId], references: [datasetId, id], onDelete: Cascade)
+  profile        HealthProfile @relation(fields: [datasetId, patientId, profileVersion], references: [datasetId, patientId, version], onDelete: Cascade)
+
+  @@id([datasetId, id])
+}
+
+model ClinicalContext {
+  datasetId String
+  id        String
+  version   Int
+  payload   Json
+  dataset   Dataset      @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  analyses  AIAnalysis[]
+
+  @@id([datasetId, id, version])
+}
+
+model AIAnalysis {
+  datasetId      String
+  id             String
+  patientId      String
+  version        Int
+  profileVersion Int
+  contextId      String
+  contextVersion Int
+  payload        Json
+  patient        Patient                  @relation(fields: [datasetId, patientId], references: [datasetId, id], onDelete: Cascade)
+  profile        HealthProfile            @relation(fields: [datasetId, patientId, profileVersion], references: [datasetId, patientId, version], onDelete: Cascade)
+  context        ClinicalContext          @relation(fields: [datasetId, contextId, contextVersion], references: [datasetId, id, version], onDelete: Cascade)
+  proposals      RecommendationProposal[]
+  reviews        MedicalReview[]
+
+  @@id([datasetId, id, version])
+  @@unique([datasetId, patientId, version])
+  @@unique([datasetId, patientId, id, version])
+}
+
+model RecommendationProposal {
+  datasetId       String
+  id              String
+  analysisId      String
+  analysisVersion Int
+  payload         Json
+  analysis        AIAnalysis @relation(fields: [datasetId, analysisId, analysisVersion], references: [datasetId, id, version], onDelete: Cascade)
+
+  @@id([datasetId, id, analysisVersion])
+}
+
+model MedicalReview {
+  datasetId       String
+  id              String
+  patientId       String
+  version         Int
+  analysisId      String
+  analysisVersion Int
+  payload         Json
+  patient         Patient          @relation(fields: [datasetId, patientId], references: [datasetId, id], onDelete: Cascade)
+  analysis        AIAnalysis       @relation(fields: [datasetId, patientId, analysisId, analysisVersion], references: [datasetId, patientId, id, version], onDelete: Cascade)
+  plans           PreventivePlan[]
+
+  @@id([datasetId, id, version])
+  @@unique([datasetId, patientId, id, version])
+}
+
+model PreventivePlan {
+  datasetId      String
+  id             String
+  patientId      String
+  version        Int
+  profileVersion Int
+  reviewId       String
+  reviewVersion  Int
+  previousPlanId String?
+  payload        Json
+  patient        Patient          @relation(fields: [datasetId, patientId], references: [datasetId, id], onDelete: Cascade)
+  profile        HealthProfile    @relation(fields: [datasetId, patientId, profileVersion], references: [datasetId, patientId, version], onDelete: Cascade)
+  review         MedicalReview    @relation(fields: [datasetId, patientId, reviewId, reviewVersion], references: [datasetId, patientId, id, version], onDelete: Cascade)
+  previousPlan   PreventivePlan?  @relation("PlanHistory", fields: [datasetId, patientId, previousPlanId], references: [datasetId, patientId, id], onDelete: NoAction)
+  nextPlans      PreventivePlan[] @relation("PlanHistory")
+
+  @@id([datasetId, id])
+  @@unique([datasetId, patientId, version])
+  @@unique([datasetId, patientId, id])
+}
+
+model TimelineEvent {
+  datasetId  String
+  id         String
+  patientId  String
+  occurredAt DateTime
+  payload    Json
+  patient    Patient  @relation(fields: [datasetId, patientId], references: [datasetId, id], onDelete: Cascade)
+
+  @@id([datasetId, id])
+  @@index([datasetId, patientId, occurredAt])
+}

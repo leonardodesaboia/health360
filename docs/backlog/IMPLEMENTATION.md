@@ -36,8 +36,8 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-01 — Synthetic persistence and version boundaries
 
 - Stable OpenSpec change ID: `p0-01-persistence`.
-- Status: **planned**; change not yet picked up.
-- Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
+- Status: **implemented; PR pending**; [archive](../../openspec/changes/archive/2026-10-22-p0-01-persistence/).
+- Implementation evidence: [verification](../../openspec/changes/archive/2026-10-22-p0-01-persistence/tasks.md): 128 unit tests, 7 PostgreSQL integration tests, 22 production e2e tests; verify/format/strict specs pass.
 
 - Goal: establish PostgreSQL/Prisma persistence for core records with immutable profile/analysis/plan versions.
 - Depends on: foundation. Local environment selected: PostgreSQL 17 via Docker Compose; Prisma remains the planned ORM (ADR0003).
