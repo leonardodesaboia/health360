@@ -64,8 +64,8 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-03 — Guided intake, first slice
 
 - Stable OpenSpec change ID: `p0-03-intake-draft`.
-- Status: **planned**; change not yet picked up.
-- Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
+- Status: **done**; [archive](../../openspec/changes/archive/2026-10-22-p0-03-intake-draft/).
+- Implementation/archive evidence: [verification](../../openspec/changes/archive/2026-10-22-p0-03-intake-draft/tasks.md); [PR #9](https://github.com/leonardodesaboia/health360/pull/9). Browser-local adapter; database/session integration follows Worker A.
 
 - Goal: implement basic profile and clinical-history steps before extending questions.
 - Depends on: P0-01, P0-02; approved minimal scenario fields.

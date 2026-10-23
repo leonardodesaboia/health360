@@ -52,3 +52,12 @@ Executable foundation tests are in `tests/e2e/foundation.spec.ts`. Full A–E Gi
 When / Then acceptance specs and prerequisites are in
 [the canonical ordered index and flow specs](docs/backlog/IMPLEMENTATION.md#future-end-to-end-acceptance-specifications); they are not claimed
 as functioning flows in this setup.
+
+## Guided draft intake (P0-03)
+
+At `/patient/intake`, enter synthetic age and the configured symptom/history
+answers. Unknown is explicit and never treated as a negative answer. Save and
+continue validates the current step; Back preserves unvalidated draft answers.
+Save draft permits incomplete answers and restores the saved step after refresh.
+Storage and stale-revision failures remain visible; reloading the saved draft
+replaces unsaved form edits. This slice does not complete intake or start analysis.

@@ -106,3 +106,12 @@ keyboard skip focus, accessible example validation, disabled decisions and unkno
 An axe smoke checks the main routes for serious/critical violations.
 These are technical smoke tests, not clinical validation, a complete accessibility audit,
 or end-to-end MVP flows. Future flow specifications are in the backlog.
+
+## Guided intake draft (P0-03)
+
+`src/features/health-intake` owns the configuration-driven RHF/Zod intake and its
+async `IntakeDraftRepository` port. The temporary browser-local adapter validates
+draft envelopes, scopes by synthetic patient ID and checks expected revisions.
+It stores synthetic drafts only; no physician sharing, database persistence,
+identity enforcement or clinical workflow transition is implemented by this adapter.
+A server adapter must enforce ownership and atomic revision checks.

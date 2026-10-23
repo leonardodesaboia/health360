@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 const routes = [
   ["/patient", "Hello, Marina"],
-  ["/patient/intake", "Example information"],
+  ["/patient/intake", "Guided health intake"],
   ["/patient/plan", "Preventive follow-up"],
   ["/doctor", "Review queue"],
   ["/doctor/reviews/demo-review-01", "Marina Example"],
@@ -20,7 +20,7 @@ for (const [route, title] of routes) {
       page.getByRole("heading", { name: title, exact: true, level: 1 }),
     ).toBeVisible();
     await expect(
-      page.getByText(/DEMONSTRATIVE — NOT CLINICALLY VALIDATED/),
+      page.getByText(/DEMONSTRATIVE — NOT CLINICALLY VALIDATED/).first(),
     ).toBeVisible();
     await expect(
       page.getByText("Demonstration environment", { exact: true }),
