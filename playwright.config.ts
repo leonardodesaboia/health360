@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const port = Number(process.env.PORT ?? 3100);
+const baseURL = `http://127.0.0.1:${port}`;
+
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: true,
@@ -7,7 +10,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: 2,
   reporter: "list",
-  use: { baseURL: "http://127.0.0.1:3100", trace: "retain-on-failure" },
+  use: { baseURL, trace: "retain-on-failure" },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
     {
@@ -16,8 +19,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm start --port 3100",
-    url: "http://127.0.0.1:3100/patient",
+    command: `pnpm start --port ${port}`,
+    url: `${baseURL}/patient`,
     reuseExistingServer: false,
     timeout: 120000,
   },

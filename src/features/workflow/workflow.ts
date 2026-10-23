@@ -53,15 +53,15 @@ export function transition(
 }
 
 export const statusLabels: Record<WorkflowStatus, string> = {
-  NOT_STARTED: "Avaliação não iniciada",
-  INTAKE_IN_PROGRESS: "Histórico em preenchimento",
-  INTAKE_COMPLETED: "Histórico preenchido",
-  ANALYSIS_PENDING: "Análise em preparação",
-  ANALYSIS_FAILED: "Análise não concluída",
-  CLARIFICATION_REQUIRED: "Informação a confirmar",
-  MEDICAL_REVIEW_PENDING: "Aguardando revisão médica",
-  MEDICAL_REVIEW_IN_PROGRESS: "Em revisão médica",
-  MEDICAL_REVIEW_COMPLETED: "Revisão concluída",
-  PLAN_AVAILABLE: "Plano disponível",
-  REASSESSMENT_PENDING: "Reavaliação pendente",
+  NOT_STARTED: "Evaluation not started",
+  INTAKE_IN_PROGRESS: "History in progress",
+  INTAKE_COMPLETED: "History completed",
+  ANALYSIS_PENDING: "Analysis in preparation",
+  ANALYSIS_FAILED: "Analysis not completed",
+  CLARIFICATION_REQUIRED: "Information to confirm",
+  MEDICAL_REVIEW_PENDING: "Awaiting physician review",
+  MEDICAL_REVIEW_IN_PROGRESS: "Physician review in progress",
+  MEDICAL_REVIEW_COMPLETED: "Review completed",
+  PLAN_AVAILABLE: "Plan available",
+  REASSESSMENT_PENDING: "Reassessment pending",
 };

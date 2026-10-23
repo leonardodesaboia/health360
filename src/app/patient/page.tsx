@@ -13,21 +13,21 @@ export default function PatientHome() {
   return (
     <ContentContainer>
       <PageHeader
-        eyebrow="Meu acompanhamento"
-        title="Olá, Marina"
-        description="Aqui você acompanha as etapas da sua avaliação preventiva."
+        eyebrow="My follow-up"
+        title="Hello, Marina"
+        description="Track the stages of your preventive evaluation here."
       />
       <Surface className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
         <div>
           <StatusIndicator status={demoPatient.status} />
-          <h2 className="mt-5">Seu histórico é o ponto de partida</h2>
+          <h2 className="mt-5">Your history is the starting point</h2>
           <p className="mt-2 max-w-form text-sm text-muted-foreground">
-            Neste exemplo, as informações de Marina Exemplo estão organizadas
-            para uma futura revisão. Nenhuma análise clínica foi executada.
+            In this example, Marina Example&apos;s information is organized for
+            a future review. No clinical analysis has been performed.
           </p>
           <Button asChild className="mt-6">
             <Link href="/patient/intake">
-              Consultar meu histórico
+              View my history
               <ArrowRight aria-hidden="true" />
             </Link>
           </Button>
@@ -37,24 +37,20 @@ export default function PatientHome() {
         </div>
       </Surface>
       <section aria-labelledby="journey-title">
-        <h2 id="journey-title">Como funciona o acompanhamento</h2>
+        <h2 id="journey-title">How follow-up works</h2>
         <ol className="mt-6 grid gap-6 md:grid-cols-3">
           {[
             [
               "01",
-              "Seu histórico",
-              "Informações que você compartilha para contextualizar a avaliação.",
+              "Your history",
+              "Information you share to provide context for the evaluation.",
             ],
             [
               "02",
-              "Revisão médica",
-              "Propostas preliminares precisam ser avaliadas por um médico.",
+              "Physician review",
+              "Preliminary proposals must be evaluated by a physician.",
             ],
-            [
-              "03",
-              "Seu plano",
-              "As próximas ações só ficam disponíveis após a revisão.",
-            ],
+            ["03", "Your plan", "Next steps are only available after review."],
           ].map(([number, title, description], i) => (
             <li key={number} className="border-t-2 pt-4">
               <span className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
@@ -63,7 +59,7 @@ export default function PatientHome() {
                 ) : (
                   <Circle aria-hidden="true" className="size-3" />
                 )}
-                ETAPA {number}
+                STEP {number}
               </span>
               <h3 className="mt-3">{title}</h3>
               <p className="mt-2 text-sm text-muted-foreground">
@@ -73,9 +69,9 @@ export default function PatientHome() {
           ))}
         </ol>
       </section>
-      <Notice title="Sobre este exemplo">
-        Marina Exemplo é uma pessoa fictícia. Os estados e registros ilustram a
-        interface e não representam uma avaliação ou aprovação médica.
+      <Notice title="About this example">
+        Marina Example is fictional. The statuses and records illustrate the
+        interface and do not represent a medical evaluation or approval.
       </Notice>
     </ContentContainer>
   );

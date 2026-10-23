@@ -2,7 +2,7 @@
 
 ## Foundation routes
 
-`/` redirects to `/patient`. Patient navigation is Início and Meu plano; the home
+`/` redirects to `/patient`. Patient navigation is Home and My plan; the home
 links to the read-only `/patient/intake` reference. The plan page explains why no
 plan exists; history is described there for later versioned cycles, without a dead link.
 `/doctor` lists one synthetic reference record; opening it navigates to

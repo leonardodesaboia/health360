@@ -15,17 +15,17 @@ export function Navigation({ role }: { role: "patient" | "doctor" }) {
   const items: { href: string; label: string; icon: LucideIcon }[] =
     role === "patient"
       ? [
-          { href: "/patient", label: "Início", icon: Home },
-          { href: "/patient/plan", label: "Meu plano", icon: ListChecks },
+          { href: "/patient", label: "Home", icon: Home },
+          { href: "/patient/plan", label: "My plan", icon: ListChecks },
         ]
       : [
-          { href: "/doctor", label: "Revisões", icon: ClipboardList },
-          { href: "/showcase", label: "Componentes", icon: Layers },
+          { href: "/doctor", label: "Reviews", icon: ClipboardList },
+          { href: "/showcase", label: "Components", icon: Layers },
         ];
   return (
     <nav
       aria-label={
-        role === "patient" ? "Navegação do paciente" : "Navegação médica"
+        role === "patient" ? "Patient navigation" : "Physician navigation"
       }
       className="flex flex-wrap gap-2"
     >

@@ -9,7 +9,7 @@ The workflow graph in `src/features/workflow/workflow.ts` is **administrative ad
 
 ## Invariants (must hold after your change)
 
-- The status union is exhaustive and matches the product's state list. Every status has a pt-BR label in `statusLabels`. Statuses are never conveyed by color alone.
+- The status union is exhaustive and matches the product's state list. Every status has a US English label in `statusLabels`. Statuses are never conveyed by color alone.
 - No edge from any AI or analysis state straight to `PLAN_AVAILABLE`. A plan is published only after `MEDICAL_REVIEW_COMPLETED`.
 - `CLARIFICATION_REQUIRED` returns through `ANALYSIS_PENDING`, never straight to review or plan.
 - `ANALYSIS_FAILED` can only retry (`ANALYSIS_PENDING`) or return to intake. It never moves forward to review on its own.

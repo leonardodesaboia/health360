@@ -44,7 +44,7 @@ deferred until a functional feature requires them.
 The showcase demonstrates `label` + help + input + connected error, Zod parsing,
 RHF first-error focus and a `role="status"` success message. Success means format
 validation only; it does not imply data saved or clinically reviewed.
-For real intake, adopt explicit “Não sei” values where appropriate and preserve
+For real intake, adopt explicit “I don't know” values where appropriate and preserve
 answers across navigation once persistence is implemented.
 
 Every new interactive primitive needs keyboard operation, visible focus, touch size,

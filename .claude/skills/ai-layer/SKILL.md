@@ -43,7 +43,7 @@ Send only the fields the scenario's rules need: age, relevant history, medicatio
    - a proposal the deterministic layer blocked.
 4. Only then persist the output as a **preliminary** analysis and move the workflow to `MEDICAL_REVIEW_PENDING` (or `CLARIFICATION_REQUIRED` when the application determines that data is missing).
 
-Every failure goes to `ANALYSIS_FAILED` or the blocked state, with bounded error metadata and safe pt-BR copy. Nothing is published automatically.
+Every failure goes to `ANALYSIS_FAILED` or the blocked state, with bounded error metadata and safe US English copy. Nothing is published automatically.
 
 ## Persistence and logging
 

@@ -2,7 +2,7 @@
 
 context: |
   Health360 is a synthetic-data prototype; no real-patient use or clinical validation is authorized.
-  UI copy is pt-BR; code identifiers and technical documentation are English.
+  UI copy is US English; code identifiers and technical documentation are English.
   Physician review is mandatory before patient guidance; no automatic publication of model output.
   Never fabricate evidence, clinical criteria or negative findings from unknown information.
   Use centralized semantic design tokens and shared components, not arbitrary feature colors.

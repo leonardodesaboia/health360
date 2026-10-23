@@ -7,7 +7,7 @@ import {
 /** Entirely invented fixtures. Never substitute real patient information. */
 export const demoPatient = patientSchema.parse({
   id: "synthetic-patient-01",
-  displayName: "Marina Exemplo",
+  displayName: "Marina Example",
   synthetic: true,
   status: "MEDICAL_REVIEW_PENDING",
 });
@@ -16,25 +16,25 @@ export const demoProfile = healthProfileSchema.parse({
   patientId: demoPatient.id,
   version: 1,
   age: 46,
-  personalHistory: [{ value: "Não informado", provenance: "PATIENT_REPORTED" }],
+  personalHistory: [{ value: "Not provided", provenance: "PATIENT_REPORTED" }],
   familyHistory: [{ value: null, provenance: "PATIENT_REPORTED" }],
   medications: [{ value: null, provenance: "PATIENT_REPORTED" }],
-  habits: [{ value: "Caminhadas ocasionais", provenance: "PATIENT_REPORTED" }],
-  missingInformation: ["Data do exame anterior", "Histórico familiar"],
+  habits: [{ value: "Occasional walks", provenance: "PATIENT_REPORTED" }],
+  missingInformation: ["Previous examination date", "Family history"],
   examinationIds: ["synthetic-exam-01"],
   updatedAt: "2026-10-20T14:00:00Z",
 });
 export const demoExamination = previousExaminationSchema.parse({
   id: "synthetic-exam-01",
   patientId: demoPatient.id,
-  name: "Exame informado pela paciente",
+  name: "Patient-reported examination",
   performedAt: null,
   result: { value: null, provenance: "PATIENT_REPORTED" },
-  notes: "Registro fictício; tipo, data e resultado não confirmados.",
+  notes: "Fictional record; type, date and result are unconfirmed.",
 });
 export const demoReview = {
   id: "demo-review-01",
   patientId: demoPatient.id,
-  submittedAt: "20 out. 2026",
-  analysisLabel: "Estrutura demonstrativa · nenhuma análise executada",
+  submittedAt: "2026-10-20T14:00:00Z",
+  analysisLabel: "Demonstration structure · no analysis performed",
 } as const;

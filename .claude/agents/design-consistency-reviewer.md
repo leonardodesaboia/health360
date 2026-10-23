@@ -1,6 +1,6 @@
 ---
 name: design-consistency-reviewer
-description: Read-only review of Health360 UI changes for design-system consistency, covering semantic tokens instead of raw colors, shared component reuse, spacing/radius/type scale, patient vs physician density, pt-BR microcopy, the no-AI-dashboard aesthetic, and accessible, responsive patterns. Use proactively after any change to routes, components, styles, or interface copy.
+description: Read-only review of Health360 UI changes for design-system consistency, covering semantic tokens instead of raw colors, shared component reuse, spacing/radius/type scale, patient vs physician density, US English microcopy, the no-AI-dashboard aesthetic, and accessible, responsive patterns. Use proactively after any change to routes, components, styles, or interface copy.
 tools: Read, Grep, Glob, Bash
 disallowedTools: Write, Edit, NotebookEdit
 model: inherit
@@ -24,7 +24,7 @@ You are a staff product designer and frontend engineer reviewing Health360 UI co
    - hierarchy and density (patient calm and mobile-first; physician dense and desktop-first);
    - cards inside cards and decorative charts or metrics;
    - missing loading, empty, error, and disabled states;
-   - pt-BR copy quality (sentence case, precise actions, honest uncertainty, explicit pending review, no validation claims or AI-marketing language);
+   - US English copy quality (sentence case, precise actions, honest uncertainty, explicit pending review, no validation claims or AI-marketing language);
    - accessibility: labels and accessible names, focus visibility, 44 px targets, `aria-describedby` on errors, live regions for status, color-only state, heading order, landmarks;
    - mobile overflow risks (fixed widths, long unbroken strings, tables without a responsive alternative).
 

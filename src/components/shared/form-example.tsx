@@ -9,8 +9,8 @@ const schema = z.object({
   example: z
     .string()
     .trim()
-    .min(2, "Use pelo menos dois caracteres.")
-    .max(40, "Use até 40 caracteres."),
+    .min(2, "Use at least two characters.")
+    .max(40, "Use up to 40 characters."),
 });
 type Values = z.infer<typeof schema>;
 
@@ -33,13 +33,13 @@ export function FormExample() {
     >
       <div>
         <label htmlFor="example" className="text-sm font-medium">
-          Texto de exemplo
+          Example text
         </label>
         <p
           id="example-help"
           className="mt-1 mb-2 text-sm text-muted-foreground"
         >
-          Use apenas texto fictício. Nada será salvo ou enviado.
+          Use fictional text only. Nothing will be saved or sent.
         </p>
         <Input
           id="example"
@@ -58,9 +58,9 @@ export function FormExample() {
           </p>
         )}
       </div>
-      <Button type="submit">Validar exemplo</Button>
+      <Button type="submit">Validate example</Button>
       <p role="status" className="text-sm text-success-foreground">
-        {validated ? "Formato válido. O texto não foi salvo." : ""}
+        {validated ? "Valid format. The text was not saved." : ""}
       </p>
     </form>
   );

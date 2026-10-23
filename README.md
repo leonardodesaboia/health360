@@ -3,6 +3,9 @@
 AI-implementation-ready foundation for a preventive-care coordination prototype.
 **Synthetic demonstration only. No clinical validation or real patient use.**
 
+UI copy, documentation and synthetic scenarios use US English, with en-US date
+and number formatting. See [ADR0004](docs/adr/0004-english-language.md).
+
 ## Run locally
 
 Requires Node 24 and pnpm 10.34.5. In Windows PowerShell with script restrictions,
@@ -32,7 +35,8 @@ pnpm exec openspec validate --all --strict --no-interactive
 
 `verify` runs lint → route type generation / strict TypeScript → Vitest → production
 build. E2E runs separately against the production build and starts its own loopback
-server on port 3100. Keep that port available. CI runs the same verify and smoke commands.
+server on port 3100 by default (`PORT` overrides it for parallel workers). Keep the
+selected port available. CI runs the same verify and smoke commands.
 Formatting stays a separate `pnpm format:check` command, enforced as its own CI step.
 The root `.gitattributes` sets `text=auto eol=lf` for text and marks binary assets
 explicitly, so fresh Windows checkouts use LF even with `core.autocrlf=true`.
