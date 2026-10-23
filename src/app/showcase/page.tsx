@@ -15,37 +15,37 @@ export default function Showcase() {
     <DoctorShell>
       <ContentContainer>
         <PageHeader
-          eyebrow="Sistema de design"
-          title="Biblioteca de componentes"
-          description="Padrões compartilhados para uma interface clínica consistente e acessível."
+          eyebrow="Design system"
+          title="Component library"
+          description="Shared patterns for a consistent, accessible clinical interface."
         />
         <Surface>
-          <h2>Ações e controles</h2>
+          <h2>Actions and controls</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Variações visuais em estado desabilitado; o formulário abaixo
-            demonstra uma ação funcional.
+            Disabled visual variants; the form below demonstrates a working
+            action.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Button disabled>Primária</Button>
+            <Button disabled>Primary</Button>
             <Button disabled variant="outline">
-              Secundária
+              Secondary
             </Button>
             <Button disabled variant="ghost">
-              Discreta
+              Subtle
             </Button>
             <Button disabled variant="destructive">
-              Destrutiva
+              Destructive
             </Button>
           </div>
         </Surface>
         <Surface>
-          <h2>Campos e validação</h2>
+          <h2>Fields and validation</h2>
           <div className="mt-6">
             <FormExample />
           </div>
         </Surface>
         <Surface>
-          <h2>Estados administrativos</h2>
+          <h2>Administrative states</h2>
           <div className="mt-6 flex flex-wrap gap-3">
             {workflowStatuses.map((status) => (
               <StatusIndicator key={status} status={status} />
@@ -53,10 +53,10 @@ export default function Showcase() {
           </div>
         </Surface>
         <div className="space-y-4">
-          <Notice title="Informação">
-            As mensagens usam texto e ícones, sem depender apenas de cor.
+          <Notice title="Information">
+            Messages use text and icons without relying on color alone.
           </Notice>
-          <InformationGap items={["Informação desconhecida no cenário"]} />
+          <InformationGap items={["Unknown information in this scenario"]} />
           <EvidenceDetails />
         </div>
       </ContentContainer>

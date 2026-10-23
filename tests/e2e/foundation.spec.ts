@@ -1,12 +1,12 @@
 import { expect, test } from "@playwright/test";
 
 const routes = [
-  ["/patient", "Olá, Marina"],
-  ["/patient/intake", "Informações do exemplo"],
-  ["/patient/plan", "Acompanhamento preventivo"],
-  ["/doctor", "Fila de revisões"],
-  ["/doctor/reviews/demo-review-01", "Marina Exemplo"],
-  ["/showcase", "Biblioteca de componentes"],
+  ["/patient", "Hello, Marina"],
+  ["/patient/intake", "Example information"],
+  ["/patient/plan", "Preventive follow-up"],
+  ["/doctor", "Review queue"],
+  ["/doctor/reviews/demo-review-01", "Marina Example"],
+  ["/showcase", "Component library"],
 ];
 for (const [route, title] of routes) {
   test(`${route} renders without overflow or runtime errors`, async ({
@@ -15,11 +15,15 @@ for (const [route, title] of routes) {
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(route);
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
     await expect(
       page.getByRole("heading", { name: title, exact: true, level: 1 }),
     ).toBeVisible();
     await expect(
-      page.getByText("Ambiente demonstrativo", { exact: true }),
+      page.getByText(/DEMONSTRATIVE — NOT CLINICALLY VALIDATED/),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Demonstration environment", { exact: true }),
     ).toBeVisible();
     expect(
       await page.evaluate(
@@ -31,31 +35,32 @@ for (const [route, title] of routes) {
 }
 test("patient and doctor navigation and review boundary", async ({ page }) => {
   await page.goto("/patient");
-  await page.getByRole("link", { name: "Consultar meu histórico" }).click();
+  await page.getByRole("link", { name: "View my history" }).click();
   await expect(page).toHaveURL(/\/patient\/intake$/);
-  await page.getByRole("link", { name: "Meu plano", exact: true }).click();
+  await page.getByRole("link", { name: "My plan", exact: true }).click();
   await expect(
     page.getByRole("heading", {
-      name: "Nenhum plano disponível neste exemplo",
+      name: "No plan available in this example",
     }),
   ).toBeVisible();
-  await page.getByRole("link", { name: /Ver como médico/ }).click();
-  await page.getByRole("link", { name: "Abrir revisão" }).click();
+  await page.getByRole("link", { name: /View as physician/ }).click();
+  await expect(page.getByText("Oct 20, 2026")).toBeVisible();
+  await page.getByRole("link", { name: "Open review" }).click();
   await expect(
-    page.getByRole("button", { name: "Aprovar", exact: true }),
+    page.getByRole("button", { name: "Approve", exact: true }),
   ).toBeDisabled();
-  await page.getByText("Consultar evidências e origem").click();
+  await page.getByText("View evidence and sources").click();
   await expect(
-    page.getByText(/Nenhuma evidência clínica foi carregada/),
+    page.getByText(/No clinical evidence has been loaded/),
   ).toBeVisible();
-  await page.getByRole("link", { name: "Voltar à fila" }).click();
+  await page.getByRole("link", { name: "Back to queue" }).click();
   await expect(page).toHaveURL(/\/doctor$/);
 });
 test("skip link receives keyboard focus and reaches main", async ({ page }) => {
   await page.goto("/patient");
   await page.keyboard.press("Tab");
   await expect(
-    page.getByRole("link", { name: "Pular para o conteúdo" }),
+    page.getByRole("link", { name: "Skip to content" }),
   ).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("main")).toBeFocused();
@@ -64,25 +69,23 @@ test("showcase validates accessibly without persisting data", async ({
   page,
 }) => {
   await page.goto("/showcase");
-  await page.getByRole("button", { name: "Validar exemplo" }).click();
+  await page.getByRole("button", { name: "Validate example" }).click();
   await expect(
-    page
-      .getByRole("alert")
-      .filter({ hasText: "Use pelo menos dois caracteres." }),
+    page.getByRole("alert").filter({ hasText: "Use at least two characters." }),
   ).toBeVisible();
-  await expect(page.getByLabel("Texto de exemplo")).toBeFocused();
-  await page.getByLabel("Texto de exemplo").fill("Exemplo sintético");
-  await page.getByRole("button", { name: "Validar exemplo" }).click();
+  await expect(page.getByLabel("Example text")).toBeFocused();
+  await page.getByLabel("Example text").fill("Synthetic example");
+  await page.getByRole("button", { name: "Validate example" }).click();
   await expect(page.getByRole("status")).toHaveText(
-    "Formato válido. O texto não foi salvo.",
+    "Valid format. The text was not saved.",
   );
   await page.reload();
-  await expect(page.getByLabel("Texto de exemplo")).toHaveValue("");
+  await expect(page.getByLabel("Example text")).toHaveValue("");
 });
 test("unknown review does not disclose another fixture", async ({ page }) => {
   const response = await page.goto("/doctor/reviews/unknown");
   expect(response?.status()).toBe(404);
   await expect(
-    page.getByRole("heading", { name: "Página não encontrada" }),
+    page.getByRole("heading", { name: "Page not found" }),
   ).toBeVisible();
 });

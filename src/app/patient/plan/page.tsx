@@ -11,23 +11,23 @@ export default function Plan() {
   return (
     <ContentContainer>
       <PageHeader
-        eyebrow="Meu plano"
-        title="Acompanhamento preventivo"
-        description="As informações do plano só podem ser disponibilizadas depois da revisão médica."
+        eyebrow="My plan"
+        title="Preventive follow-up"
+        description="Plan information can only be made available after physician review."
       />
       <StatusIndicator status={demoPatient.status} />
       <EmptyState
-        title="Nenhum plano disponível neste exemplo"
-        description="A geração de planos e o registro de decisões ainda não fazem parte desta etapa do protótipo."
+        title="No plan available in this example"
+        description="Plan generation and decision recording are not yet part of this stage of the prototype."
         action={
           <Button asChild variant="outline">
-            <Link href="/patient">Acompanhar avaliação</Link>
+            <Link href="/patient">Track evaluation</Link>
           </Button>
         }
       />
-      <Notice title="Histórico de versões">
-        Quando os ciclos de acompanhamento forem implementados, os planos
-        anteriores serão preservados aqui.
+      <Notice title="Version history">
+        When follow-up cycles are implemented, previous plans will be preserved
+        here.
       </Notice>
     </ContentContainer>
   );

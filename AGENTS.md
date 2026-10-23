@@ -34,7 +34,7 @@ Use Node 24 and pnpm 10.34.5. On restricted Windows PowerShell use `pnpm.cmd`.
 
 ## Design and code conventions
 
-- UI text is natural pt-BR; identifiers and technical docs are English.
+- UI text, identifiers and documentation use natural US English. Dates and numbers use en-US formatting.
 - Use [design tokens](DESIGN_GUIDELINES.md); no raw colors or arbitrary Tailwind palette classes in features. Reuse the shared components before creating new ones.
 - Geist typography; 4 px spacing rhythm; patient mobile-first, physician desktop-first. Avoid decorative charts, invented scores, gradients and redundant cards.
 - Strict TypeScript. Runtime-validate external data with Zod. Model unknown values explicitly; never default unknown clinical facts to false.
@@ -83,6 +83,6 @@ tooling PRs; this root guide remains the harness-neutral policy source.
 ## Definition of done
 
 Acceptance and failure paths are covered, no scope creep, no sensitive data. `pnpm verify`, `pnpm test:e2e` and `pnpm format:check` pass.
-For UI changes inspect mobile/desktop, keyboard focus, empty/error/disabled states and pt-BR copy.
+For UI changes inspect mobile/desktop, keyboard focus, empty/error/disabled states and US English copy.
 Review clinical publication gates and provenance when touched. Update docs and report exact validation plus unverified aspects.
 Commits use conventional messages. Publish only within the current user's authorization. The foundation PR is authorized; do not merge it. Respect the active environment's delegation and review policies over optional plugin automation.

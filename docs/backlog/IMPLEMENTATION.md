@@ -182,7 +182,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 - Goal: publish a patient-facing version derived solely from finalized physician decisions.
 - Depends on: P0-10.
 - Areas: preventive-plan feature, publication service, `/patient/plan`, contracts.
-- Accept: approved/modified actions only; reviewed redundancy, pending information, next steps and action states understandable in pt-BR; all references trace to the review; direct URL/API cannot expose preliminary proposals as a plan.
+- Accept: approved/modified actions only; reviewed redundancy, pending information, next steps and action states understandable in US English; all references trace to the review; direct URL/API cannot expose preliminary proposals as a plan.
 - Tests: reject/pending exclusion, ownership, review bypass rejection, stale cycle rejection, repeat publication idempotency, output matches decisions; complete flows A/B.
 
 <a id="p0-12"></a>
@@ -196,7 +196,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 - Goal: collect application-selected missing fields without a chatbot.
 - Depends on: P0-07, P0-10.
 - Areas: clarification feature, intake/profile updates, workflow service.
-- Accept: restricted question templates selected by required gaps; explicit “Não sei”; persisted answer creates a profile version and re-enters analysis; unresolved unknowns remain blocked where required; review-origin clarification invalidates stale proposals.
+- Accept: restricted question templates selected by required gaps; explicit “I don't know”; persisted answer creates a profile version and re-enters analysis; unresolved unknowns remain blocked where required; review-origin clarification invalidates stale proposals.
 - Tests: supported/unsupported fields, unknown answer, refresh recovery, new profile version, stale review rejection, no direct transition to plan; flow C.
 
 <a id="p0-13"></a>
@@ -322,7 +322,7 @@ case must not automatically become “unnecessary”. Pending decisions block pu
 ### Flow C — Clarification (P0-12)
 
 Given essential information is missing, when analysis or review requests a supported
-field, then the patient sees a bounded complementary question with “Não sei”. When
+field, then the patient sees a bounded complementary question with “I don't know”. When
 answered, then the new profile version persists, a new analysis runs and the prior
 analysis cannot be finalized as current. If unknown remains insufficient, then the
 case stays explicitly blocked/needs clarification; no fabricated fact or plan appears.
@@ -339,7 +339,7 @@ second analysis cannot overwrite v1 or imply v2 is available.
 
 Given a completed synthetic intake, when the provider times out, returns malformed
 output, an unsupported category, nonexistent evidence or insufficient support, then
-analysis is blocked/failed with clear pt-BR feedback and no patient plan/proposal is
+analysis is blocked/failed with clear US English feedback and no patient plan/proposal is
 published. When the user retries with a valid result, then exactly one current
 analysis enters medical review pending. Review remains mandatory. Verify bounded
 retry, idempotency, no leaked key/raw output and no fallback recommendation.

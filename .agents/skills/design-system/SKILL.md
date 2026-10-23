@@ -1,6 +1,6 @@
 ---
 name: design-system
-description: Enforces the Health360 design system. Use whenever you create or change UI in Health360, including any route, page, layout, component, Tailwind class, color, spacing, typography, icon, empty/error/loading state, form control, or pt-BR interface copy. Also use when reviewing UI diffs for design consistency or accessibility.
+description: Enforces the Health360 design system. Use whenever you create or change UI in Health360, including any route, page, layout, component, Tailwind class, color, spacing, typography, icon, empty/error/loading state, form control, or US English interface copy. Also use when reviewing UI diffs for design consistency or accessibility.
 ---
 
 # Health360 design system
@@ -22,13 +22,14 @@ Health360 is a restrained, professional clinical SaaS product ("Clinical Premium
 - **Geometry and rhythm.** Use the 4 px spacing scale (4, 8, 12, 16, 24, 32, 40, 48, 64) and the radius tokens (`rounded-sm/md/lg`). Use the standard content widths from `ContentContainer`, not arbitrary `max-w-[...]`.
 - **Typography.** Use Geist and the documented scale, with weights 400, 500, and 600 only. Use `tabular-nums` for dates, measurements, and numbers.
 - **Restraint.** Don't add gradients, glassmorphism, glows, robot or brain imagery, emoji navigation, cards inside cards, decorative charts, invented scores or metrics, giant pill buttons, heavy shadows, badge clutter, or marketing heroes inside the app.
-- **Two densities.** Patient screens are mobile-first, calm, and explanatory, with nav limited to Início, Meu plano, and Histórico. Physician screens are desktop-first, dense but uncluttered, use two columns on wide screens (context left, proposals and decisions right), and degrade gracefully.
+- **Two densities.** Patient screens are mobile-first, calm, and explanatory, with nav limited to Home, My plan, and History. Physician navigation uses Reviews, Patients, and History as those features become available. Physician screens are desktop-first, dense but uncluttered, use two columns on wide screens (context left, proposals and decisions right), and degrade gracefully.
 
-## Copy (pt-BR)
+## Copy (US English)
 
-- All visible text is natural Brazilian Portuguese in sentence case. Code identifiers stay in English.
-- Use precise action labels: "Ver justificativa", "Consultar evidências", "Acompanhar meu plano". Avoid AI marketing language like "insights poderosos" or "inteligência revolucionária".
-- Make workflow status explicit, and keep administrative status separate from clinical status. Always say when medical review is pending ("Proposta aguardando revisão médica").
+- All visible text is natural US English in sentence case. Code identifiers stay in English.
+- Format displayed dates and numbers with explicit `en-US` Intl formatters; keep ISO values in data contracts. Use `lang="en"` on the HTML document.
+- Use precise action labels: "View rationale", "View evidence", "Track my plan". Avoid AI marketing language like "powerful insights" or "revolutionary intelligence".
+- Make workflow status explicit, and keep administrative status separate from clinical status. Always say when medical review is pending ("Proposal awaiting physician review").
 - Communicate uncertainty honestly. Never claim clinical validation, accuracy, or efficacy. Keep demo labeling visible.
 
 ## Accessibility (WCAG 2.2 AA, where practical)

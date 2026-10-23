@@ -94,6 +94,6 @@ Form help/errors connect via `aria-describedby`; errors set `aria-invalid` and
 focus the first invalid field. Status feedback uses live regions only for changes.
 Reduced-motion preference disables transitions and animation. Never use color alone.
 
-Use natural pt-BR sentence case, clear verbs and honest uncertainty. Workflow status
-is not clinical status. Say “Aguardando revisão médica”, not “Resultado aprovado pela IA”.
+Use natural US English sentence case, clear verbs and honest uncertainty. Workflow status
+is not clinical status. Say “Awaiting physician review”, not “Result approved by AI”.
 Keep demo/synthetic labels visible, with no implication of medical efficacy.

@@ -19,7 +19,7 @@ The preloaded `clinical-safety` skill is your checklist. `AGENTS.md` ("Clinical 
 2. Read each changed file plus enough surrounding code (contracts, callers, tests) to judge actual behavior.
 3. Check, at minimum:
    - **Fabrication:** invented guidelines, evidence IDs, thresholds, statistics, confidence or accuracy figures, or clinical criteria that a medical owner didn't supply.
-   - **Unknown handling:** `null` or "Não sei" coerced to `false`, "normal", `0`, or a default. Missing-information lists dropped.
+   - **Unknown handling:** `null` or "I don't know" coerced to `false`, "normal", `0`, or a default. Missing-information lists dropped.
    - **Provenance:** patient-reported, structured, rule, AI, and physician-reviewed content conflated in contracts or UI.
    - **Review gate:** any path that publishes or displays proposals or plans before every item is decided and the review is explicitly finalized. Missing reasons for modify or reject. UI-only gating with no server check.
    - **Fail-open AI:** timeout, API error, invalid schema, unknown evidence, or a disallowed category that leads anywhere except blocked or needs-review. Fallback recommendations. Retries that publish or duplicate.

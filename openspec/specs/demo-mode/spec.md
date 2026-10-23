@@ -11,12 +11,12 @@ Specify existing labeling, role navigation and synthetic-data boundaries in
 
 Patient and doctor reference environments SHALL show a visible demonstration
 banner identifying synthetic data, lack of clinical validation and exclusion of
-real care, with pt-BR interface copy.
+real care, with US English interface copy.
 
 #### Scenario: Open any reference route
 
 - **WHEN** a user opens /patient, /patient/intake, /patient/plan, /doctor, /doctor/reviews/demo-review-01 or /showcase
-- **THEN** the shell SHALL display Ambiente demonstrativo and synthetic/non-validated context
+- **THEN** the shell SHALL display Demonstration environment and synthetic/non-validated context
 - **AND** the reference screen SHALL NOT claim a validated medical recommendation
 
 ### Requirement: Role switching is navigation only
@@ -26,13 +26,13 @@ creating authentication or authorization.
 
 #### Scenario: Switch to physician view
 
-- **WHEN** the user follows Ver como médico from the patient environment
+- **WHEN** the user follows View as physician from the patient environment
 - **THEN** the link SHALL navigate to /doctor
 - **AND** its accessible name SHALL identify demonstration switching without authorization
 
 #### Scenario: Switch to patient view
 
-- **WHEN** the user follows Ver como paciente from the doctor environment
+- **WHEN** the user follows View as patient from the doctor environment
 - **THEN** the link SHALL navigate to /patient
 - **AND** no credential, persisted role or clinical authority SHALL be issued
 
@@ -43,7 +43,7 @@ decisions and an unavailable plan instead of performing MVP module logic.
 
 #### Scenario: Read the prepared case
 
-- **WHEN** the reference queue/workspace opens Marina Exemplo
+- **WHEN** the reference queue/workspace opens Marina Example
 - **THEN** the case SHALL remain explicitly fictitious with unknown values preserved
 - **AND** no model call, saved decision or generated plan SHALL occur
 

@@ -1,560 +1,560 @@
-# HEALTH360 — CONTEXTO DA APLICAÇÃO, FUNCIONALIDADES E FLUXOS DO MVP
+# HEALTH360 — APPLICATION CONTEXT, MVP FEATURES AND FLOWS
 
-(Prompt original do usuário, transcrito na íntegra. Representa trabalho FUTURO: deve ser registrado no repositório como contexto e backlog, não implementado nesta etapa. O escopo é definido em 00-orchestrator-brief.md.)
+(English translation of the original user prompt, preserving its full requirements. This describes FUTURE work: record it as product context and backlog, rather than implementing it all at once. The assigned task defines scope. ADR0004 supersedes the original interface-language requirement.)
 
-## 1. Visão geral do Health360
+## 1. Health360 overview
 
-O Health360 é uma healthtech brasileira que está desenvolvendo uma plataforma de inteligência clínica voltada à medicina preventiva personalizada, contínua e baseada em evidências científicas.
+Health360 is a Brazilian healthtech developing a clinical intelligence platform for personalized, continuous preventive medicine based on scientific evidence.
 
-A proposta é transformar os check-ups tradicionais, frequentemente organizados em pacotes padronizados de exames, em um processo de prevenção individualizado e acompanhado ao longo do tempo.
+The aim is to transform traditional checkups, often organized as standardized test packages, into an individualized prevention process followed over time.
 
-O Health360 busca ajudar médicos e pacientes a compreender:
+Health360 seeks to help physicians and patients understand:
 
-- Quais oportunidades preventivas são relevantes para cada pessoa.
-- Quais avaliações devem ser consideradas.
-- Quais exames podem ser redundantes ou desnecessários.
-- Quais informações precisam ser esclarecidas.
-- Quais ações devem ser acompanhadas.
-- Como o plano preventivo deve evoluir ao longo do tempo.
+- Which preventive opportunities are relevant to each person.
+- Which evaluations should be considered.
+- Which tests may be redundant or unnecessary.
+- Which information needs clarification.
+- Which actions need follow-up.
+- How the preventive plan should evolve over time.
 
-O princípio central do produto é:
+The central product principle is:
 
 "Better decisions, not more tests."
 
-A plataforma combina anamnese estruturada, histórico clínico, inteligência artificial, evidências científicas, revisão médica e acompanhamento longitudinal.
+The platform combines structured health intake, clinical history, artificial intelligence, scientific evidence, physician review and longitudinal follow-up.
 
-O Health360 não pretende substituir o médico. A inteligência artificial funciona como uma ferramenta de apoio, enquanto as decisões clínicas permanecem sob responsabilidade do profissional.
-
----
-
-# 2. Objetivo do MVP
-
-Construir uma aplicação web funcional que demonstre o ciclo principal do Health360.
-
-O MVP será desenvolvido em um prazo reduzido e apresentado no contexto da competição internacional HISIC 2026.
-
-O projeto ainda não possui funcionalidades desenvolvidas nem validação clínica.
-
-Portanto, o protótipo deverá funcionar inicialmente com dados sintéticos, pacientes fictícios e cenários demonstrativos.
-
-O objetivo é comprovar a viabilidade técnica e apresentar a experiência idealizada, não demonstrar eficácia clínica.
-
-O fluxo completo será:
-
-Paciente preenche histórico → Sistema organiza informações → IA analisa o contexto fornecido → IA prepara propostas para revisão → Médico avalia e toma decisões → Paciente recebe o plano revisado → Sistema preserva o histórico → Novos dados permitem uma reavaliação.
-
-Todas as etapas principais devem funcionar de ponta a ponta.
-
-Evitar funcionalidades apenas visuais que não produzam efeitos reais na aplicação.
+Health360 does not seek to replace physicians. AI serves as a support tool, while clinical decisions remain the professional's responsibility.
 
 ---
 
-# 3. Estratégia de inteligência artificial — IMPORTANTE
+# 2. MVP objective
 
-O Health360 NÃO desenvolverá uma inteligência artificial proprietária neste MVP.
+Build a working web application that demonstrates the main Health360 cycle.
 
-Não criar, treinar, ajustar ou hospedar modelos próprios.
+The MVP will be developed on a short schedule and presented at the international HISIC 2026 competition.
 
-Não implementar pipelines de machine learning, modelos preditivos proprietários, sistemas multiagentes, Knowledge Graphs ou mecanismos sofisticados de otimização.
+The product requirements do not imply that functional modules or clinical validation already exist.
 
-A plataforma utilizará um modelo de linguagem consolidado, como um modelo GPT, acessado por API.
+The prototype must initially operate with synthetic data, fictional patients and demonstration scenarios.
 
-O modelo específico deverá ser configurável, permitindo substituição sem alterações significativas na aplicação.
+The objective is to demonstrate technical feasibility and the intended experience, rather than clinical efficacy.
 
-A inteligência da solução estará na combinação entre:
+The complete flow will be:
 
-1. Informações estruturadas do paciente.
-2. Contexto clínico previamente preparado.
-3. Evidências científicas selecionadas.
-4. Instruções específicas de comportamento.
-5. Regras explícitas e limites de atuação.
-6. Respostas estruturadas do modelo.
-7. Supervisão médica obrigatória.
+Patient completes health history → System organizes information → AI analyzes the supplied context → AI prepares proposals for review → Physician evaluates and makes decisions → Patient receives the reviewed plan → System preserves history → New data enables reassessment.
 
-## 3.1. Funcionamento da integração
+All main stages must work end to end.
 
-O backend deverá preparar as informações que serão enviadas ao modelo.
-
-A requisição poderá conter:
-
-### Instruções do sistema
-
-Definem:
-
-- O papel da IA como assistente de apoio clínico.
-- Suas responsabilidades.
-- Os limites das análises.
-- O comportamento diante de informações insuficientes.
-- A obrigação de reconhecer incertezas.
-- A proibição de inventar informações clínicas.
-- A necessidade de utilizar apenas as evidências fornecidas para fundamentar propostas.
-
-### Contexto clínico
-
-Um conjunto reduzido de documentos e informações selecionados pela equipe médica, contendo:
-
-- Diretrizes clínicas pertinentes ao escopo.
-- Critérios preventivos.
-- Informações sobre indicações e contraindicações.
-- Critérios de elegibilidade.
-- Situações de possível redundância.
-- Limitações e incertezas.
-
-Esse contexto deverá ser organizado de maneira versionada e rastreável.
-
-Para o MVP, não será necessário criar um sistema RAG completo ou banco vetorial.
-
-O contexto poderá ser mantido em arquivos estruturados ou registros simples, carregados pelo backend conforme o cenário.
-
-### Dados do paciente
-
-Informações coletadas pela anamnese:
-
-- Idade.
-- Informações clinicamente relevantes.
-- Histórico pessoal.
-- Histórico familiar.
-- Medicamentos.
-- Hábitos.
-- Exames anteriores.
-- Informações ausentes.
-
-Enviar somente os dados necessários para cada análise.
-
-### Contrato de resposta
-
-A IA deverá retornar uma estrutura padronizada contendo:
-
-- Resumo do caso.
-- Informações relevantes identificadas.
-- Informações ausentes.
-- Possíveis oportunidades preventivas.
-- Possíveis exames redundantes.
-- Justificativas baseadas no contexto fornecido.
-- Referências às evidências disponibilizadas.
-- Incertezas e limitações.
-- Questões para revisão médica.
-
-Utilizar Structured Outputs ou mecanismo equivalente, com validação do schema no backend.
+Avoid purely visual features that produce no real effect in the application.
 
 ---
 
-# 4. Regras e segurança da IA
+# 3. Artificial intelligence strategy — IMPORTANT
 
-O modelo poderá auxiliar na interpretação e organização das informações, mas não terá autonomia para autorizar decisões médicas.
+Health360 will NOT develop proprietary AI for this MVP.
 
-Não confiar exclusivamente em instruções textuais para impor restrições clínicas.
+Do not create, train, fine-tune or host custom models.
 
-Implementar uma camada simples de validação no backend, responsável por:
+Do not implement machine learning pipelines, proprietary predictive models, multiagent systems, knowledge graphs or sophisticated optimization mechanisms.
 
-- Validar o formato da resposta.
-- Verificar identificadores de evidências.
-- Impedir referências inexistentes.
-- Rejeitar categorias não permitidas.
-- Detectar ausência de informações obrigatórias.
-- Bloquear publicação automática de propostas.
-- Tratar respostas inválidas ou falhas da API.
-- Garantir revisão médica antes da disponibilização do plano.
+The platform will use an established language model, such as a GPT model, accessed through an API.
 
-Para o protótipo, utilizar apenas cenários clínicos restritos e previamente definidos.
+The specific model must be configurable so it can be replaced without significant application changes.
 
-O comportamento esperado dos cenários deverá ser documentado e testado.
+The solution's intelligence will come from combining:
 
-O LLM não deverá ter permissão para ampliar autonomamente o escopo clínico ou transformar suas próprias conclusões em recomendações finais.
+1. Structured patient information.
+2. Prepared clinical context.
+3. Selected scientific evidence.
+4. Specific behavioral instructions.
+5. Explicit rules and operating limits.
+6. Structured model responses.
+7. Mandatory physician supervision.
 
-As regras críticas de elegibilidade, contraindicação e bloqueio deverão ser controladas pela aplicação, ainda que de maneira simples, e não apenas pelo prompt.
+## 3.1. Integration behavior
 
-As evidências e regras inicialmente utilizadas serão demonstrativas até passarem por revisão médica formal.
+The backend must prepare the information sent to the model.
 
-O sistema deverá reconhecer quando não dispõe de informações suficientes.
+A request may contain:
 
----
+### System instructions
 
-# 5. Usuários da aplicação
+These define:
 
-O MVP terá dois ambientes integrados.
+- The AI's role as a clinical support assistant.
+- Its responsibilities.
+- Analysis boundaries.
+- Behavior when information is insufficient.
+- The obligation to acknowledge uncertainty.
+- The prohibition on inventing clinical information.
+- The requirement to use only supplied evidence to support proposals.
 
-## 5.1. Paciente
+### Clinical context
 
-O paciente utiliza a plataforma para fornecer suas informações, acompanhar sua avaliação e visualizar seu plano preventivo.
+A small set of documents and information selected by the medical team, containing:
 
-Funcionalidades:
+- Clinical guidelines relevant to the scope.
+- Preventive criteria.
+- Information about indications and contraindications.
+- Eligibility criteria.
+- Situations involving possible redundancy.
+- Limitations and uncertainties.
 
-- Acessar o ambiente do paciente.
-- Iniciar ou continuar uma anamnese.
-- Informar histórico pessoal e familiar.
-- Registrar medicamentos e hábitos.
-- Informar exames anteriores.
-- Revisar e editar respostas.
-- Enviar as informações para análise.
-- Visualizar o status do processo.
-- Responder a perguntas complementares.
-- Consultar o plano após revisão médica.
-- Acompanhar seu histórico longitudinal.
-- Atualizar informações relevantes.
+This context must be versioned and traceable.
 
-A experiência deve ser simples, intuitiva e mobile-first.
+The MVP does not require a complete RAG system or vector database.
 
-## 5.2. Médico
+Context may be maintained in structured files or simple records loaded by the backend according to the scenario.
 
-O médico acessa um workspace profissional para revisar as propostas preparadas pelo sistema.
+### Patient data
 
-Funcionalidades:
+Information collected through health intake:
 
-- Visualizar pacientes aguardando revisão.
-- Consultar perfis clínicos.
-- Ler resumos estruturados pela IA.
-- Analisar propostas preventivas.
-- Consultar justificativas e evidências.
-- Identificar possíveis redundâncias.
-- Visualizar informações insuficientes.
-- Aprovar, modificar ou rejeitar propostas.
-- Solicitar esclarecimentos.
-- Registrar justificativas.
-- Finalizar revisões.
-- Consultar histórico de decisões.
+- Age.
+- Clinically relevant information.
+- Personal history.
+- Family history.
+- Medications.
+- Habits.
+- Previous examinations.
+- Missing information.
 
-A experiência médica deverá priorizar desktop, clareza, rastreabilidade e produtividade.
+Send only the data required for each analysis.
 
----
+### Response contract
 
-# 6. Módulo 1 — Ambiente demonstrativo
+The AI must return a standardized structure containing:
 
-Implementar um ambiente de demonstração com pacientes fictícios.
+- Case summary.
+- Relevant findings.
+- Missing information.
+- Possible preventive opportunities.
+- Possibly redundant tests.
+- Rationales based on the supplied context.
+- References to the supplied evidence.
+- Uncertainties and limitations.
+- Questions for physician review.
 
-O MVP deverá conter pelo menos um cenário completo, previamente preparado, que possa ser apresentado rapidamente aos jurados.
-
-Funcionalidades:
-
-- Selecionar paciente demonstrativo.
-- Alternar entre visualização do paciente e do médico.
-- Manter os dados compartilhados entre os ambientes.
-- Persistir alterações e decisões.
-- Reiniciar a demonstração.
-- Identificar claramente o ambiente como protótipo.
-
-Não implementar autenticação complexa inicialmente.
-
-A alternância de papéis será exclusiva do ambiente demonstrativo, sem representar autorização válida para uso clínico real.
+Use Structured Outputs or an equivalent mechanism, with backend schema validation.
 
 ---
 
-# 7. Módulo 2 — Smart Health Intake
+# 4. AI rules and safety
 
-Implementar uma anamnese guiada, dividida em etapas.
+The model may help interpret and organize information, but must not autonomously authorize medical decisions.
 
-## Etapa 1 — Informações básicas
+Do not rely exclusively on textual instructions to enforce clinical restrictions.
 
-Coletar apenas os dados necessários aos cenários demonstrativos.
+Implement a simple backend validation layer responsible for:
 
-## Etapa 2 — Histórico clínico
+- Validating response format.
+- Checking evidence identifiers.
+- Preventing nonexistent references.
+- Rejecting unsupported categories.
+- Detecting missing required information.
+- Blocking automatic publication of proposals.
+- Handling invalid responses or API failures.
+- Ensuring physician review before making the plan available.
 
-- Condições prévias.
-- Histórico familiar.
-- Medicamentos em uso.
+Use only restricted, predefined clinical scenarios for the prototype.
 
-## Etapa 3 — Hábitos
+Document and test the expected scenario behavior.
 
-- Tabagismo.
-- Atividade física.
-- Outros hábitos relevantes ao cenário.
+The LLM must not autonomously expand clinical scope or turn its own conclusions into final recommendations.
 
-## Etapa 4 — Exames anteriores
+Critical eligibility, contraindication and blocking rules must be controlled by the application, even through simple logic, rather than by the prompt alone.
 
-- Tipo de exame.
-- Data.
-- Resultado demonstrativo.
-- Observações.
+The initial evidence and rules remain demonstrative until formal medical review.
 
-## Etapa 5 — Revisão das respostas
-
-O paciente poderá revisar, corrigir e confirmar as informações.
-
-Após a conclusão:
-
-1. Os dados são salvos.
-2. O perfil clínico é atualizado.
-3. A análise pode ser iniciada.
-4. O status do paciente é atualizado.
-
-Requisitos de UX:
-
-- Indicador de progresso.
-- Navegação de voltar e avançar.
-- Salvamento de respostas.
-- Perguntas condicionais.
-- Validação.
-- Respostas como "Não sei".
-- Formulário responsivo.
-- Linguagem clara.
-
-Não criar uma anamnese extensa ou excessivamente complexa.
+The system must recognize when it lacks sufficient information.
 
 ---
 
-# 8. Módulo 3 — Clinical Profile
+# 5. Application users
 
-Implementar uma visualização consolidada do histórico clínico.
+The MVP will have two integrated environments.
 
-O perfil deverá conter:
+## 5.1. Patient
 
-- Informações básicas.
-- Histórico pessoal.
-- Histórico familiar.
-- Medicamentos.
-- Hábitos.
-- Exames anteriores.
-- Informações ausentes.
-- Data da última atualização.
+Patients use the platform to provide information, follow their evaluation and view their preventive plan.
 
-O perfil será compartilhado entre os fluxos de paciente, análise por IA e revisão médica.
+Features:
 
-Identificar claramente informações declaradas, estruturadas e desconhecidas.
+- Access the patient environment.
+- Start or continue health intake.
+- Provide personal and family history.
+- Record medications and habits.
+- Report previous examinations.
+- Review and edit answers.
+- Submit information for analysis.
+- View process status.
+- Answer follow-up questions.
+- View the plan after physician review.
+- Follow longitudinal history.
+- Update relevant information.
 
-Não criar scores artificiais de saúde.
+The experience must be simple, intuitive and mobile-first.
 
----
+## 5.2. Physician
 
-# 9. Módulo 4 — AI Clinical Analysis
+Physicians access a professional workspace to review proposals prepared by the system.
 
-Este é o principal módulo tecnológico do MVP.
+Features:
 
-Implementar a integração entre dados do paciente, contexto clínico e LLM consolidado.
+- View patients awaiting review.
+- View clinical profiles.
+- Read AI-structured summaries.
+- Analyze preventive proposals.
+- View rationales and evidence.
+- Identify possible redundancies.
+- View insufficient information.
+- Approve, modify or reject proposals.
+- Request clarification.
+- Record rationales.
+- Finalize reviews.
+- View decision history.
 
-## Fluxo de execução
-
-1. O paciente conclui a anamnese.
-2. O backend obtém seu perfil estruturado.
-3. Seleciona o contexto clínico pertinente ao cenário.
-4. Aplica os critérios e bloqueios determinísticos necessários.
-5. Monta a requisição ao modelo de IA.
-6. O modelo retorna uma análise estruturada.
-7. O backend valida a resposta e suas referências.
-8. As propostas são armazenadas.
-9. O paciente passa ao estado de revisão médica pendente.
-10. O médico pode consultar a análise.
-
-## Responsabilidades da IA
-
-- Criar resumo clínico estruturado.
-- Identificar informações relevantes.
-- Relacionar dados do paciente ao contexto fornecido.
-- Explicar o significado das regras aplicáveis.
-- Organizar possíveis oportunidades preventivas.
-- Contextualizar possíveis redundâncias identificadas.
-- Reconhecer informações ausentes.
-- Registrar incertezas.
-- Preparar explicações para o médico.
-
-Não implementar análises clínicas ilimitadas ou consultas genéricas sobre qualquer doença.
-
-O escopo do modelo será restrito às situações selecionadas para o MVP.
-
-A saída será sempre preliminar e exigirá revisão humana.
+The physician experience must prioritize desktop use, clarity, traceability and productivity.
 
 ---
 
-# 10. Módulo 5 — Do Not Test Intelligence
+# 6. Module 1 — Demonstration environment
 
-Implementar como uma capacidade do fluxo de análise clínica.
+Implement a demonstration environment with fictional patients.
 
-Seu objetivo é demonstrar a identificação de possíveis exames redundantes ou desnecessários.
+The MVP must contain at least one complete, prepared scenario that can be presented quickly to judges.
 
-## Exemplo do fluxo
+Features:
 
-1. O paciente registra um exame anterior.
-2. O sistema identifica o exame, sua data e as informações disponíveis.
-3. Uma regra demonstrativa verifica uma possível redundância.
-4. A IA recebe os resultados dessa verificação.
-5. A IA organiza uma explicação contextualizada.
-6. O médico visualiza a proposta.
-7. O médico aceita, modifica ou rejeita a avaliação.
-8. O resultado revisado é registrado.
+- Select a demonstration patient.
+- Switch between patient and physician views.
+- Share data between the environments.
+- Persist changes and decisions.
+- Reset the demonstration.
+- Clearly identify the environment as a prototype.
 
-O sistema deverá explicar:
+Do not initially implement complex authentication.
 
-- Qual avaliação foi analisada.
-- Quais dados foram considerados.
-- Qual critério foi aplicado.
-- Por que a possível redundância foi identificada.
-- Quais limitações existem.
-
-Não presumir que todo exame recente seja desnecessário.
-
-Nenhuma sinalização deverá ser convertida automaticamente em orientação médica ao paciente.
+Role switching is exclusive to the demonstration environment and does not represent valid authorization for real clinical use.
 
 ---
 
-# 11. Módulo 6 — Intelligent Clarification
+# 7. Module 2 — Smart Health Intake
 
-Implementar perguntas complementares simples.
+Implement guided health intake divided into steps.
 
-Quando dados essenciais estiverem ausentes, o sistema poderá solicitar uma informação adicional.
+## Step 1 — Basic information
 
-A aplicação determinará quais campos precisam ser esclarecidos.
+Collect only the data needed for demonstration scenarios.
 
-A IA poderá auxiliar na redação da pergunta, utilizando linguagem compreensível.
+## Step 2 — Clinical history
 
-Exemplo:
+- Previous conditions.
+- Family history.
+- Current medications.
 
-"Você informou que realizou um exame anteriormente. Sabe aproximadamente em que período ele foi realizado?"
+## Step 3 — Habits
 
-O paciente responde e a informação é salva.
+- Smoking.
+- Physical activity.
+- Other habits relevant to the scenario.
 
-Se necessário, a análise é executada novamente.
+## Step 4 — Previous examinations
 
-Não criar um chatbot conversacional completo.
+- Examination type.
+- Date.
+- Demonstration result.
+- Notes.
 
-Limitar perguntas ao escopo das regras demonstrativas.
+## Step 5 — Answer review
 
-Permitir que o paciente informe que não sabe responder.
+Patients can review, correct and confirm their information.
+
+After completion:
+
+1. Data is saved.
+2. The clinical profile is updated.
+3. Analysis can begin.
+4. Patient status is updated.
+
+UX requirements:
+
+- Progress indicator.
+- Back and next navigation.
+- Answer saving.
+- Conditional questions.
+- Validation.
+- Answers such as "I don't know".
+- Responsive form.
+- Clear language.
+
+Do not create an extensive or overly complex intake.
 
 ---
 
-# 12. Módulo 7 — Physician Review Workspace
+# 8. Module 3 — Clinical Profile
 
-Criar um ambiente médico com duas telas principais.
+Implement a consolidated clinical-history view.
 
-## Tela A — Fila de revisões
+The profile must contain:
 
-Apresentar:
+- Basic information.
+- Personal history.
+- Family history.
+- Medications.
+- Habits.
+- Previous examinations.
+- Missing information.
+- Last updated date.
 
-- Paciente.
-- Data da análise.
+The profile is shared across patient, AI analysis and physician review flows.
+
+Clearly distinguish patient-reported, structured and unknown information.
+
+Do not create artificial health scores.
+
+---
+
+# 9. Module 4 — AI Clinical Analysis
+
+This is the MVP's main technology module.
+
+Integrate patient data, clinical context and an established LLM.
+
+## Execution flow
+
+1. The patient completes health intake.
+2. The backend retrieves the structured profile.
+3. It selects clinical context relevant to the scenario.
+4. It applies required deterministic criteria and blocking checks.
+5. It builds the AI model request.
+6. The model returns a structured analysis.
+7. The backend validates the response and its references.
+8. Proposals are stored.
+9. The patient moves to the awaiting physician review state.
+10. The physician can view the analysis.
+
+## AI responsibilities
+
+- Create a structured clinical summary.
+- Identify relevant information.
+- Relate patient data to the supplied context.
+- Explain the meaning of applicable rules.
+- Organize possible preventive opportunities.
+- Contextualize identified possible redundancies.
+- Acknowledge missing information.
+- Record uncertainties.
+- Prepare explanations for the physician.
+
+Do not implement unrestricted clinical analysis or generic consultations about any disease.
+
+The model's scope is restricted to the situations selected for the MVP.
+
+Output is always preliminary and requires human review.
+
+---
+
+# 10. Module 5 — Do Not Test Intelligence
+
+Implement this as a capability within the clinical analysis flow.
+
+Its objective is to demonstrate identification of possibly redundant or unnecessary tests.
+
+## Example flow
+
+1. The patient records a previous examination.
+2. The system identifies the examination, its date and available information.
+3. A demonstrative rule checks for possible redundancy.
+4. The AI receives the check results.
+5. The AI organizes a contextual explanation.
+6. The physician views the proposal.
+7. The physician accepts, modifies or rejects the assessment.
+8. The reviewed result is recorded.
+
+The system must explain:
+
+- Which evaluation was analyzed.
+- Which data was considered.
+- Which criterion was applied.
+- Why possible redundancy was identified.
+- What limitations exist.
+
+Do not assume every recent examination is unnecessary.
+
+No flag may automatically become medical guidance for the patient.
+
+---
+
+# 11. Module 6 — Intelligent Clarification
+
+Implement simple follow-up questions.
+
+When essential data is missing, the system may request additional information.
+
+The application determines which fields need clarification.
+
+AI may help phrase the question in understandable language.
+
+Example:
+
+"You reported having an examination previously. Do you know approximately when it was performed?"
+
+The patient answers and the information is saved.
+
+If necessary, analysis runs again.
+
+Do not create a full conversational chatbot.
+
+Limit questions to the scope of demonstrative rules.
+
+Allow patients to indicate that they do not know the answer.
+
+---
+
+# 12. Module 7 — Physician Review Workspace
+
+Create a physician environment with two main screens.
+
+## Screen A — Review queue
+
+Present:
+
+- Patient.
+- Analysis date.
 - Status.
-- Ação para abrir.
+- Action to open the review.
 
-## Tela B — Revisão clínica
+## Screen B — Clinical review
 
-O workspace será dividido em:
+Divide the workspace into:
 
-### Contexto do paciente
+### Patient context
 
-- Histórico clínico.
-- Fatores relevantes.
-- Medicamentos.
-- Exames anteriores.
-- Informações ausentes.
+- Clinical history.
+- Relevant factors.
+- Medications.
+- Previous examinations.
+- Missing information.
 
-### Propostas da IA
+### AI proposals
 
-Cada proposta deverá conter:
+Each proposal must contain:
 
-- Nome da ação.
-- Categoria.
-- Justificativa.
-- Critérios considerados.
-- Evidência vinculada.
-- Incertezas.
-- Status de revisão.
+- Action name.
+- Category.
+- Rationale.
+- Criteria considered.
+- Linked evidence.
+- Uncertainties.
+- Review status.
 
-### Decisão médica
+### Physician decision
 
-Permitir:
+Allow:
 
-- Aprovar.
-- Modificar.
-- Rejeitar.
-- Manter pendente.
-- Solicitar informações complementares.
+- Approve.
+- Modify.
+- Reject.
+- Leave pending.
+- Request additional information.
 
-Exigir justificativa para modificações ou rejeições.
+Require a rationale for modifications or rejections.
 
-Registrar:
+Record:
 
-- Identificação do revisor demonstrativo.
-- Data.
-- Decisão.
-- Justificativa.
-- Versão da análise.
+- Demonstration reviewer identification.
+- Date.
+- Decision.
+- Rationale.
+- Analysis version.
 
-Permitir finalizar a revisão apenas quando as condições de conclusão forem atendidas.
+Allow review finalization only when completion conditions are met.
 
-Não representar ações de usuários fictícios como validação médica real.
-
----
-
-# 13. Módulo 8 — Personalized Preventive Plan
-
-Após a conclusão da revisão, gerar um plano preventivo compreensível.
-
-O plano deverá apresentar:
-
-- Resumo do acompanhamento.
-- Ações selecionadas.
-- Avaliações consideradas potencialmente redundantes e revisadas.
-- Informações pendentes.
-- Próximos passos.
-- Estado das ações.
-
-A visualização deve ser voltada ao paciente.
-
-Evitar textos técnicos desnecessários e explicações complexas.
-
-O conteúdo apresentado deverá corresponder às decisões registradas no workspace médico.
-
-Não publicar propostas ainda não revisadas.
+Do not represent fictional user actions as real medical validation.
 
 ---
 
-# 14. Módulo 9 — Longitudinal Health Twin
+# 13. Module 8 — Personalized Preventive Plan
 
-Implementar uma versão simplificada do histórico longitudinal.
+After review completion, generate an understandable preventive plan.
 
-O Health Twin do MVP não será um modelo preditivo ou uma representação biológica complexa.
+The plan must present:
 
-Será uma estrutura que preserva informações e decisões ao longo do tempo.
+- Follow-up summary.
+- Selected actions.
+- Evaluations considered potentially redundant and reviewed.
+- Pending information.
+- Next steps.
+- Action states.
 
-Funcionalidades:
+The view must be patient-oriented.
 
-- Timeline de eventos.
-- Histórico de avaliações.
-- Histórico de decisões.
-- Versões anteriores de planos.
-- Alterações no perfil.
-- Comparação básica entre ciclos.
+Avoid unnecessary technical language and complex explanations.
 
-## Fluxo de atualização
+Displayed content must match decisions recorded in the physician workspace.
 
-1. Paciente possui um plano anterior.
-2. Atualiza uma informação.
-3. A aplicação salva uma nova versão do perfil.
-4. O contexto da nova análise é preparado.
-5. A IA é utilizada novamente, dentro do escopo controlado.
-6. Uma nova proposta é gerada.
-7. O médico revisa.
-8. Um novo plano pode ser publicado.
-9. A versão anterior permanece disponível.
+Do not publish proposals that have not been reviewed.
 
 ---
 
-# 15. Fluxos obrigatórios de ponta a ponta
+# 14. Module 9 — Longitudinal Health Twin
 
-## Fluxo A — Primeira avaliação
+Implement a simplified longitudinal history.
 
-Paciente → Anamnese → Perfil clínico → Análise por IA → Revisão médica → Plano preventivo.
+The MVP Health Twin is not a predictive model or a complex biological representation.
 
-## Fluxo B — Do Not Test
+It is a structure that preserves information and decisions over time.
 
-Exame anterior → Verificação de possível redundância → Explicação da IA → Revisão médica → Registro da decisão → Plano.
+Features:
 
-## Fluxo C — Esclarecimento
+- Event timeline.
+- Evaluation history.
+- Decision history.
+- Previous plan versions.
+- Profile changes.
+- Basic comparison between cycles.
 
-Informação ausente → Pergunta complementar → Resposta do paciente → Atualização do perfil → Nova análise.
+## Update flow
 
-## Fluxo D — Reavaliação
-
-Plano anterior → Nova informação → Nova análise → Revisão médica → Nova versão do plano → Histórico preservado.
-
-## Fluxo E — Falha da IA
-
-Falha de API, resposta inválida ou evidência insuficiente → Análise bloqueada → Mensagem de erro apropriada → Possibilidade de nova tentativa → Nenhuma proposta publicada automaticamente.
+1. The patient has a previous plan.
+2. The patient updates a piece of information.
+3. The application saves a new profile version.
+4. Context for the new analysis is prepared.
+5. AI is used again within the controlled scope.
+6. A new proposal is generated.
+7. The physician reviews it.
+8. A new plan can be published.
+9. The previous version remains available.
 
 ---
 
-# 16. Estados da aplicação
+# 15. Required end-to-end flows
 
-Implementar estados claros:
+## Flow A — First evaluation
+
+Patient → Health intake → Clinical profile → AI analysis → Physician review → Preventive plan.
+
+## Flow B — Do Not Test
+
+Previous examination → Possible redundancy check → AI explanation → Physician review → Decision recording → Plan.
+
+## Flow C — Clarification
+
+Missing information → Follow-up question → Patient answer → Profile update → New analysis.
+
+## Flow D — Reassessment
+
+Previous plan → New information → New analysis → Physician review → New plan version → Preserved history.
+
+## Flow E — AI failure
+
+API failure, invalid response or insufficient evidence → Blocked analysis → Appropriate error message → Retry option → No automatically published proposal.
+
+---
+
+# 16. Application states
+
+Implement clear states:
 
 - NOT_STARTED
 - INTAKE_IN_PROGRESS
@@ -568,56 +568,56 @@ Implementar estados claros:
 - PLAN_AVAILABLE
 - REASSESSMENT_PENDING
 
-Garantir consistência entre os estados do backend e a interface.
+Ensure consistency between backend states and the interface.
 
-Não permitir acesso a planos não revisados como se estivessem concluídos.
-
----
-
-# 17. Design e experiência
-
-A identidade visual será Clinical Premium SaaS.
-
-A aplicação deverá parecer um software profissional de saúde, não um projeto genérico gerado por IA.
-
-Características:
-
-- Minimalista.
-- Moderna.
-- Clara.
-- Confiável.
-- Consistente.
-- Responsiva.
-- Acessível.
-
-O ambiente do paciente será mobile-first.
-
-O ambiente do médico será desktop-first.
-
-Utilizar design system com tokens centralizados para cores, tipografia, espaçamentos, bordas e estados.
-
-Evitar:
-
-- Chatbot como interface principal.
-- Gradientes exagerados.
-- Excesso de cards.
-- Cores arbitrárias.
-- Métricas inventadas.
-- Componentes inconsistentes.
-- Dashboards decorativos.
-- Animações sem função.
-
-A IA deverá aparecer integrada aos fluxos, sem dominar visualmente a aplicação.
-
-Todos os textos da interface deverão estar em português brasileiro.
+Do not allow access to unreviewed plans as if they were complete.
 
 ---
 
-# 18. Persistência e dados
+# 17. Design and experience
 
-Persistir os dados necessários para o funcionamento dos fluxos.
+The visual identity is Clinical Premium SaaS.
 
-Entidades principais:
+The application must look like professional healthcare software rather than a generic AI-generated project.
+
+Characteristics:
+
+- Minimal.
+- Modern.
+- Clear.
+- Trustworthy.
+- Consistent.
+- Responsive.
+- Accessible.
+
+The patient environment is mobile-first.
+
+The physician environment is desktop-first.
+
+Use a design system with centralized tokens for colors, typography, spacing, borders and states.
+
+Avoid:
+
+- A chatbot as the main interface.
+- Excessive gradients.
+- Too many cards.
+- Arbitrary colors.
+- Invented metrics.
+- Inconsistent components.
+- Decorative dashboards.
+- Animation without a purpose.
+
+AI should be integrated into the flows without visually dominating the application.
+
+All interface text and documentation must use US English, with en-US date and number formatting (ADR0004).
+
+---
+
+# 18. Persistence and data
+
+Persist the data required for the flows to work.
+
+Core entities:
 
 - Patient.
 - HealthProfile.
@@ -630,122 +630,122 @@ Entidades principais:
 - PreventivePlan.
 - TimelineEvent.
 
-Registrar a versão do contexto clínico, o modelo utilizado e a versão das informações analisadas.
+Record the clinical-context version, model used and version of the analyzed information.
 
-Preservar o histórico de análises e decisões.
+Preserve analysis and decision history.
 
-Evitar armazenar raciocínios internos extensos do LLM; registrar somente entradas relevantes, referências, resultados estruturados e metadados necessários à rastreabilidade.
+Avoid storing extensive internal LLM reasoning; record only relevant inputs, references, structured results and metadata needed for traceability.
 
-Todos os dados do protótipo deverão ser sintéticos.
-
----
-
-# 19. O que NÃO implementar
-
-Não desenvolver:
-
-- IA própria.
-- Treinamento ou fine-tuning de modelos.
-- Modelos preditivos proprietários.
-- Knowledge Graph.
-- Infraestrutura de machine learning.
-- Orquestração multiagente.
-- Sistemas RAG complexos.
-- Bancos vetoriais sem necessidade.
-- Aplicativo mobile nativo.
-- Integrações reais com laboratórios.
-- Integrações com hospitais.
-- Telemedicina.
-- Pagamentos.
-- Agendamentos.
-- OCR de exames.
-- Chatbot médico aberto.
-- Marketplace.
-- Dashboards empresariais.
-- Recursos de wearable.
-- Funcionalidades clínicas para pacientes reais.
-
-Esses recursos poderão ser avaliados em fases posteriores.
+All prototype data must be synthetic.
 
 ---
 
-# 20. Prioridades do MVP
+# 19. What NOT to implement
 
-## P0 — Obrigatório
+Do not develop:
 
-- Ambiente demonstrativo.
-- Anamnese estruturada.
-- Perfil clínico.
-- Integração via API com LLM consolidado.
-- Contexto clínico estruturado e versionado.
-- Validação de respostas.
-- Análise clínica preliminar assistida por IA.
-- Identificação demonstrativa de possíveis redundâncias.
-- Workspace médico.
-- Revisão de propostas.
-- Plano preventivo.
-- Histórico longitudinal básico.
-- Persistência.
-- Estados de erro e pendência.
+- Proprietary AI.
+- Model training or fine-tuning.
+- Proprietary predictive models.
+- Knowledge graphs.
+- Machine learning infrastructure.
+- Multiagent orchestration.
+- Complex RAG systems.
+- Unnecessary vector databases.
+- A native mobile application.
+- Real laboratory integrations.
+- Hospital integrations.
+- Telemedicine.
+- Payments.
+- Scheduling.
+- Examination OCR.
+- An unrestricted medical chatbot.
+- A marketplace.
+- Enterprise dashboards.
+- Wearable features.
+- Clinical features for real patients.
 
-## P1 — Se houver tempo
-
-- Perguntas complementares formuladas com apoio de IA.
-- Comparação de versões do plano.
-- Resumos automatizados de mudanças.
-- Melhorias adicionais na demonstração.
-
-## P2 — Futuro
-
-Funcionalidades comerciais, integrações externas e inteligência clínica avançada.
+These features may be considered in later phases.
 
 ---
 
-# 21. Critérios de aceite do MVP
+# 20. MVP priorities
 
-O protótipo estará pronto quando for possível demonstrar:
+## P0 — Required
 
-1. Um paciente fictício inicia sua avaliação.
-2. Preenche uma anamnese.
-3. As informações são persistidas.
-4. O backend prepara o contexto para o LLM.
-5. A integração real com a API executa a análise.
-6. A resposta estruturada é validada.
-7. O sistema apresenta propostas preliminares.
-8. Uma possível redundância é identificada.
-9. Uma informação insuficiente é reconhecida.
-10. O médico acessa o workspace.
-11. Consulta evidências e justificativas.
-12. Aprova, modifica ou rejeita propostas.
-13. Finaliza a revisão.
-14. O paciente visualiza o plano demonstrativo.
-15. Atualiza uma informação.
-16. Uma nova análise é executada.
-17. O histórico anterior é preservado.
-18. A demonstração pode ser reiniciada.
+- Demonstration environment.
+- Structured health intake.
+- Clinical profile.
+- API integration with an established LLM.
+- Structured, versioned clinical context.
+- Response validation.
+- Preliminary AI-assisted clinical analysis.
+- Demonstrative identification of possible redundancies.
+- Physician workspace.
+- Proposal review.
+- Preventive plan.
+- Basic longitudinal history.
+- Persistence.
+- Error and pending states.
 
-Os casos apresentados devem ser sintéticos, com resultados esperados previamente definidos e testados.
+## P1 — If time permits
 
-O uso de um LLM consolidado não significa que suas propostas tenham sido clinicamente validadas.
+- AI-assisted follow-up question wording.
+- Plan version comparison.
+- Automated change summaries.
+- Additional demonstration improvements.
+
+## P2 — Future
+
+Commercial features, external integrations and advanced clinical intelligence.
 
 ---
 
-# 22. Resultado esperado
+# 21. MVP acceptance criteria
 
-Construir um MVP web funcional, com interface profissional, duas experiências integradas e uma inteligência artificial consolidada atuando como assistente contextualizado de apoio à decisão médica.
+The prototype is ready when it can demonstrate:
 
-O diferencial tecnológico não está na criação de um modelo de IA próprio, mas na forma como o Health360 organiza informações, incorpora contexto clínico, aplica regras, estrutura propostas, permite revisão médica e mantém a continuidade do acompanhamento.
+1. A fictional patient starts an evaluation.
+2. The patient completes health intake.
+3. Information is persisted.
+4. The backend prepares context for the LLM.
+5. The real API integration performs the analysis.
+6. The structured response is validated.
+7. The system presents preliminary proposals.
+8. A possible redundancy is identified.
+9. Insufficient information is recognized.
+10. The physician accesses the workspace.
+11. The physician views evidence and rationales.
+12. The physician approves, modifies or rejects proposals.
+13. The physician finalizes the review.
+14. The patient views the demonstration plan.
+15. The patient updates a piece of information.
+16. A new analysis runs.
+17. Previous history is preserved.
+18. The demonstration can be reset.
 
-O sistema deve demonstrar três capacidades centrais:
+Presented cases must be synthetic, with predefined and tested expected outcomes.
 
-**Personalized Prevention:** propostas contextualizadas a partir do histórico do paciente.
+Using an established LLM does not mean its proposals have been clinically validated.
 
-**Do Not Test Intelligence:** identificação de possíveis exames redundantes para revisão médica.
+---
 
-**Continuous Preventive Care:** preservação das informações e reavaliação longitudinal.
+# 22. Expected result
 
-Priorizar a qualidade e o funcionamento real desses fluxos em vez da quantidade de funcionalidades.
+Build a working web MVP with a professional interface, two integrated experiences and an established AI model serving as a contextual assistant for medical decision support.
 
-O MVP deverá permanecer restrito a demonstrações com dados sintéticos, sem apresentar propostas como recomendações clínicas validadas ou disponibilizá-las para uso médico real.
+The technological distinction is not creating a proprietary AI model, but how Health360 organizes information, incorporates clinical context, applies rules, structures proposals, enables physician review and maintains continuity of follow-up.
+
+The system must demonstrate three core capabilities:
+
+**Personalized Prevention:** proposals contextualized by the patient's history.
+
+**Do Not Test Intelligence:** identification of possibly redundant tests for physician review.
+
+**Continuous Preventive Care:** preservation of information and longitudinal reassessment.
+
+Prioritize quality and working flows over the number of features.
+
+The MVP must remain restricted to synthetic-data demonstrations, without presenting proposals as clinically validated recommendations or making them available for real medical use.
 
 **Health360 — Better decisions, not more tests.**

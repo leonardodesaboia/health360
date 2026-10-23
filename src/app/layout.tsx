@@ -2,15 +2,15 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 export const metadata: Metadata = {
-  title: { default: "Health360 · Demonstração", template: "%s · Health360" },
+  title: { default: "Health360 · Demonstration", template: "%s · Health360" },
   description:
-    "Protótipo de acompanhamento preventivo com dados sintéticos. Sem validação clínica.",
+    "Preventive care prototype with synthetic data. Not clinically validated.",
 };
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="en">
       <body className={GeistSans.variable}>{children}</body>
     </html>
   );
