@@ -13,15 +13,10 @@ One task per session. Do only the assigned scope. The product context describes 
 - If no task was named, pick the first authorized **planned** P0 entry (then P1) whose dependencies are done and whose external-owner inputs exist. Say which one you picked.
 - Dependencies and owner inputs aren't enforced by the CLI. Check them yourself. If a task needs a human input (medical criteria, evidence IDs, expected outcomes, provider choice, DB environment, secrets), stop and ask. Never fabricate it.
 - Use the locked CLI: `pnpm exec openspec ...` (devDependency, 1.14.3). The generated `openspec-*` skills write bare `openspec ...`. Run those commands as `pnpm exec openspec ...` too, because a global `openspec` may be a different version.
-- **Pick up the change.**
-  1. If `openspec/changes/<stable-id>/` exists, resume it; never create a duplicate. Otherwise run `pnpm exec openspec new change <stable-id>`.
-  2. Write `proposal.md` linking the index anchor (for example `../../../docs/backlog/IMPLEMENTATION.md#p0-03`). State the scope and the exclusions.
-  3. Derive the spec deltas, `design.md`, and `tasks.md` from the entry. Reference its acceptance criteria rather than copying long lists.
-  4. Mark the index entry **in progress** with a link to the change.
+- **Pick up the change** exactly as the index's "OpenSpec task lifecycle" describes. There are no pre-generated change folders: create the change at pickup, or resume it if it already exists. Then link it from the index entry and mark the entry in progress.
 
   ```sh
-  pnpm exec openspec new change <stable-id>
-  pnpm exec openspec status --change <stable-id>
+  pnpm exec openspec new change <stable-id>                            # at pickup (resume if it exists)
   pnpm exec openspec instructions apply --change <stable-id> --json   # actual checkbox progress
   pnpm exec openspec validate --all --strict --no-interactive
   ```

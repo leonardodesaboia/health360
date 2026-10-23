@@ -28,11 +28,11 @@ The workflow graph in `src/features/workflow/workflow.ts` is **administrative ad
    - Keep the test that checks _every_ (from, to) pair against an explicit expected-legal list written independently of the implementation map. Don't derive the expectations from `transitions` itself.
    - Add tests for each invariant above, for example that no path reaches `PLAN_AVAILABLE` without `MEDICAL_REVIEW_COMPLETED` (graph reachability).
    - Update the e2e flows affected (failure and retry, clarification, reassessment).
-4. **Persisted data.** If states are already persisted (after `p0-01-persistence`), describe the migration and compatibility for existing records in the change and PR description.
+4. **Persisted data.** If states are already persisted (after task P0-01), describe the migration and compatibility for existing records in the change and PR description.
 5. Run the `verify` skill. Apply the `clinical-safety` checklist to the guard conditions.
 
 ## Don't
 
-- Don't add "skip", "force", or "admin override" edges for demo convenience. Use the demo reset (`p0-02-demo-session`) instead.
+- Don't add "skip", "force", or "admin override" edges for demo convenience. Use the demo reset (task P0-02) instead.
 - Don't call `transition()` from client components to show progress.
 - Don't treat a successful transition as proof of a clinical event.
