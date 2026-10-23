@@ -30,3 +30,9 @@ P0-05 `facts` (symptoms, prior screening, completeness) have no P0-01 column, so
 - Unit (`src/server/demo/*.test.ts`): case ID and token rejection, dataset ID derivation, scenario → record mapping (unknowns preserved, no clinical rows, fixtures not mutated).
 - Integration (`tests/integration/demo-session.test.ts`): select and load, reset idempotency (identical records twice), reset scope (another session unchanged), invalid case ID leaves the dataset intact, case switch replaces records.
 - E2E (`tests/e2e/demo-session.spec.ts`): select → same patient in patient and doctor views, refresh and navigation persistence, reset keeps the case, empty state without a session, other-case review ID returns 404, prototype labels remain.
+
+## Phase A implementation updates
+
+The first PR exports server-only functions and changes no routes. getDemoSession returns the stored case plus datasetId and patientId. selectDemoCaseForSession and resetDemoSession must be invoked from a Server Action/Route Handler that may set response cookies. resetDemoDataset resolves the current case inside the dataset lock. loadDemoCase uses a repeatable-read transaction, returns the latest profile and authoritative workflow status, and rejects incomplete data. Reset also obtains current patient workflow locks before deleting/reseeding, coordinating with in-flight workflow writes. getDatabase is a lazy process-level server-only pool.
+
+Intake and plan remain outside this lane. Their workers wire getDemoSession. UI actions/selection/navigation/error states above are deferred to the separate presenter UI PR, not claimed implemented here.

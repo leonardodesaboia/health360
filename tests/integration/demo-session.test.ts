@@ -4,7 +4,12 @@ import { afterAll, describe, expect, it } from "vitest";
 import { createDatabase } from "../../src/server/db/client";
 import { datasetRepository } from "../../src/server/db/repository";
 import { demoCaseRecords } from "../../src/server/demo/records";
-import { loadDemoCase, replaceDemoDataset } from "../../src/server/demo/store";
+import {
+  loadDemoCase,
+  replaceDemoDataset,
+  resetDemoDataset,
+} from "../../src/server/demo/store";
+import { transitionWorkflow } from "../../src/server/workflow/state";
 
 if (!process.env.TEST_DATABASE_URL)
   throw new Error(
@@ -58,7 +63,8 @@ describe("demo session storage", () => {
   it("resets idempotently to identical prepared records", async () => {
     await replaceDemoDataset(db, a, "repeat-screening");
     const first = await snapshot(a);
-    await replaceDemoDataset(db, a, "repeat-screening");
+    expect(await resetDemoDataset(db, a)).toBe(true);
+    expect(await resetDemoDataset(db, a)).toBe(true);
     expect(await snapshot(a)).toEqual(first);
   });
 
@@ -106,5 +112,64 @@ describe("demo session storage", () => {
       replaceDemoDataset(db, a, "first-screening"),
     ]);
     expect((await snapshot(a)).patient).toHaveLength(1);
+  });
+  it("reads the latest profile and workflow state, then resets only this session's history", async () => {
+    await replaceDemoDataset(db, a, "repeat-screening");
+    const records = demoCaseRecords("repeat-screening");
+    await datasetRepository(db, a).append("profile", {
+      ...records.profile,
+      id: "updated-demo-profile",
+      version: 2,
+      age: null,
+    });
+    await transitionWorkflow(db, a, {
+      patientId: records.patient.id,
+      expectedFrom: "NOT_STARTED",
+      to: "INTAKE_IN_PROGRESS",
+      actor: "patient",
+      refs: { profileVersion: 2 },
+    });
+    const loaded = await loadDemoCase(db, a);
+    expect(loaded?.profile.version).toBe(2);
+    expect(loaded?.profile.age).toBeNull();
+    expect(loaded?.patient.status).toBe("INTAKE_IN_PROGRESS");
+    const other = await snapshot(b);
+    expect(await resetDemoDataset(db, a)).toBe(true);
+    expect((await loadDemoCase(db, a))?.profile).toEqual(records.profile);
+    expect((await loadDemoCase(db, a))?.patient.status).toBe("NOT_STARTED");
+    expect(await datasetRepository(db, a).list("workflowTransition")).toEqual(
+      [],
+    );
+    expect(await snapshot(b)).toEqual(other);
+    expect(await resetDemoDataset(db, "missing-session")).toBe(false);
+  });
+  it("fails closed on incomplete stored case data instead of returning prepared fixtures", async () => {
+    const id = "test-demo-" + randomUUID();
+    await db.dataset.create({ data: { id, scenarioId: "first-screening" } });
+    try {
+      await expect(loadDemoCase(db, id)).rejects.toThrow(
+        "Selected demo case is incomplete",
+      );
+    } finally {
+      await db.dataset.delete({ where: { id } });
+    }
+  });
+  it("reads coherent case snapshots during concurrent case switches", async () => {
+    const [, first, , second] = await Promise.all([
+      replaceDemoDataset(db, a, "first-screening"),
+      loadDemoCase(db, a),
+      replaceDemoDataset(db, a, "repeat-screening"),
+      loadDemoCase(db, a),
+    ]);
+    for (const state of [first, second]) {
+      expect(state).not.toBeNull();
+      expect(state?.profile.patientId).toBe(state?.patient.id);
+      expect(
+        state?.examinations.every(
+          (exam) => exam.patientId === state.patient.id,
+        ),
+      ).toBe(true);
+      expect(state?.patient.id).toBe("synthetic-" + state?.caseId);
+    }
   });
 });

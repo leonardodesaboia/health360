@@ -14,7 +14,9 @@ describe("demo session records", () => {
         "patient",
         "profile",
       ]);
-      expect(records.patient).toEqual(validateRecord("patient", records.patient));
+      expect(records.patient).toEqual(
+        validateRecord("patient", records.patient),
+      );
       expect(records.patient.status).toBe("NOT_STARTED");
       expect(records.patient.synthetic).toBe(true);
       expect(records.profile.patientId).toBe(records.patient.id);
@@ -39,9 +41,9 @@ describe("demo session records", () => {
   it("returns fresh copies so callers cannot mutate prepared cases", () => {
     const first = demoCaseRecords("repeat-screening");
     first.profile.medications.length = 0;
-    expect(demoCaseRecords("repeat-screening").profile.medications).toHaveLength(
-      1,
-    );
+    expect(
+      demoCaseRecords("repeat-screening").profile.medications,
+    ).toHaveLength(1);
   });
 
   it("rejects unknown case IDs and malformed tokens", () => {

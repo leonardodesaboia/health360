@@ -1,5 +1,10 @@
 import "server-only";
 import { z } from "zod";
+import type {
+  Patient,
+  HealthProfile,
+  PreviousExamination,
+} from "../../features/patients/contracts";
 import { demoScenarios } from "../clinical-rules/scenarios";
 
 // Demonstration navigation state only. A demo session is never an identity or authorization.
@@ -13,7 +18,14 @@ export const demoSessionTokenSchema = z
   .string()
   .regex(/^[A-Za-z0-9_-]{43}$/, "Invalid demo session token");
 
-export type DemoSession = {
+export type StoredDemoCase = {
+  caseId: DemoCaseId;
+  patient: Patient;
+  profile: HealthProfile;
+  examinations: PreviousExamination[];
+};
+
+export type DemoSession = StoredDemoCase & {
   /** Storage scope for every record of this browser's demo case. */
   datasetId: string;
   caseId: DemoCaseId;

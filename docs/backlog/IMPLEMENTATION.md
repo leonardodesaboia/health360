@@ -50,8 +50,8 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-02 — Demonstration session and reset
 
 - Stable OpenSpec change ID: `p0-02-demo-session`.
-- Status: **planned**; change not yet picked up.
-- Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
+- Status: **in progress**; [change](../../openspec/changes/p0-02-demo-session/).
+- Implementation evidence: [phase A/B tasks](../../openspec/changes/p0-02-demo-session/tasks.md). Server session module first; presenter UI remains planned. No archive yet.
 
 - Goal: select a prepared synthetic case and share its state across patient/doctor views.
 - Depends on: P0-01.
