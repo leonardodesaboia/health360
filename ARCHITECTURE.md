@@ -115,3 +115,29 @@ draft envelopes, scopes by synthetic patient ID and checks expected revisions.
 It stores synthetic drafts only; no physician sharing, database persistence,
 identity enforcement or clinical workflow transition is implemented by this adapter.
 A server adapter must enforce ownership and atomic revision checks.
+
+## Persisted workflow API
+
+Internal services use src/server/workflow/state.ts:
+
+- getWorkflowStatus(db, datasetId, patientId) returns Promise<WorkflowStatus>.
+- transitionWorkflow(db, datasetId, { patientId, expectedFrom, expectedRefs?, to, actor, reason?, refs? }) returns Promise<WorkflowStatus>.
+
+Both accept PrismaClient or Prisma.TransactionClient. inDatasetTransaction passes
+(repository, tx) to its callback; existing one-argument callbacks remain valid. A root-client transition
+creates a transaction; an existing transaction keeps domain writes and state atomic.
+The service serializes each dataset/patient, rejects stale expectedFrom and illegal
+graph edges, and appends a versioned workflowTransition repository record. Reads use
+the latest transition or the immutable initial patient status. Patient snapshots
+are never overwritten. Actor is patient, system or demo-physician; optional audit
+references are profileVersion, analysisId, reviewId and planId.
+
+This is administrative persistence, not authentication or clinical authorization.
+The calling service must validate identity, reference ownership/freshness, evidence
+and finalized physician review before advancing state. No UI calls the API yet.
+
+getWorkflowState(db, datasetId, patientId) returns {status,lastTransition}, with
+null history for the initial snapshot. Its patient lock lasts through the caller's
+transaction. Optional expectedRefs compares supplied fields to the latest transition
+refs under this lock; status or refs mismatches throw exported StaleStateError.
+Analysis/review services should bind attempts by expectedRefs to reject ABA retries.
