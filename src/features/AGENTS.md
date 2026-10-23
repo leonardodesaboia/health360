@@ -1,6 +1,8 @@
 # Feature implementation
 
-Apply root AGENTS.md and the canonical `.claude/skills/new-feature/SKILL.md` recipe.
+Apply [root AGENTS.md](../../AGENTS.md) and the canonical
+[new-feature recipe](../../.claude/skills/new-feature/SKILL.md). Select work from the
+[ordered index](../../docs/backlog/IMPLEMENTATION.md); follow its change-at-pickup lifecycle.
 Routes compose feature behavior; keep domain decisions outside JSX and client state.
 
 - `patients/contracts.ts` is the initial entity/schema source, not a persistence

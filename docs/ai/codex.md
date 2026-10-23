@@ -260,37 +260,19 @@ of this repo; recheck upstream instructions before upgrading.
 
 ## Implementation workflow
 
-1. **Spec:** read root instructions, [WORKFLOW.md](WORKFLOW.md), the assigned
-   index entry and relevant canonical skills. Check dependencies are implemented,
-   create or resume its OpenSpec change, and mark the index in progress with its link.
-   Use explore/propose only within authorized scope; request human-owned clinical
-   criteria rather than inventing them.
-2. **Plan:** inspect implementation/tests and version-matched docs. Refine the
-   change's `design.md` and `tasks.md` with touched paths, acceptance criteria,
-   test mappings and failure/publication boundaries. Read nested instructions when
-   entering `src/features/` or `tests/`. Keep the plan in the existing change.
-3. **TDD:** reproduce the acceptance behavior or failure with a focused test before
-   the fix. Test illegal transitions, unknown facts and blocked publication where
-   relevant. Use `$new-feature`, `$workflow-transitions` or `$ai-layer`; add no LLM
-   calls or clinical criteria as incidental scaffolding.
-4. **Implement:** make one reviewable slice, reuse tokens/components, keep secrets
-   server-only, and preserve synthetic-data labels and mandatory physician review.
-5. **Verify:** use `$verify`: run `pnpm verify` (including skill checks/tests),
-   `pnpm test:e2e`, `pnpm format:check` and
-   `pnpm exec openspec validate --all --strict --no-interactive`.
-   Investigate failures in your scope and report unrelated blockers. If an optional
-   OpenSpec verify skill is absent, compare acceptance criteria/tasks to actual
-   diff and test evidence directly.
-6. **Review:** inspect `git diff`, apply clinical-safety/design checklists to touched
-   behavior and use the authorized reviewer. Address concrete findings, re-run
-   affected checks and preserve honest unverified limitations.
-7. **PR:** tick only tasks actually implemented and record real evidence in the
-   change's `tasks.md`; planning completeness or foundation smoke tests do not
-   prove MVP delivery. After implementation, verification, review and archive,
-   mark the ordered index done with archive/test/PR links. Commit focused changes
-   and publish within the user's scope.
-   Describe behavior, tests and risks. Under AO, request native review and address
-   findings on the same PR; never treat its approval as permission to merge.
+Follow the pickup, evidence and completion rules in
+[AGENTS.md](../../AGENTS.md) and [WORKFLOW.md](WORKFLOW.md), using the
+[ordered index](../backlog/IMPLEMENTATION.md). The Codex adapter for those stages is:
+
+| Stage     | Codex tool or recipe                                                                                                                                          |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Spec      | `$implement-task` for an indexed entry; the pinned CLI creates/resumes its change at pickup. `$openspec-propose` is for an authorized new change.             |
+| Plan      | `$openspec-explore` and the change's `design.md`/`tasks.md`; point any optional ECC planner at those same artifacts.                                          |
+| TDD       | `$new-feature`, `$workflow-transitions` or `$ai-layer`; optional ECC TDD recipes use the same change.                                                         |
+| Implement | `$openspec-apply-change` with the assigned change ID and the relevant project recipes.                                                                        |
+| Verify    | `$verify`; `pnpm verify` also runs the mirror drift check and sync tests. Use the canonical full verification sequence, including strict OpenSpec validation. |
+| Review    | The scoped read-only Codex reviewer when delegation is permitted, or canonical checklists inline. AO workers use AO native review.                            |
+| PR        | The canonical completion lifecycle and publishing scope; `$openspec-archive-change` only when its completion conditions are satisfied.                        |
 
 ## Primary sources and verification limits
 

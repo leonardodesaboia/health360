@@ -1,9 +1,9 @@
 # Acceptance tests
 
-Apply root AGENTS.md. `tests/e2e/` covers the implemented foundation; product flows
-A–E in `docs/backlog/IMPLEMENTATION.md` are future acceptance criteria, not existing
-functionality. At pickup, map the assigned entry to an OpenSpec change's
-scenarios to tests in that change's design/tasks; planning status is not test evidence.
+Apply [root AGENTS.md](../AGENTS.md). `tests/e2e/` covers the implemented foundation;
+product flows A–E in the [ordered index](../docs/backlog/IMPLEMENTATION.md) are future
+acceptance criteria. For an assigned task, map its scenarios to tests in the change's
+design/tasks at pickup; planning status is not test evidence.
 
 - Exercise observable behavior with accessible locators and synthetic fixtures.
   Do not depend on external LLMs, real records, arbitrary timeouts or test ordering.
