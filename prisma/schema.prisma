@@ -8,9 +8,11 @@ datasource db {
 }
 
 model Dataset {
-  id       String            @id
-  patients Patient[]
-  contexts ClinicalContext[]
+  id         String            @id
+  /// Prepared demo case for a demo-session dataset; null for non-demo datasets.
+  scenarioId String?
+  patients   Patient[]
+  contexts   ClinicalContext[]
 }
 
 model Patient {
