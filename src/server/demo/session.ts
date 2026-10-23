@@ -50,3 +50,5 @@ export async function resetDemoSession(): Promise<boolean> {
   if (!token.success) return false;
   return resetDemoDataset(getDatabase(), demoDatasetId(token.data));
 }
+
+export type { DemoSession, StoredDemoCase, DemoCaseId } from "./contracts";

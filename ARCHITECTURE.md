@@ -192,7 +192,8 @@ the production server and test base URL. A busy port is never reused or stopped.
 Server-only src/server/demo/session.ts resolves an opaque httpOnly cookie to one
 synthetic dataset. getDemoSession returns null for absent/malformed/unknown sessions
 and otherwise returns datasetId, patientId, caseId, patient, latest profile and
-linked examinations. Patient status comes from the authoritative workflow API.
+linked examinations, plus the stored canonical clinicalContext (including id/version,
+evidence metadata, rules and demonstrative labels). Patient status comes from the authoritative workflow API.
 Page reads never seed data; database/incomplete-record errors propagate.
 
 selectDemoCaseForSession(caseId: unknown): Promise<void> validates a prepared case,
@@ -214,3 +215,9 @@ DEMO_COOKIE_SECURE=true enables Secure cookies for HTTPS deployment; local HTTP
 preview and CI leave it false. getDatabase lazily creates one server-only Prisma
 pool per process. This phase has no route changes: case-selection UI and shell
 integration remain planned. Intake and plan workers own their session wiring.
+
+Selection/reset also persists loadClinicalContext(caseId, 1) as a validated P0-05
+context snapshot. This uses the extended P0-05 schema directly so its issuer/year,
+rule versions and demonstrative labels survive the narrower legacy core context
+repository parser. The session returns that stored snapshot; analysis can reference
+clinicalContext.id/version through its dataset-scoped foreign key.

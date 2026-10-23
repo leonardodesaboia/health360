@@ -47,3 +47,13 @@ The review workspace SHALL render only the current session's case.
 
 - **WHEN** a review ID does not match the current session's case
 - **THEN** the route SHALL return not found without disclosing another case
+
+### Requirement: Versioned case context snapshot
+
+Selection and reset SHALL persist the canonical P0-05 context with its version, rule IDs, evidence metadata and demonstrative labels. Session reads SHALL expose the stored clinicalContext and its id/version for analysis references.
+
+#### Scenario: Selected case context
+
+- **WHEN** a prepared case is selected or reset
+- **THEN** its dataset SHALL contain exactly one canonical context snapshot of version 1
+- **AND** an analysis SHALL be able to reference that dataset-scoped context without creating or publishing any recommendation during selection

@@ -1,5 +1,7 @@
 import "server-only";
 import { z } from "zod";
+import { loadClinicalContext } from "../clinical-rules/context";
+import { demoContextSchema } from "../clinical-rules/contracts";
 import type { Prisma, PrismaClient } from "../../generated/prisma/client";
 import { datasetRepository } from "../db/repository";
 import { getWorkflowState, getWorkflowStatus } from "../workflow/state";
@@ -30,6 +32,16 @@ async function replaceRecords(
   for (const examination of records.examination)
     await repository.append("examination", examination);
   await repository.append("profile", records.profile);
+  const context = loadClinicalContext(caseId, 1);
+  // The extended P0-05 schema preserves issuer/year/rules/labels beyond the core repository contract.
+  await tx.clinicalContext.create({
+    data: {
+      datasetId,
+      id: context.id,
+      version: context.version,
+      payload: context,
+    },
+  });
 }
 
 /** Internal storage API: caller must derive datasetId from the browser's server-side session. */
@@ -89,7 +101,22 @@ export async function loadDemoCase(
       );
       if (examinations.length !== profile.examinationIds.length)
         throw new Error("Selected demo case is incomplete");
+      const reference = loadClinicalContext(parsed.data, 1);
+      const storedContext = await tx.clinicalContext.findUnique({
+        where: {
+          datasetId_id_version: {
+            datasetId,
+            id: reference.id,
+            version: reference.version,
+          },
+        },
+      });
+      if (!storedContext) throw new Error("Selected demo case is incomplete");
+      const clinicalContext = demoContextSchema.parse(storedContext.payload);
+      if (clinicalContext.scenarioId !== parsed.data)
+        throw new Error("Selected demo context does not match case");
       return {
+        clinicalContext,
         caseId: parsed.data,
         patient: {
           ...patient,

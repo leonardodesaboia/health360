@@ -14,7 +14,7 @@ real care, with US English interface copy.
 
 ### Requirement: Synthetic references do not simulate completed clinical work
 
-The demonstration SHALL use synthetic case records, read-only intake, disabled review
+The demonstration SHALL use synthetic case records, bounded synthetic intake, disabled review
 decisions and an unavailable plan instead of performing MVP module logic.
 
 #### Scenario: Read the prepared case

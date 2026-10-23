@@ -20,6 +20,7 @@ import {
   selectDemoCaseForSession,
   resetDemoSession,
 } from "./session";
+import { loadClinicalContext } from "../clinical-rules/context";
 import { demoSessionCookie } from "./contracts";
 import { demoCaseRecords, demoDatasetId } from "./records";
 const token = "a".repeat(43);
@@ -44,6 +45,7 @@ describe("cookie-bound demo session", () => {
     mocks.get.mockReturnValue({ value: token });
     const records = demoCaseRecords("repeat-screening");
     const stored = {
+      clinicalContext: loadClinicalContext("repeat-screening", 1),
       caseId: "repeat-screening",
       patient: records.patient,
       profile: records.profile,

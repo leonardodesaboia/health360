@@ -1,7 +1,9 @@
 import "dotenv/config";
 import { randomUUID } from "node:crypto";
 import { afterAll, describe, expect, it } from "vitest";
+import { loadClinicalContext } from "../../src/server/clinical-rules/context";
 import { createDatabase } from "../../src/server/db/client";
+import { seedRecords } from "../../src/server/db/records";
 import { datasetRepository } from "../../src/server/db/repository";
 import { demoCaseRecords } from "../../src/server/demo/records";
 import {
@@ -48,6 +50,7 @@ describe("demo session storage", () => {
     const expected = demoCaseRecords("repeat-screening");
     const loaded = await loadDemoCase(db, a);
     expect(loaded).toEqual({
+      clinicalContext: loadClinicalContext("repeat-screening", 1),
       caseId: "repeat-screening",
       patient: expected.patient,
       profile: expected.profile,
@@ -171,5 +174,28 @@ describe("demo session storage", () => {
       ).toBe(true);
       expect(state?.patient.id).toBe("synthetic-" + state?.caseId);
     }
+  });
+  it("seeds exactly one canonical context snapshot with evidence, rules and demonstrative labels", async () => {
+    await replaceDemoDataset(db, a, "repeat-screening");
+    const context = loadClinicalContext("repeat-screening", 1);
+    const rows = await db.clinicalContext.findMany({ where: { datasetId: a } });
+    expect(rows).toEqual([
+      { datasetId: a, id: context.id, version: 1, payload: context },
+    ]);
+    const selected = await loadDemoCase(db, a);
+    expect(selected?.clinicalContext).toEqual(context);
+    await datasetRepository(db, a).append("analysis", {
+      ...seedRecords.analysis[0],
+      id: "session-context-fk-check",
+      patientId: selected!.patient.id,
+      profileVersion: selected!.profile.version,
+      contextId: selected!.clinicalContext.id,
+      contextVersion: selected!.clinicalContext.version,
+    });
+    expect(await datasetRepository(db, a).list("analysis")).toHaveLength(1);
+    expect(await resetDemoDataset(db, a)).toBe(true);
+    expect(
+      await db.clinicalContext.findMany({ where: { datasetId: a } }),
+    ).toEqual(rows);
   });
 });
