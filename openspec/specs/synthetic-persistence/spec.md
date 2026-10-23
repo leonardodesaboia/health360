@@ -2,7 +2,7 @@
 
 ## Purpose
 
-TBD - created by archiving change p0-01-persistence. Update Purpose after archive.
+Define validated synthetic dataset storage, immutable clinical record versions, relational ownership links, transaction rollback, and the explicit dataset deletion boundary.
 
 ## Requirements
 
