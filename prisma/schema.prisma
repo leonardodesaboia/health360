@@ -14,17 +14,18 @@ model Dataset {
 }
 
 model Patient {
-  datasetId    String
-  id           String
-  payload      Json
-  dataset      Dataset               @relation(fields: [datasetId], references: [id], onDelete: Cascade)
-  profiles     HealthProfile[]
-  examinations PreviousExamination[]
-  intakes      IntakeResponse[]
-  analyses     AIAnalysis[]
-  reviews      MedicalReview[]
-  plans        PreventivePlan[]
-  events       TimelineEvent[]
+  datasetId           String
+  id                  String
+  payload             Json
+  dataset             Dataset               @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  profiles            HealthProfile[]
+  examinations        PreviousExamination[]
+  intakes             IntakeResponse[]
+  analyses            AIAnalysis[]
+  reviews             MedicalReview[]
+  plans               PreventivePlan[]
+  events              TimelineEvent[]
+  workflowTransitions WorkflowTransition[]
 
   @@id([datasetId, id])
 }
@@ -169,4 +170,16 @@ model TimelineEvent {
 
   @@id([datasetId, id])
   @@index([datasetId, patientId, occurredAt])
+}
+
+model WorkflowTransition {
+  datasetId String
+  id        String
+  patientId String
+  version   Int
+  payload   Json
+  patient   Patient @relation(fields: [datasetId, patientId], references: [datasetId, id], onDelete: Cascade)
+
+  @@id([datasetId, id])
+  @@unique([datasetId, patientId, version])
 }

@@ -1,5 +1,6 @@
 ﻿import "server-only";
 import { z } from "zod";
+import { workflowTransitionSchema } from "../workflow/contracts";
 import {
   patientSchema,
   healthProfileSchema,
@@ -13,6 +14,7 @@ import {
 } from "../../features/patients/contracts";
 
 export const recordSchemas = {
+  workflowTransition: workflowTransitionSchema,
   patient: patientSchema,
   profile: healthProfileSchema,
   examination: previousExaminationSchema,
