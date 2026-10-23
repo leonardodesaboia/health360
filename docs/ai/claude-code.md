@@ -1,6 +1,6 @@
 # Claude Code setup for Health360
 
-This page covers what the repository configures for Claude Code, why, how to enable it, and how a Claude session should implement work. The canonical, harness-neutral rules are in [AGENTS.md](../../AGENTS.md). The tool index is in [TOOLING.md](TOOLING.md). The workflow adoption decision (OpenSpec as the only backlog, plus selected ECC and superpowers practices) and the specialist map are in [WORKFLOW.md](WORKFLOW.md). The Codex counterpart is [codex.md](codex.md), added by the Codex tooling PR.
+This page covers what the repository configures for Claude Code, why, how to enable it, and how a Claude session should implement work. The canonical, harness-neutral rules are in [AGENTS.md](../../AGENTS.md). The tool index is in [TOOLING.md](TOOLING.md). The ordered task index is [docs/backlog/IMPLEMENTATION.md](../backlog/IMPLEMENTATION.md). Each task becomes an OpenSpec change at pickup. The specialist map is in [WORKFLOW.md](WORKFLOW.md). The Codex counterpart is [codex.md](codex.md), added by the Codex tooling PR.
 
 Verified on 2026-10-22 with Claude Code 2.1.300 on Windows 10 against code.claude.com/docs (memory, skills, sub-agents, settings, permissions, MCP).
 
@@ -47,7 +47,7 @@ General-purpose reviewers are **reused from the ECC plugin, not duplicated**: `e
   - `pnpm install --frozen-lockfile`;
   - targeted `pnpm exec` (playwright test and install chromium, vitest, `tsc --noEmit`, eslint, `prettier --check`);
   - `node scripts/contrast.mjs`;
-  - read-only `openspec` subcommands (list, show, validate, status, instructions, view);
+  - `openspec` (bare and `pnpm exec`): read-only subcommands (list, show, validate, status, instructions, view) plus `new change` for task pickup;
   - `git add`, `git commit`, `git fetch`;
   - read-only `gh pr|run` queries.
 
@@ -115,21 +115,21 @@ Codex mirrors `.claude/skills/`, so re-run its sync and drift check after regene
 
 The `implement-task` skill encodes this loop for one OpenSpec change. [WORKFLOW.md](WORKFLOW.md) is the canonical specialist map. The table below is its Claude Code view.
 
-OpenSpec safeguards (also in `openspec/README.md`):
+OpenSpec safeguards (canonical in `docs/backlog/IMPLEMENTATION.md` "OpenSpec task lifecycle"):
 
 - `status --json` `isComplete` means the planning artifacts exist, not that anything is implemented. Check progress with `instructions apply --change <id> --json` and the unchecked boxes in `tasks.md`.
 - Dependencies and medical-owner inputs aren't enforced by the CLI. Check them yourself, and never fabricate them.
 - Plan inside the change's `design.md` and `tasks.md`. If a superpowers or ECC planner defaults to its own plan file, point it at those artifacts instead.
-- Archive only after the change is implemented, reviewed, and merged. Never use force or skip-validation flags, and never bulk-archive.
+- Archive (`pnpm exec openspec archive <stable-id>`) only after the work is implemented, verified, and reviewed. Then mark the index entry done with the archive, verification, and PR links. Never use force or skip-validation flags, never archive an unimplemented plan, and never bulk-archive.
 
-| Step      | Project                                                                                           | OpenSpec                                                                                                    | superpowers                                                    | ECC                                                                                                 |
-| --------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| 1. Spec   | OpenSpec change (`openspec/README.md` is the only backlog); product context                       | `openspec-explore` → `openspec-propose` for new changes only; refine the existing change's design and tasks | `superpowers:brainstorming` for unclear scope                  | `ecc:plan-prd` / `ecc:product-capability` (optional)                                                |
-| 2. Plan   | `implement-task` §1 plus the domain recipes                                                       | `tasks.md` is the plan                                                                                      | `superpowers:writing-plans`                                    | `ecc:plan`, agent `ecc:planner` / `ecc:architect`                                                   |
-| 3. TDD    | `new-feature` §5; `clinical-safety` gate tests                                                    | `openspec-apply-change` works through `tasks.md`                                                            | `superpowers:test-driven-development`                          | `ecc:tdd-workflow`, agent `ecc:tdd-guide`; `ecc:e2e-runner` for Playwright                          |
-| 4. Verify | `/verify` (`pnpm verify`, `pnpm test:e2e`, `pnpm format:check`)                                   | `openspec validate --all --strict --no-interactive`                                                         | `superpowers:verification-before-completion`                   | `ecc:verification-loop`                                                                             |
-| 5. Review | `spec-conformance-reviewer`, `clinical-safety-reviewer`, `design-consistency-reviewer`            | —                                                                                                           | `superpowers:requesting-code-review` / `receiving-code-review` | `ecc:typescript-reviewer`, `ecc:react-reviewer`, `ecc:security-reviewer`, `ecc:healthcare-reviewer` |
-| 6. PR     | `implement-task` §6 (conventional commits, PR body with criteria → tests and verification output) | `openspec-archive-change` after merge                                                                       | `superpowers:finishing-a-development-branch`                   | `ecc:pr`                                                                                            |
+| Step      | Project                                                                                           | OpenSpec                                                                                                          | superpowers                                                    | ECC                                                                                                 |
+| --------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| 1. Spec   | Index entry in `docs/backlog/IMPLEMENTATION.md`; product context                                  | `pnpm exec openspec new change <stable-id>` at pickup (resume if it exists); `openspec-explore` for unclear scope | `superpowers:brainstorming` for unclear scope                  | `ecc:plan-prd` / `ecc:product-capability` (optional)                                                |
+| 2. Plan   | `implement-task` §1 plus the domain recipes                                                       | `tasks.md` is the plan                                                                                            | `superpowers:writing-plans`                                    | `ecc:plan`, agent `ecc:planner` / `ecc:architect`                                                   |
+| 3. TDD    | `new-feature` §5; `clinical-safety` gate tests                                                    | `openspec-apply-change` works through `tasks.md`                                                                  | `superpowers:test-driven-development`                          | `ecc:tdd-workflow`, agent `ecc:tdd-guide`; `ecc:e2e-runner` for Playwright                          |
+| 4. Verify | `/verify` (`pnpm verify`, `pnpm test:e2e`, `pnpm format:check`)                                   | `openspec validate --all --strict --no-interactive`                                                               | `superpowers:verification-before-completion`                   | `ecc:verification-loop`                                                                             |
+| 5. Review | `spec-conformance-reviewer`, `clinical-safety-reviewer`, `design-consistency-reviewer`            | —                                                                                                                 | `superpowers:requesting-code-review` / `receiving-code-review` | `ecc:typescript-reviewer`, `ecc:react-reviewer`, `ecc:security-reviewer`, `ecc:healthcare-reviewer` |
+| 6. PR     | `implement-task` §6 (conventional commits, PR body with criteria → tests and verification output) | `openspec archive <stable-id>` after review; index entry marked done                                              | `superpowers:finishing-a-development-branch`                   | `ecc:pr`                                                                                            |
 
 Rules that hold at every step:
 

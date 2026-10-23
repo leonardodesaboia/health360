@@ -1,31 +1,36 @@
 ---
 name: implement-task
-description: End-to-end loop for implementing one Health360 OpenSpec change (the backlog, e.g. P0-03 / p0-03-intake-draft): check dependencies, plan in the change's design/tasks, write tests first, implement, verify, self-review against the spec, clinical, and design checklists, record evidence in tasks.md, commit, and open a PR within the authorized publishing scope. Use when asked to implement, pick up, continue, or finish a backlog item, an OpenSpec change, or "the next task" in Health360.
+description: End-to-end loop for implementing one Health360 backlog task (e.g. P0-03) from the ordered index in docs/backlog/IMPLEMENTATION.md through its OpenSpec change: pick up or resume the change, plan in its design/tasks, write tests first, implement, verify, self-review against the spec, clinical, and design checklists, record evidence, archive, and open a PR within the authorized publishing scope. Use when asked to implement, pick up, continue, or finish a backlog task, an OpenSpec change, or "the next task" in Health360.
 ---
 
-# Implement a Health360 OpenSpec change end to end
+# Implement a Health360 backlog task end to end
 
-One change per session. Do only the assigned scope. The product context describes the whole MVP, but that doesn't authorize building all of it.
+One task per session. Do only the assigned scope. The product context describes the whole MVP, but that doesn't authorize building all of it.
 
-## 0. Select the change
+## 0. Select the task and pick up its change
 
-- **OpenSpec is the only backlog.** `openspec/README.md` lists the P0 and P1 changes in dependency order. Each `openspec/changes/<id>/` holds `proposal.md`, `specs/` (requirements and scenarios), `design.md`, `tasks.md`, and an "Evidence" section, and together they are the contract. `docs/backlog/IMPLEMENTATION.md` is only a redirect.
+- **The ordered index is `docs/backlog/IMPLEMENTATION.md`.** Each entry has an anchor (`#p0-03`), a stable OpenSpec change ID (`p0-03-intake-draft`), a status, a goal, dependencies, areas, acceptance criteria, and required tests. It is the only backlog. Follow its "OpenSpec task lifecycle" section and `AGENTS.md` "Pick up a task". Where this skill differs from them, they win.
+- If no task was named, pick the first authorized **planned** P0 entry (then P1) whose dependencies are done and whose external-owner inputs exist. Say which one you picked.
+- Dependencies and owner inputs aren't enforced by the CLI. Check them yourself. If a task needs a human input (medical criteria, evidence IDs, expected outcomes, provider choice, DB environment, secrets), stop and ask. Never fabricate it.
 - Use the locked CLI: `pnpm exec openspec ...` (devDependency, 1.14.3). The generated `openspec-*` skills write bare `openspec ...`. Run those commands as `pnpm exec openspec ...` too, because a global `openspec` may be a different version.
+- **Pick up the change.**
+  1. If `openspec/changes/<stable-id>/` exists, resume it; never create a duplicate. Otherwise run `pnpm exec openspec new change <stable-id>`.
+  2. Write `proposal.md` linking the index anchor (for example `../../../docs/backlog/IMPLEMENTATION.md#p0-03`). State the scope and the exclusions.
+  3. Derive the spec deltas, `design.md`, and `tasks.md` from the entry. Reference its acceptance criteria rather than copying long lists.
+  4. Mark the index entry **in progress** with a link to the change.
 
   ```sh
-  pnpm exec openspec list
-  pnpm exec openspec instructions apply --change <id> --json   # implementation checkbox progress
+  pnpm exec openspec new change <stable-id>
+  pnpm exec openspec status --change <stable-id>
+  pnpm exec openspec instructions apply --change <stable-id> --json   # actual checkbox progress
   pnpm exec openspec validate --all --strict --no-interactive
   ```
 
-- If no change was named, pick the first P0 change (then P1) whose dependencies are **implemented**, and say which one you picked.
-- **`status --json` reporting `isComplete: true` means only that the planning artifacts exist**, not that anything is implemented. Judge progress by the unchecked boxes in `tasks.md`.
-- Dependencies aren't enforced by the CLI. Check them yourself. If a change needs a human input (medical criteria, evidence IDs, expected outcomes, provider choice, DB environment, secrets), stop and ask. Never fabricate it.
-- A new change (not in the README) starts with the `openspec-propose` workflow, and only when the user asks for one.
+- `status --json` `isComplete: true` means only that the planning artifacts exist, not that anything is implemented. Judge progress by the unchecked boxes in `tasks.md`.
 
 ## 1. Scope and plan
 
-1. Read `AGENTS.md`, `ARCHITECTURE.md`, `docs/ai/WORKFLOW.md`, the change (proposal → specs → design → tasks), and the relevant `docs/product/PRODUCT_CONTEXT.md` sections.
+1. Read `AGENTS.md`, `ARCHITECTURE.md`, `docs/ai/WORKFLOW.md`, the index entry and its change (proposal → specs → design → tasks), and the relevant `docs/product/PRODUCT_CONTEXT.md` sections.
 2. Load the recipes that apply:
    - `new-feature` (code structure), always;
    - `design-system` for any UI;
@@ -71,17 +76,14 @@ Review your own diff (`git diff <base>...HEAD`) against:
 
 If your harness offers dedicated review agents (in Claude Code: `spec-conformance-reviewer`, `clinical-safety-reviewer`, `design-consistency-reviewer`, plus ECC's `typescript-reviewer`, `react-reviewer`, `security-reviewer`) and your session rules allow delegation, use them. Otherwise apply the checklists yourself. Fix real findings and re-run `verify`.
 
-## 5. Record status and docs
+## 5. Record status, archive, docs
 
-- Tick **only** the `tasks.md` items you actually completed. Replace the change's "Evidence" section with:
-  - the tests added;
-  - the real command results;
-  - the review performed;
-  - the PR link once it exists;
-  - any follow-ups.
-- Never tick boxes based on foundation smoke tests or planning completeness.
+- In `tasks.md`, tick **only** the items you actually completed, and record evidence: tests added, real command results, the review performed, and follow-ups. Never tick boxes based on foundation smoke tests or planning completeness.
 - Run `pnpm exec openspec validate --all --strict --no-interactive`.
-- Archive (`openspec-archive-change`) only after the implementation is merged, reviewed, and every required task is done. Archiving promotes the specs to the baseline. Never use force or skip-validation flags, and never bulk-archive.
+- After all assigned work, verification, and review pass:
+  1. Run `pnpm exec openspec archive <stable-id>` (or the `openspec-archive-change` skill). Inspect the diff, and never force or skip checks. Archiving promotes the deltas into the baseline specs.
+  2. Mark the index entry **done**, with the archive, verification, and PR links.
+- Never archive an unimplemented plan, and never bulk-archive.
 - Update the canonical docs your change affects (see `new-feature` §6).
 
 ## 6. Commit and publish (within scope)

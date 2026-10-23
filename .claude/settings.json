@@ -125,7 +125,11 @@
       "PowerShell(gh pr checks *)",
       "PowerShell(gh pr list *)",
       "PowerShell(gh run list *)",
-      "PowerShell(gh run view *)"
+      "PowerShell(gh run view *)",
+      "Bash(pnpm exec openspec new change *)",
+      "Bash(pnpm.cmd exec openspec new change *)",
+      "PowerShell(pnpm exec openspec new change *)",
+      "PowerShell(pnpm.cmd exec openspec new change *)"
     ],
     "deny": [
       "Read(./.env)",
