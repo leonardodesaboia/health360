@@ -2,7 +2,7 @@
 
 ## Purpose
 
-TBD - created by archiving change p0-03-intake-draft. Update Purpose after archive.
+Collect and recover scoped synthetic intake drafts with explicit unknown values, accessible step navigation and visible persistence failures.
 
 ## Requirements
 
