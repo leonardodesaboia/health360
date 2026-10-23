@@ -78,8 +78,8 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-04 — Intake completion and clinical profile
 
 - Stable OpenSpec change ID: `p0-04-clinical-profile`.
-- Status: **planned**; change not yet picked up.
-- Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
+- Status: **done**; [archive](../../openspec/changes/archive/2026-10-23-p0-04-clinical-profile/).
+- Implementation/archive evidence: [verification](../../openspec/changes/archive/2026-10-23-p0-04-clinical-profile/tasks.md); [PR #17](https://github.com/leonardodesaboia/health360/pull/17). Browser-local adapter; dataset/session wiring and workflow transitions follow in a separate PR after P0-02.
 
 - Goal: finish habits/medications/examination/review steps and consolidate the versioned profile.
 - Depends on: P0-03.

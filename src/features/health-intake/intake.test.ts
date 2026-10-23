@@ -17,11 +17,20 @@ describe("synthetic intake draft", () => {
     const answers = Object.fromEntries(
       Object.keys(initialAnswers).map((id) => [id, "no"]),
     );
-    expect(intakeSchema.safeParse({ ...answers, age: "52" }).success).toBe(
-      true,
-    );
     expect(
-      intakeSchema.safeParse({ ...answers, age: "52", ibd: "normal" }).success,
+      intakeSchema.safeParse({
+        ...answers,
+        age: "52",
+        priorScreening: "NEVER_SCREENED",
+      }).success,
+    ).toBe(true);
+    expect(
+      intakeSchema.safeParse({
+        ...answers,
+        age: "52",
+        priorScreening: "NEVER_SCREENED",
+        ibd: "normal",
+      }).success,
     ).toBe(false);
   });
   it("requires conditional history details and retains explicit unknown details", () => {
