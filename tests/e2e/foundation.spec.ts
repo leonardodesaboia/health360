@@ -20,7 +20,7 @@ for (const [route, title] of routes) {
       page.getByRole("heading", { name: title, exact: true, level: 1 }),
     ).toBeVisible();
     await expect(
-      page.getByText(/DEMONSTRATIVE — NOT CLINICALLY VALIDATED/),
+      page.getByText(/DEMONSTRATIVE — NOT CLINICALLY VALIDATED/).first(),
     ).toBeVisible();
     await expect(
       page.getByText("Demonstration environment", { exact: true }),
