@@ -78,7 +78,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-04 — Intake completion and clinical profile
 
 - Stable OpenSpec change ID: `p0-04-clinical-profile`.
-- Status: **planned**; change not yet picked up.
+- Status: **in progress**; [active change](../../openspec/changes/p0-04-clinical-profile/).
 - Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
 
 - Goal: finish habits/medications/examination/review steps and consolidate the versioned profile.

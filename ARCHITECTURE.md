@@ -112,8 +112,10 @@ or end-to-end MVP flows. Future flow specifications are in the backlog.
 `src/features/health-intake` owns the configuration-driven RHF/Zod intake and its
 async `IntakeDraftRepository` port. The temporary browser-local adapter validates
 draft envelopes, scopes by synthetic patient ID and checks expected revisions.
-It stores synthetic drafts only; no physician sharing, database persistence,
-identity enforcement or clinical workflow transition is implemented by this adapter.
+P0-04 adds atomic confirmed intake/profile snapshots, idempotent submit and immutable
+history in the same browser storage envelope. Web Locks serialize cross-tab writes.
+No physician sharing, database persistence, identity enforcement or clinical workflow
+transition is implemented by this temporary adapter.
 A server adapter must enforce ownership and atomic revision checks.
 
 ## Persisted workflow API
@@ -228,3 +230,15 @@ context snapshot. This uses the extended P0-05 schema directly so its issuer/yea
 rule versions and demonstrative labels survive the narrower legacy core context
 repository parser. The session returns that stored snapshot; analysis can reference
 clinicalContext.id/version through its dataset-scoped foreign key.
+
+## Clinical profile (P0-04)
+
+The optional typed `HealthProfile.intakeFacts` preserves patient-reported boolean/null
+CRC symptoms and risk facts, prior screening and colonoscopy quality. Existing arrays
+remain compatible. Examination `datePrecision` and `approximateDate` are optional;
+`performedAt` remains null unless the date is exact. The pure projection stores
+completed IntakeResponse plus examinations and a new immutable HealthProfile together.
+`/patient/profile` shows structured version/date metadata separately from declared and
+unknown answers. No score, clinical eligibility, analysis or plan publication occurs.
+Server integration must resolve P0-02 getDemoSession and bind datasetRepository to its
+trusted datasetId; patientId alone is not a storage isolation boundary.
