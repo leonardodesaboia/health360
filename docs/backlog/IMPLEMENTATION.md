@@ -108,6 +108,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 - Stable OpenSpec change ID: `p0-06-llm-adapter`.
 - Status: **done**; [archive](../../openspec/changes/archive/2026-10-23-p0-06-llm-adapter/proposal.md); [PR #10](https://github.com/leonardodesaboia/health360/pull/10).
 - Implementation evidence: [verification and review](../../openspec/changes/archive/2026-10-23-p0-06-llm-adapter/tasks.md): 202 unit tests (live smoke skipped), 28 production e2e tests after rebase on main; verify/format/strict specs pass. Real API call not run.
+- Mock findings follow-up: **in progress**; [change](../../openspec/changes/p0-06-mock-findings/).
 
 - Goal: introduce a provider interface and one external API adapter using configurable provider/model.
 - Depends on: P0-05; OpenAI selected (ADR0003), model via `LLM_MODEL`; user supplies `OPENAI_API_KEY` separately. Provider selection is resolved.

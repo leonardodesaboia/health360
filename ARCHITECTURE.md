@@ -165,10 +165,17 @@ OpenAI uses the official SDK Responses API, strict structured output and store:f
 with no tools, reasoning summaries or automatic retries. Configuration uses
 LLM_PROVIDER=openai, LLM_MODEL (ADR0003 selects gpt-6-astra), OPENAI_API_KEY and
 LLM_TIMEOUT_MS (default 30000, bounded to 1–120000 ms). Missing/invalid configuration
-blocks. LLM_PROVIDER=mock explicitly selects a deterministic empty preliminary
-response; failures never switch providers. No prompts, raw errors, responses or
+blocks. LLM_PROVIDER=mock explicitly selects deterministic preliminary explanations of
+supplied allowed findings; failures never switch providers. No prompts, raw errors, responses or
 private chain-of-thought are logged or persisted. Provider retention policies still
 apply; store:false is not a claim of zero provider retention.
+
+The default mock copies rationale records from minimized SYSTEM_STRUCTURED personal
+history using `Rule <id>, version <n>; evidence version <n>: <rationale>`. Each allowed
+finding must have one unambiguous record with matching supplied evidence versions.
+It emits exact supplied rule/evidence scope, never new rules; absent or ambiguous
+support blocks. Empty allowed scope stays empty. Explicit test-result injection is
+unchanged. The mock is demonstrative engineering behavior, never clinical approval.
 
 Results are BLOCKED with a bounded reason, or NEEDS_REVIEW with AI_GENERATED
 provenance, demonstrative validation, structured data and prompt/profile/context/
