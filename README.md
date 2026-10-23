@@ -16,7 +16,7 @@ pnpm dev
 Open http://127.0.0.1:3000/patient. Also inspect `/patient/intake`, `/patient/plan`,
 `/doctor`, `/doctor/reviews/demo-review-01` and `/showcase`.
 No environment variables, database or API account are needed for the foundation.
-`.env.example` reserves provider-agnostic **server-only** variables for a future task;
+`.env.example` contains local Postgres defaults and future **server-only** OpenAI variables;
 they are not read by this application. Never use a `NEXT_PUBLIC_` key variable.
 
 ## Verify
@@ -69,3 +69,5 @@ There is no persistence, LLM provider, rules engine, timeline engine or medical 
 - [Spec → plan → TDD → verify → review workflow](docs/ai/WORKFLOW.md)
 - [Tooling sources, plugin inventory and enablement](docs/ai/TOOLING.md)
 - [Foundation decisions](docs/adr/0001-foundation.md)
+- [MVP runtime and scenario decisions](docs/adr/0003-mvp-runtime-decisions.md)
+- [Local Postgres and Easypanel deployment](docs/deploy/easypanel.md)

@@ -136,7 +136,7 @@ Rules that hold at every step:
 - **One task per session.** Never implement MVP features that weren't asked for.
 - **Check APIs before using them.** Verify unstable APIs with Context7, next-devtools docs, or `node_modules/next/dist/docs/` before writing code.
 - **Evidence before claims.** Paste real command output.
-- **Escalate medical decisions.** Medical criteria, evidence, and expected outcomes come from a human medical owner. Escalate, don't invent.
+- **Keep demo authoring explicit.** Agents may author demonstrative scenarios, rules and expected outcomes under ADR0003 and the clinical-safety skill. Use data/UI labels and real sources or marked placeholders; retain physician review gates. Real clinical use requires formal medical review.
 
 ### In AO sessions
 

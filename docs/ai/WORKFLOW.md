@@ -76,8 +76,10 @@ anchors; never mine future product prose as implemented functionality.
 `healthcare-cdss-patterns` includes broader drug/dose/scoring examples and
 `healthcare-phi-compliance` discusses several jurisdictions. Those examples do not
 authorize adding scores, dosing, PHI storage, RLS infrastructure or a compliance
-claim here. Use applicable engineering principles only. Qualified medical owners
-must supply scenario criteria and approve clinical content; AI review is not clinical
+claim here. Use applicable engineering principles only. Agents may author demonstrative scenarios, rules and expected outcomes under
+[ADR0003](../adr/0003-mvp-runtime-decisions.md), with explicit data/UI labels,
+verifiable sources or marked placeholders, and mandatory in-app physician review.
+Formal medical review is required before real clinical use; AI review is not clinical
 validation or a Brazil-specific legal assessment.
 
 ECC `/orch-add-feature` is a gated research/plan/TDD/review wrapper, exposed as

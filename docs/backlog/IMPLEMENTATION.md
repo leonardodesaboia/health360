@@ -8,20 +8,24 @@ for execution and definition of done. No issues have been published.
 
 Choose one task per implementation session, confirm its scope and dependencies,
 and record completion/archive links here. This is the only ordered task index. Split further if a task cannot fit a focused
-reviewable change. All data remains synthetic. Medical criteria require a qualified
-owner; an AI coding agent must not invent them.
+reviewable change. All data remains synthetic. Agents may author demonstrative
+scenarios, rules and expected demo outcomes under [ADR0003](../adr/0003-mvp-runtime-decisions.md):
+data and UI carry **DEMONSTRATIVE — NOT CLINICALLY VALIDATED**, evidence is publicly
+verifiable (guideline, issuer, year, URL) or explicitly `evidence: placeholder`, and
+physician review gates remain mandatory. Placeholders cannot satisfy evidence validation.
+Real clinical use requires formal medical review. All entries below remain planned.
 
 ## OpenSpec task lifecycle
 
 OpenSpec1.14.3 is the adopted **per-task specification workflow**, installed as the exact devDependency `@fission-ai/openspec`. This document owns order, stable task identity and completion status. An active OpenSpec change owns that task's implementation checklist and precise spec deltas. No second backlog is maintained.
 
-1. Select an authorized planned entry whose dependencies and external-owner inputs are satisfied. Read its goal, affected areas, acceptance criteria and required tests below.
+1. Select an authorized planned entry whose dependencies and required inputs are satisfied. Read its goal, affected areas, acceptance criteria and required tests below.
 2. At pickup run `pnpm exec openspec new change <stable-id>`. If that change already exists, resume it; do not create a duplicate. Add a proposal referencing this document's stable anchor (for example `../../../docs/backlog/IMPLEMENTATION.md#p0-03`), identify scope/exclusions, and refine spec deltas/design/tasks from the entry. Reference the acceptance criteria instead of copying long lists into parallel documents.
 3. Mark the entry **in progress** with a link to its actual change. Plan inside that change, then TDD: meaningful failing test, minimal implementation, refactor. Preserve synthetic-only and medical-review boundaries.
 4. Verify the entry's required tests, `pnpm verify`, `pnpm test:e2e`, formatting and `pnpm exec openspec validate --all --strict --no-interactive`. Review spec conformance and applicable clinical, security, TypeScript/React concerns. Record real output in tasks/evidence; foundation smoke does not complete future MVP tasks.
 5. After all assigned work and review pass, archive with `pnpm exec openspec archive <stable-id>` (inspect the diff, never force or skip checks). This promotes completed deltas into baseline specs. Mark the entry **done** with its archive, verification and PR links. Do not archive unimplemented plans.
 
-The CLI's `status --json` `isComplete` flag describes planning artifacts, not delivered functionality. Inspect `instructions apply --change <stable-id> --json` for actual checklist progress. Dependencies and clinical-owner inputs are not automatically enforced by CLI readiness.
+The CLI's `status --json` `isComplete` flag describes planning artifacts, not delivered functionality. Inspect `instructions apply --change <stable-id> --json` for actual checklist progress. Dependencies and scenario-policy requirements are not automatically enforced by CLI readiness.
 
 All 18 entries remain **planned** in this setup. Pre-created unimplemented draft folders were removed when adopting this pickup lifecycle; no implementation or completed archive was discarded. Existing baseline specs describe implemented capabilities only. Workflow comparison and rationale: [ADR0002](../adr/0002-spec-driven-workflow.md); specialist mapping: [WORKFLOW.md](../ai/WORKFLOW.md).
 
@@ -36,7 +40,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 - Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
 
 - Goal: establish PostgreSQL/Prisma persistence for core records with immutable profile/analysis/plan versions.
-- Depends on: foundation; human selection of local DB environment.
+- Depends on: foundation. Local environment selected: PostgreSQL 17 via Docker Compose; Prisma remains the planned ORM (ADR0003).
 - Areas: future `src/server/db`, Prisma schema/migrations, contracts, `.env.example`, architecture.
 - Accept: synthetic seeds only; stable IDs/foreign keys; review/analysis/profile/context version links; previous versions cannot be silently overwritten; no clinical data in logs.
 - Tests: isolated DB migration/seed integration, referential integrity, rollback, unique version constraints, no fixture mutation.
@@ -91,11 +95,11 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 - Status: **planned**; change not yet picked up.
 - Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
 
-- Goal: load a small versioned demonstrative scenario/context selected by a medical owner.
-- Depends on: P0-04; owner-supplied criteria, evidence IDs and expected synthetic outcomes.
+- Goal: load a small versioned demonstrative scenario/context authored by agents under the ADR0003 demonstrative safety policy.
+- Depends on: P0-04; agent-authored demonstrative criteria and expected outcomes, with verifiable source metadata or explicit evidence placeholders (ADR0003).
 - Areas: future `src/server/clinical-rules`, context fixtures/contracts and scenario docs.
 - Accept: deterministic eligibility, contraindication and blocking checks are separate from the LLM; evidence IDs/version/source and review status recorded; unknown data can block or clarify; no broad clinical search/RAG.
-- Tests: medically specified positive/negative/unknown boundary cases, unsupported scenario rejection, missing context version, no autonomous scope expansion.
+- Tests: demonstrative positive/negative/unknown boundary cases, unsupported scenario rejection, missing context version, no autonomous scope expansion.
 
 <a id="p0-06"></a>
 
@@ -106,7 +110,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 - Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
 
 - Goal: introduce a provider interface and one external API adapter using configurable provider/model.
-- Depends on: P0-05; user-selected provider and separately supplied secret.
+- Depends on: P0-05; OpenAI selected (ADR0003), model via `LLM_MODEL`; user supplies `OPENAI_API_KEY` separately. Provider selection is resolved.
 - Areas: future `src/server/ai` provider/prompts/schema, `.env.example`, tooling/architecture docs.
 - Accept: server-only secret and minimized synthetic payload; versioned prompt/context/profile metadata; structured output; bounded timeout; no chain-of-thought retained; provider substitution does not change feature UI.
 - Tests: mock-provider integration for payload minimization, timeout/API error, schema failures and model configuration; separately authorized synthetic live API check, never clinical certification.
@@ -133,11 +137,11 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 - Status: **planned**; change not yet picked up.
 - Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
 
-- Goal: contextualize possible redundancy from a medically supplied deterministic rule.
+- Goal: contextualize possible redundancy from an agent-authored demonstrative deterministic rule under ADR0003.
 - Depends on: P0-05, P0-07.
 - Areas: rules, analysis output, proposal/evidence presentation.
 - Accept: records examination data, applied rule ID/version, rationale and limitations; recent examination alone is insufficient; AI explains supplied rule result; remains preliminary until reviewed.
-- Tests: medically specified redundant/nonredundant/unknown cases, missing dates, rule/proposal traceability, no automatic patient advice; flow B through proposal stage.
+- Tests: demonstrative redundant/nonredundant/unknown cases, missing dates, rule/proposal traceability, no automatic patient advice; flow B through proposal stage.
 
 <a id="p0-09"></a>
 
@@ -220,7 +224,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 - Goal: assemble an explicitly synthetic reproducible HISIC demonstration across A–E.
 - Depends on: P0-01 through P0-13.
 - Areas: scenario fixtures, reset, Playwright flows, runbook and docs.
-- Accept: at least one prepared full case with medically supplied expected outcomes; all 18 product acceptance points demonstrated, resettable, with failure/retry path; no fake metrics, validation claims or silent success stubs.
+- Accept: at least one prepared full case with agent-authored demonstrative expected outcomes under ADR0003; all 18 product acceptance points demonstrated, resettable, with failure/retry path; no fake metrics, validation claims or silent success stubs.
 - Tests: run A–E end-to-end on desktop/mobile; verify refresh persistence, reset isolation, keyboard access; record actual provider integration separately from deterministic mocked CI.
 
 ## P1 — Optional after P0
@@ -308,7 +312,7 @@ appears containing only those decisions. Reject direct publication before review
 
 ### Flow B — Do Not Test (P0-08–11)
 
-Given a medically specified synthetic prior-exam case, when the deterministic rule
+Given an agent-authored demonstrative synthetic prior-exam case, when the deterministic rule
 runs, then considered data, rule/version, limitations and possible redundancy are
 traceable. When AI explains it, then no evidence outside supplied context appears.
 When the physician accepts/modifies/rejects with the required reason, then the

@@ -42,14 +42,14 @@ The queue's review ID is a display fixture, not a persisted MedicalReview.
 When authorized, add `src/server` modules marked with `import "server-only"`:
 
 - DB/repositories: synthetic data, transactions, immutable versions and reset isolation.
-- Clinical context/rules: restricted medically owned scenarios, versioned evidence,
-  deterministic eligibility/contraindication/blocking checks. No clinical criteria invented by an agent.
+- Clinical context/rules: restricted demonstrative scenarios under ADR0003, versioned evidence,
+  deterministic eligibility/contraindication/blocking checks. Agent-authored demo rules follow [ADR0003](docs/adr/0003-mvp-runtime-decisions.md); real clinical use requires formal medical review.
 - AI: provider interface → minimal profile/context input → versioned prompt → structured
   output parsing → evidence/category/required-field validators → blocked or review-pending result.
 - Review/publication: authorize actor and ownership; verify current analysis/profile/context,
   completed review and explicit finalization; atomically publish only reviewed decisions.
 
-The LLM is replaceable via `LLM_PROVIDER`, `LLM_MODEL`, `LLM_API_KEY` and
+The LLM is replaceable via `LLM_PROVIDER`, `LLM_MODEL`, `OPENAI_API_KEY` and
 `LLM_TIMEOUT_MS`. No provider is installed or invoked now. Keep secrets server-only;
 do not retain chain-of-thought or log raw prompts/identifiers. Avoid sending display names.
 Timeouts, invalid outputs and insufficient evidence fail closed with bounded retries.
@@ -65,12 +65,16 @@ No UI invokes the transition function to fabricate progress.
 
 Unrecognized review IDs return 404. All demo content remains clearly marked.
 The current fixture state is illustrative and does not mean a real analysis exists.
-No platform deployment, production credentials or public publishing is part of setup.
+The public repository includes local Postgres Compose and a production standalone
+Dockerfile. The selected deployment target is a VPS with Easypanel and a separate
+Postgres service; see [the runbook](docs/deploy/easypanel.md). No deployment has
+been performed by this setup.
 
 ## Verification boundaries
 
 Vitest checks all state pairs and unknown-data contracts. Playwright checks every
 route, role/navigation links, no page overflow at desktop/mobile, runtime errors,
 keyboard skip focus, accessible example validation, disabled decisions and unknown IDs.
+An axe smoke checks the main routes for serious/critical violations.
 These are technical smoke tests, not clinical validation, a complete accessibility audit,
 or end-to-end MVP flows. Future flow specifications are in the backlog.
