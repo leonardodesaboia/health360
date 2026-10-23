@@ -106,7 +106,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-06 — Replaceable server LLM adapter
 
 - Stable OpenSpec change ID: `p0-06-llm-adapter`.
-- Status: **implemented; PR pending**; [archive](../../openspec/changes/archive/2026-10-23-p0-06-llm-adapter/proposal.md).
+- Status: **done**; [archive](../../openspec/changes/archive/2026-10-23-p0-06-llm-adapter/proposal.md); [PR #10](https://github.com/leonardodesaboia/health360/pull/10).
 - Implementation evidence: [verification and review](../../openspec/changes/archive/2026-10-23-p0-06-llm-adapter/tasks.md): 202 unit tests (live smoke skipped), 28 production e2e tests after rebase on main; verify/format/strict specs pass. Real API call not run.
 
 - Goal: introduce a provider interface and one external API adapter using configurable provider/model.
