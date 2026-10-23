@@ -37,7 +37,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 
 - Stable OpenSpec change ID: `p0-01-persistence`.
 - Status: **implemented; PR pending**; [archive](../../openspec/changes/archive/2026-10-22-p0-01-persistence/).
-- Implementation evidence: [verification](../../openspec/changes/archive/2026-10-22-p0-01-persistence/tasks.md): 128 unit tests, 7 PostgreSQL integration tests, 22 production e2e tests; verify/format/strict specs pass.
+- Implementation evidence: [verification](../../openspec/changes/archive/2026-10-22-p0-01-persistence/tasks.md): 169 unit tests, 7 PostgreSQL integration tests, 22 production e2e tests after rebase on main; verify/format/strict specs pass.
 
 - Goal: establish PostgreSQL/Prisma persistence for core records with immutable profile/analysis/plan versions.
 - Depends on: foundation. Local environment selected: PostgreSQL 17 via Docker Compose; Prisma remains the planned ORM (ADR0003).
