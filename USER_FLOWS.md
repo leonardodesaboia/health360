@@ -3,14 +3,18 @@
 ## Foundation routes
 
 `/` redirects to `/patient`. Patient navigation is Home and My plan; the home
-links to the read-only `/patient/intake` reference. The plan page explains why no
-plan exists; history is described there for later versioned cycles, without a dead link.
+links to the read-only `/patient/intake` reference. The plan page loads the selected
+dataset's reviewed plan or explains the current session, review, clarification or
+blocked state. It never displays preliminary proposals. Previous reviewed content
+remains identified as previous during a new cycle.
 `/doctor` lists one synthetic reference record; opening it navigates to
 `/doctor/reviews/demo-review-01`. Unrecognized IDs return 404.
 `/showcase` is the shared-component verification route, linked in the shell/footer.
 
 The demo role link changes between `/patient` and `/doctor`. It is neither login
-nor authorization. No screen writes data or executes a workflow transition.
+nor authorization. The plan page reads persisted records and never publishes on a
+page visit. The review finalization service invokes guarded plan publication inside
+the same serialized dataset transaction.
 No route reveals unreviewed proposals as patient guidance.
 
 ## Administrative lifecycle

@@ -40,7 +40,7 @@ test("patient and doctor navigation and review boundary", async ({ page }) => {
   await page.getByRole("link", { name: "My plan", exact: true }).click();
   await expect(
     page.getByRole("heading", {
-      name: "No plan available in this example",
+      name: "Select a demonstration case",
     }),
   ).toBeVisible();
   await page.getByRole("link", { name: /View as physician/ }).click();
