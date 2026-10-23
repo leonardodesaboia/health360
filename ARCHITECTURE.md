@@ -35,7 +35,7 @@ allowed categories, decision reasons and version consistency.
 Unknown clinical values use `null` and explicit missing-information lists. Provenance
 distinguishes patient-reported, system-structured, rule-generated, AI-generated and
 physician-reviewed content. Synthetic fixtures are parsed at load time and never mutated.
-The queue's review ID is a display fixture, not a persisted MedicalReview.
+Physician workspace IDs identify an analysis ID and version; a reader URL does not imply a persisted or finalized MedicalReview.
 
 ## Implemented synthetic persistence
 
@@ -89,6 +89,11 @@ REASSESSMENT_PENDING. It appends only its own request event and redirects to the
 existing intake route. Opening an edit form does not invent a new profile; the
 intake producer must save the updated version and invoke analysis. A second
 review and publication are still required before a new plan becomes available.
+## Physician queue and reader
+
+The physician queue and workspace read this storage after resolving the current demo session; no session yields no patient records. All reads use datasetRepository with the server-resolved dataset ID, then filter to its patient. The reader joins the exact analyzed profile and context versions, reports newer versions as stale, and never falls back to display fixtures on errors.
+
+
 
 ## Future server boundaries
 
@@ -125,7 +130,7 @@ Never infer authority from the pathname, a cookie supplied by the client, or a d
 The workflow function checks legal edges only; it cannot prove medical review occurred.
 No UI invokes the transition function to fabricate progress.
 
-Unrecognized review IDs return 404. All demo content remains clearly marked.
+Unrecognized or foreign physician workspace IDs return no patient content (404 UI). All demo content remains clearly marked.
 The current fixture state is illustrative and does not mean a real analysis exists.
 The public repository includes local Postgres Compose and a production
 Dockerfile. The selected deployment target is a VPS with Easypanel and a separate
@@ -136,7 +141,7 @@ been performed by this setup.
 
 Vitest checks all state pairs and unknown-data contracts. Playwright checks every
 route, role/navigation links, no page overflow at desktop/mobile, runtime errors,
-keyboard skip focus, accessible example validation, disabled decisions and unknown IDs.
+keyboard skip focus, accessible example validation, the no-session queue boundary and unknown workspace IDs.
 An axe smoke checks the main routes for serious/critical violations.
 These are technical smoke tests, not clinical validation, a complete accessibility audit,
 or end-to-end MVP flows. Future flow specifications are in the backlog.

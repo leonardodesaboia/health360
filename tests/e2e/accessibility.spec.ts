@@ -10,7 +10,6 @@ test("main demo routes have no serious or critical axe violations", async ({
     "/patient/profile",
     "/patient/plan",
     "/doctor",
-    "/doctor/reviews/demo-review-01",
     "/showcase",
   ]) {
     await page.goto(route);

@@ -7,8 +7,8 @@ links to the read-only `/patient/intake` reference. The plan page loads the sele
 dataset's reviewed plan or explains the current session, review, clarification or
 blocked state. It never displays preliminary proposals. Previous reviewed content
 remains identified as previous during a new cycle.
-`/doctor` lists one synthetic reference record; opening it navigates to
-`/doctor/reviews/demo-review-01`. Unrecognized IDs return 404.
+`/doctor` lists the latest persisted analysis for the selected demo session patient. Without a session or analysis it shows an empty state. Opening an entry navigates to `/doctor/reviews/<analysis-id>--v<version>`. The reader shows the exact analyzed profile/context, proposal criteria, evidence versions, uncertainty and stale-version warnings. Unknown or foreign IDs disclose no records. No reader action completes a review or publishes a plan.
+
 `/showcase` is the shared-component verification route, linked in the shell/footer.
 
 The demo role link changes between `/patient` and `/doctor`. It is neither login
