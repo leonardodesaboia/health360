@@ -204,7 +204,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-13 — Longitudinal history and reassessment
 
 - Stable OpenSpec change ID: `p0-13-reassessment`.
-- Status: **planned**; change not yet picked up.
+- Status: **in progress**; [change](../../openspec/changes/p0-13-reassessment/).
 - Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
 
 - Goal: preserve events and prior plans while a new cycle is prepared.
