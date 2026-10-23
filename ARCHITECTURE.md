@@ -39,6 +39,15 @@ The queue's review ID is a display fixture, not a persisted MedicalReview.
 
 ## Future server boundaries
 
+P0-05 implements the restricted server-only `src/server/clinical-rules` layer:
+versioned demonstrative colorectal screening context, synthetic scenario inputs,
+and pure deterministic eligibility/exclusion/clarification/redundancy checks.
+It wraps existing profile/examination contracts with explicit nullable screening
+facts; it has no database, provider or publication dependency. Findings require
+physician review and always deny publication authority. See the
+[scenario pack](docs/product/DEMO_SCENARIOS.md) for limits and source verification.
+Other server services below remain future work.
+
 When authorized, add `src/server` modules marked with `import "server-only"`:
 
 - DB/repositories: synthetic data, transactions, immutable versions and reset isolation.

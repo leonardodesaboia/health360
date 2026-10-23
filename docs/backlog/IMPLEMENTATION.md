@@ -92,8 +92,8 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-05 — Restricted clinical context and deterministic checks
 
 - Stable OpenSpec change ID: `p0-05-clinical-context`.
-- Status: **planned**; change not yet picked up.
-- Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
+- Status: **done**; [archive](../../openspec/changes/archive/2026-10-22-p0-05-clinical-context/proposal.md).
+- Implementation/archive evidence: [verification and review](../../openspec/changes/archive/2026-10-22-p0-05-clinical-context/tasks.md); PR link follows after creation.
 
 - Goal: load a small versioned demonstrative scenario/context authored by agents under the ADR0003 demonstrative safety policy.
 - Depends on: P0-04; agent-authored demonstrative criteria and expected outcomes, with verifiable source metadata or explicit evidence placeholders (ADR0003).
