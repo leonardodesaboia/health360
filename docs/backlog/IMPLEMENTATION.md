@@ -79,7 +79,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 
 - Stable OpenSpec change ID: `p0-04-clinical-profile`.
 - Status: **done**; [archive](../../openspec/changes/archive/2026-10-23-p0-04-clinical-profile/).
-- Implementation/archive evidence: [verification](../../openspec/changes/archive/2026-10-23-p0-04-clinical-profile/tasks.md); PR link recorded after creation. Browser-local adapter; dataset/session wiring and workflow transitions follow in a separate PR after P0-02.
+- Implementation/archive evidence: [verification](../../openspec/changes/archive/2026-10-23-p0-04-clinical-profile/tasks.md); [PR #17](https://github.com/leonardodesaboia/health360/pull/17). Browser-local adapter; dataset/session wiring and workflow transitions follow in a separate PR after P0-02.
 
 - Goal: finish habits/medications/examination/review steps and consolidate the versioned profile.
 - Depends on: P0-03.
