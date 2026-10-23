@@ -1,0 +1,37 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+# Loaded only after the user trusts this checkout. Higher-level policy still applies.
+# Keep model/provider/account selection in the user's own configuration.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+web_search = "cached"
+
+[sandbox_workspace_write]
+network_access = false
+
+# Match the project .mcp.json server names, packages and arguments.
+# npx is resolved by Codex on Windows; no shell-specific cmd /c wrapper is needed.
+[mcp_servers.shadcn]
+command = "npx"
+args = ["-y", "shadcn@4.22.1", "mcp"]
+startup_timeout_sec = 60
+
+[mcp_servers.next-devtools]
+command = "npx"
+args = ["-y", "next-devtools-mcp@0.4.0"]
+startup_timeout_sec = 60
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["-y", "@playwright/mcp@0.0.83", "--headless"]
+startup_timeout_sec = 60
+
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp@4.4.4"]
+startup_timeout_sec = 60
+
+# Select this role only when delegation is explicitly requested and the host permits it.
+# No multi_agent feature is enabled by this repository.
+[agents.health360_reviewer]
+description = "Read-only correctness, clinical-boundary and design-consistency engineering review."
+config_file = "agents/reviewer.toml"
