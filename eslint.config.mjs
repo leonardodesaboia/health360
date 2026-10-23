@@ -7,6 +7,7 @@ export default defineConfig([
   ...nextTs,
   globalIgnores([
     ".next/**",
+    "src/generated/prisma/**",
     "coverage/**",
     "playwright-report/**",
     "test-results/**",

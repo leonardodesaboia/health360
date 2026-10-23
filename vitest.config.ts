@@ -1,5 +1,10 @@
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  test: { environment: "node", include: ["src/**/*.test.ts"] },
+  resolve: { conditions: ["react-server"] },
+  test: {
+    environment: "node",
+    setupFiles: ["./tests/server-only.ts"],
+    include: ["src/**/*.test.ts"],
+  },
 });

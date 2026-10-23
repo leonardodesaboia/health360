@@ -6,3 +6,5 @@ test-results
 .claude/settings.local.json
 .claude/.gitignore
 next-env.d.ts
+
+src/generated/prisma

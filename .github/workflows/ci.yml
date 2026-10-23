@@ -6,6 +6,21 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: health360
+          POSTGRES_PASSWORD: test_only
+          POSTGRES_DB: health360_tests
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U health360 -d health360_tests"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://health360:test_only@127.0.0.1:5432/health360_tests
+      TEST_DATABASE_URL: postgresql://health360:test_only@127.0.0.1:5432/health360_tests
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -16,6 +31,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run --if-present skills:check
       - run: pnpm run --if-present skills:test
+      - run: pnpm db:generate
+      - run: pnpm db:migrate
+      - run: pnpm test:integration
       - run: pnpm verify
       - run: pnpm format:check
       - run: pnpm exec openspec validate --all --strict --no-interactive

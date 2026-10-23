@@ -37,6 +37,25 @@ distinguishes patient-reported, system-structured, rule-generated, AI-generated 
 physician-reviewed content. Synthetic fixtures are parsed at load time and never mutated.
 The queue's review ID is a display fixture, not a persisted MedicalReview.
 
+## Implemented synthetic persistence
+
+Prisma 7 and PostgreSQL 17 store dataset-scoped core records through server-only
+repositories in src/server/db. Zod validates JSON payloads; relational keys bind
+patients, examinations, immutable profile/context/analysis/review/plan versions and
+timeline events. SQL triggers reject historical updates and deletes. Explicit
+Dataset deletion cascades within that dataset, providing the later demo reset boundary.
+
+Run pnpm db:up, pnpm db:migrate and pnpm db:seed after copying .env.example.
+Build/typecheck generate the Prisma client. DATABASE_URL is server-only. The seed
+is synthetic and blocked; it performs no clinical analysis or publication.
+Repository list/append operations require a dataset ID; inDatasetTransaction rolls
+back a complete operation. These persistence APIs are internal: future services
+must enforce actor identity, freshness, evidence and finalized physician review.
+
+Integration tests require TEST_DATABASE_URL pointing to a disposable database.
+Apply migrations with DATABASE_URL set to that URL, then run pnpm test:integration.
+Default unit tests never connect to PostgreSQL. No runtime UI reads this storage yet.
+
 ## Future server boundaries
 
 P0-05 implements the restricted server-only `src/server/clinical-rules` layer:
