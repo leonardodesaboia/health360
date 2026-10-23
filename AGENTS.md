@@ -17,7 +17,7 @@ Do only the assigned task. Never add database access, LLM calls, persistence or 
 2. **Plan:** inspect affected code/tests and use relevant recipes. Use superpowers brainstorming for unresolved requirements, writing-plans or ECC `/plan` for implementation detail. Keep the result in the change's `design.md`/`tasks.md`; no parallel backlog or plan directory. Verify changing APIs against current primary docs.
 3. **TDD:** use ECC `tdd-guide` / `tdd-workflow` or superpowers `test-driven-development`: reproduce a meaningful failure, implement the smallest fix, then refactor. Keep domain logic outside JSX and services server-only. Do not implement unrelated changes.
 4. **Verify:** use ECC `verification-loop` / `e2e-runner` and superpowers `verification-before-completion`. Run focused regressions, `pnpm verify`, `pnpm test:e2e`, format and strict OpenSpec validation. Record real output against completed task checkboxes; do not claim unimplemented scenarios pass.
-5. **Review:** check spec conformance, ECC `code-reviewer` and `typescript-reviewer`, plus `react-reviewer` for TSX; apply `healthcare-reviewer` to clinical data/publication boundaries and `security-reviewer` to trust/secret/auth changes. Review skill guidance inline when delegation is unavailable; never pretend a separate reviewer ran. Clinical review by a qualified human remains mandatory for medical criteria.
+5. **Review:** check spec conformance, ECC `code-reviewer` and `typescript-reviewer`, plus `react-reviewer` for TSX; apply `healthcare-reviewer` to clinical data/publication boundaries and `security-reviewer` to trust/secret/auth changes. Review skill guidance inline when delegation is unavailable; never pretend a separate reviewer ran. Formal medical review remains mandatory before real clinical use; demo authoring follows the policy below.
 6. After implementation, verification and review, archive with `pnpm exec openspec archive <id>` without skipping checks. Mark the ordered index entry done with archive, verification and PR links. Never archive an unimplemented plan or treat CLI planning completeness as delivered functionality. See [workflow mapping and tool fallbacks](docs/ai/WORKFLOW.md).
 
 ## Commands
@@ -46,7 +46,16 @@ Use Node 24 and pnpm 10.34.5. On restricted Windows PowerShell use `pnpm.cmd`.
 
 Synthetic data only. Never imply clinical validation, efficacy or accuracy.
 Distinct provenance: patient-reported, system-structured, rule-generated, AI explanation, physician-reviewed.
-No invented evidence, autonomous diagnosis or unsupported recommendation. Version evidence, profiles, analyses and decisions.
+Agents may author synthetic scenarios, demonstrative rules and expected demo outcomes.
+Each must carry `validation: "demonstrative"` (or equivalent `reviewStatus`) in data and
+show **DEMONSTRATIVE — NOT CLINICALLY VALIDATED** wherever displayed in the UI.
+Evidence references require real, publicly verifiable guideline name, issuer, year and URL.
+Never fabricate citations, statistics or accuracy claims. Without a supporting source,
+mark `evidence: placeholder` and display that limitation; placeholders never satisfy
+evidence validation or bypass publication gates. In-app physician review remains
+mandatory; a demo reviewer is never real clinical validation. Real clinical use
+requires formal medical review. See [ADR0003](docs/adr/0003-mvp-runtime-decisions.md).
+No autonomous diagnosis or unsupported recommendation. Version evidence, profiles, analyses and decisions.
 Software schema validation is not medical approval. A role switch is navigation, not authorization.
 The workflow graph is administrative adjacency only; future server services must enforce identity, ownership, evidence integrity, version freshness, completeness and physician review before publication.
 AI timeout, malformed output, missing/unknown evidence or unsupported category must block publication. Do not bypass a blocked result with a fallback recommendation.

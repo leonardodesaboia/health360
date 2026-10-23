@@ -1,0 +1,10 @@
+.git
+.next
+node_modules
+.env*
+!.env.example
+.claude/settings.local.json
+playwright-report
+test-results
+coverage
+*.tsbuildinfo

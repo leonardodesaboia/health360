@@ -17,7 +17,7 @@ Health360 is a **pre-validation prototype on synthetic data**. Clinical decision
 
 1. **Synthetic data only.** Fixtures are marked synthetic (`synthetic: true` or `demonstrative: true`). Never add real names, documents, identifiers, or real patient records, even as examples.
 2. **Unknown is not negative.** Missing or "Não sei" answers stay `null` and appear in an explicit missing-information list. Never default an unknown clinical fact to `false`, "normal", or a plausible value.
-3. **No fabrication.** Agents must not invent guidelines, evidence, references, rule criteria, thresholds, statistics, accuracy or confidence figures, testimonials, or partnerships. Clinical criteria and expected scenario outcomes come from a qualified medical owner. If they're missing, stop and ask.
+3. **Demonstrative authoring; no fabricated evidence.** Agents may author synthetic patient scenarios, demonstrative rules and expected outcomes for the MVP demo. Each rule/scenario carries `validation: "demonstrative"` (or equivalent `reviewStatus`) in data and displays **DEMONSTRATIVE — NOT CLINICALLY VALIDATED** wherever shown in the UI. Cite only real, publicly verifiable sources with guideline name, issuer, year and URL. Never fabricate citations, statistics, accuracy/confidence claims, testimonials or partnerships. Without a supporting source, mark `evidence: placeholder` and display it as such; placeholders never satisfy evidence validators or bypass publication gates. In-app physician review remains mandatory; a demo reviewer is never real clinical validation. Real clinical use requires formal medical review. See `docs/adr/0003-mvp-runtime-decisions.md`.
 4. **Provenance is visible.** Keep these distinct in contracts and in the UI: patient-reported, system-structured, rule-generated, AI-generated, physician-reviewed (`provenanceSchema`).
 5. **The LLM decides nothing.** The model may structure, summarize, explain, and draft questions. It doesn't diagnose, authorize, expand clinical scope, or turn its output into a final recommendation. Eligibility, contraindication, and blocking checks are deterministic application code with versioned rules.
 6. **Physician review gates publication.** No plan, proposal, or redundancy flag reaches the patient until a physician has decided on it (approve, modify, or reject, with a reason for modify and reject) and has explicitly finalized the review. Leaving an item pending blocks publication.
@@ -50,7 +50,7 @@ Never weaken a gate to make a test pass.
 
 Escalate (ask the user or orchestrator) when a task needs:
 
-- medical criteria, evidence content, or expected outcomes;
+- criteria or expected outcomes intended for real clinical use (formal medical review required);
 - a change to who may publish;
 - any real-data or deployment decision.
 

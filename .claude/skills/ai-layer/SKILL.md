@@ -23,13 +23,13 @@ Every module starts with `import "server-only";`. Client code never imports from
 ## Provider contract
 
 - Use one small interface, for example `generateStructured({ promptId, promptVersion, input, schema, timeoutMs })`. It returns a discriminated result: `{ ok: true, data, meta }` or `{ ok: false, reason }`, with reasons such as `timeout`, `api_error`, `invalid_output`, and `refused`. Don't throw raw provider errors into the UI.
-- Read configuration from server env: `LLM_PROVIDER`, `LLM_MODEL`, `LLM_API_KEY`, `LLM_TIMEOUT_MS`. Document them in `.env.example` and `ARCHITECTURE.md`. Never hard-code a model name. Swapping providers must not change feature code or UI.
+- Read configuration from server env: `LLM_PROVIDER`, `LLM_MODEL`, `OPENAI_API_KEY`, `LLM_TIMEOUT_MS`. Document them in `.env.example` and `ARCHITECTURE.md`. Never hard-code a model name. Swapping providers must not change feature code or UI.
 - Use the provider's native structured-output or JSON-schema mode when available, and parse with the Zod schema regardless.
 - Check the provider SDK's current API with Context7 or the official docs before coding. Don't write it from memory.
 
 ## Input minimization
 
-Send only the fields the scenario's rules need: age, relevant history, medications, habits, exams, and the missing-information list. Never send display names, IDs that could re-identify a person, or free text the analysis doesn't use. The clinical context is the medically selected, versioned scenario from `src/server/clinical-rules`. No RAG and no vector DB.
+Send only the fields the scenario's rules need: age, relevant history, medications, habits, exams, and the missing-information list. Never send display names, IDs that could re-identify a person, or free text the analysis doesn't use. The clinical context is the demonstrative, versioned scenario under ADR0003 from `src/server/clinical-rules`. No RAG and no vector DB.
 
 ## Validation pipeline (schema-valid is not enough)
 
