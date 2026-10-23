@@ -65,3 +65,13 @@ continue validates the current step; Back preserves unvalidated draft answers.
 Save draft permits incomplete answers and restores the saved step after refresh.
 Storage and stale-revision failures remain visible; reloading the saved draft
 replaces unsaved form edits. This slice does not complete intake or start analysis.
+
+## Persisted administrative state
+
+Server services can now read and append workflow history through
+`src/server/workflow/state.ts`. A required expectedFrom guards stale writes; a
+per-patient transaction lock serializes concurrent changes. Actor, time, version
+and optional reason/profile/analysis/review/plan references remain in immutable
+audit history. This API does not change the graph above or establish that a
+clinical precondition passed. Callers must enforce those checks atomically with
+the transition. Existing screens still perform no transitions.

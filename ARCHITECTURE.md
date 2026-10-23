@@ -95,7 +95,7 @@ When authorized, add `src/server` modules marked with `import "server-only"`:
   completed review and explicit finalization; atomically publish only reviewed decisions.
 
 The LLM is replaceable via `LLM_PROVIDER`, `LLM_MODEL`, `OPENAI_API_KEY` and
-`LLM_TIMEOUT_MS`. No provider is installed or invoked now. Keep secrets server-only;
+`LLM_TIMEOUT_MS`. The adapter is implemented under `src/server/ai`; no route invokes it yet. Keep secrets server-only;
 do not retain chain-of-thought or log raw prompts/identifiers. Avoid sending display names.
 Timeouts, invalid outputs and insufficient evidence fail closed with bounded retries.
 
@@ -132,3 +132,74 @@ draft envelopes, scopes by synthetic patient ID and checks expected revisions.
 It stores synthetic drafts only; no physician sharing, database persistence,
 identity enforcement or clinical workflow transition is implemented by this adapter.
 A server adapter must enforce ownership and atomic revision checks.
+
+## Persisted workflow API
+
+Internal services use src/server/workflow/state.ts:
+
+- getWorkflowStatus(db, datasetId, patientId) returns Promise<WorkflowStatus>.
+- transitionWorkflow(db, datasetId, { patientId, expectedFrom, expectedRefs?, to, actor, reason?, refs? }) returns Promise<WorkflowStatus>.
+
+Both accept PrismaClient or Prisma.TransactionClient. inDatasetTransaction passes
+(repository, tx) to its callback; existing one-argument callbacks remain valid. A root-client transition
+creates a transaction; an existing transaction keeps domain writes and state atomic.
+The service serializes each dataset/patient, rejects stale expectedFrom and illegal
+graph edges, and appends a versioned workflowTransition repository record. Reads use
+the latest transition or the immutable initial patient status. Patient snapshots
+are never overwritten. Actor is patient, system or demo-physician; optional audit
+references are profileVersion, analysisId, reviewId and planId.
+
+This is administrative persistence, not authentication or clinical authorization.
+The calling service must validate identity, reference ownership/freshness, evidence
+and finalized physician review before advancing state. No UI calls the API yet.
+
+getWorkflowState(db, datasetId, patientId) returns {status,lastTransition}, with
+null history for the initial snapshot. Its patient lock lasts through the caller's
+transaction. Optional expectedRefs compares supplied fields to the latest transition
+refs under this lock; status or refs mismatches throw exported StaleStateError.
+Analysis/review services should bind attempts by expectedRefs to reject ABA retries.
+
+## Implemented synthetic LLM adapter (P0-06)
+
+`src/server/ai/analyze.ts` is the feature-independent entry point. It accepts unknown
+input and an `LlmProvider`; `analyzeFromEnv` selects an explicitly configured provider.
+`schemas/analysis.ts` exports `AnalysisInput`, `ClinicalContextInput` and
+`AnalysisOutput`. Existing domain contracts remain unchanged. P0-05 callers map
+versioned evidence (ID, version, title, issuer, year, URL, excerpt, supported or
+placeholder) and deterministic allowed proposals (rule ID, category, evidence IDs)
+into this context. An empty allowed set permits no proposals. A supported flag means
+supplied source support, never medical validation; callers verify sources before use.
+
+Callers select only necessary synthetic clinical facts. The adapter projects the
+HealthProfile clinical fields and prior exams, stripping identity keys and entity
+links, and preserves null unknowns. Clinical text must never contain identifiers.
+Profile version stays in local metadata; no patient or profile ID enters the model
+request. The versioned prompt treats clinical text as data and limits explanations
+to supplied deterministic scope. Zod and evidence/scope checks are software gates,
+not clinical approval or semantic verification of every generated statement.
+
+OpenAI uses the official SDK Responses API, strict structured output and store:false,
+with no tools, reasoning summaries or automatic retries. Configuration uses
+LLM_PROVIDER=openai, LLM_MODEL (ADR0003 selects gpt-6-astra), OPENAI_API_KEY and
+LLM_TIMEOUT_MS (default 30000, bounded to 1–120000 ms). Missing/invalid configuration
+blocks. LLM_PROVIDER=mock explicitly selects a deterministic empty preliminary
+response; failures never switch providers. No prompts, raw errors, responses or
+private chain-of-thought are logged or persisted. Provider retention policies still
+apply; store:false is not a claim of zero provider retention.
+
+Results are BLOCKED with a bounded reason, or NEEDS_REVIEW with AI_GENERATED
+provenance, demonstrative validation, structured data and prompt/profile/context/
+provider/model metadata. No persistence, workflow transition or publication exists
+in this layer. P0-07 owns freshness checks, orchestration and idempotent persistence;
+physician review and explicit finalization remain mandatory downstream.
+
+Tests inject deterministic providers and HTTP responses without live API calls.
+For a separately authorized synthetic live connectivity check, explicitly set
+LLM_LIVE_SMOKE=1 plus the OpenAI configuration, then run
+`pnpm exec vitest run src/server/ai/live-smoke.test.ts`. It is always skipped when CI
+is set. This check proves connectivity only; it does not establish clinical validity.
+The implementation follows the [official Structured Outputs guide](https://developers.openai.com/api/docs/guides/structured-outputs)
+and the installed SDK declarations (OpenAI 7.43.0).
+
+For shared-machine e2e verification, Playwright honors PORT (default 3100) for both
+the production server and test base URL. A busy port is never reused or stopped.

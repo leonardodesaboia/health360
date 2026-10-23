@@ -9,6 +9,11 @@ export function datasetRepository(
 ) {
   z.string().min(1).parse(datasetId);
   const readers = {
+    workflowTransition: () =>
+      db.workflowTransition.findMany({
+        where: { datasetId },
+        orderBy: [{ patientId: "asc" }, { version: "asc" }],
+      }),
     patient: () => db.patient.findMany({ where: { datasetId } }),
     profile: () => db.healthProfile.findMany({ where: { datasetId } }),
     examination: () =>
@@ -32,6 +37,19 @@ export function datasetRepository(
     async append(kind: RecordKind, input: unknown): Promise<void> {
       // Parse in each branch to retain discriminated entity types.
       switch (kind) {
+        case "workflowTransition": {
+          const r = validateRecord(kind, input);
+          await db.workflowTransition.create({
+            data: {
+              datasetId,
+              id: r.id,
+              patientId: r.patientId,
+              version: r.version,
+              payload: r,
+            },
+          });
+          break;
+        }
         case "patient": {
           const r = validateRecord(kind, input);
           await db.patient.create({
@@ -160,7 +178,12 @@ export type DatasetRepository = ReturnType<typeof datasetRepository>;
 export function inDatasetTransaction<T>(
   db: PrismaClient,
   datasetId: string,
-  operation: (repository: DatasetRepository) => Promise<T>,
+  operation: (
+    repository: DatasetRepository,
+    tx: Prisma.TransactionClient,
+  ) => Promise<T>,
 ) {
-  return db.$transaction((tx) => operation(datasetRepository(tx, datasetId)));
+  return db.$transaction((tx) =>
+    operation(datasetRepository(tx, datasetId), tx),
+  );
 }
