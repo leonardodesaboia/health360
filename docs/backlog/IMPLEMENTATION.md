@@ -65,7 +65,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 
 - Stable OpenSpec change ID: `p0-03-intake-draft`.
 - Status: **done**; [archive](../../openspec/changes/archive/2026-10-22-p0-03-intake-draft/).
-- Implementation/archive evidence: [verification](../../openspec/changes/archive/2026-10-22-p0-03-intake-draft/tasks.md); PR link recorded after creation. Browser-local adapter; database/session integration follows Worker A.
+- Implementation/archive evidence: [verification](../../openspec/changes/archive/2026-10-22-p0-03-intake-draft/tasks.md); [PR #9](https://github.com/leonardodesaboia/health360/pull/9). Browser-local adapter; database/session integration follows Worker A.
 
 - Goal: implement basic profile and clinical-history steps before extending questions.
 - Depends on: P0-01, P0-02; approved minimal scenario fields.
