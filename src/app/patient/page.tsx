@@ -8,22 +8,26 @@ import {
   Surface,
 } from "@/components/shared/primitives";
 import { demoPatient } from "@/features/patients/fixtures";
+import { getDemoSession } from "@/server/demo/session";
 
-export default function PatientHome() {
+export default async function PatientHome() {
+  // Without a selected demo case, the reference fixture keeps the page illustrative.
+  const patient = (await getDemoSession())?.patient ?? demoPatient;
   return (
     <ContentContainer>
       <PageHeader
         eyebrow="My follow-up"
-        title="Hello, Marina"
+        title={`Hello, ${patient.displayName.split(" ")[0]}`}
         description="Track the stages of your preventive evaluation here."
       />
       <Surface className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
         <div>
-          <StatusIndicator status={demoPatient.status} />
+          <StatusIndicator status={patient.status} />
           <h2 className="mt-5">Your history is the starting point</h2>
           <p className="mt-2 max-w-form text-sm text-muted-foreground">
-            In this example, Marina Example&apos;s information is organized for
-            a future review. No clinical analysis has been performed.
+            In this example, {patient.displayName}&apos;s information is
+            organized for a future review. No clinical analysis has been
+            performed.
           </p>
           <Button asChild className="mt-6">
             <Link href="/patient/intake">
@@ -70,8 +74,8 @@ export default function PatientHome() {
         </ol>
       </section>
       <Notice title="About this example">
-        Marina Example is fictional. The statuses and records illustrate the
-        interface and do not represent a medical evaluation or approval.
+        {patient.displayName} is fictional. The statuses and records illustrate
+        the interface and do not represent a medical evaluation or approval.
       </Notice>
     </ContentContainer>
   );

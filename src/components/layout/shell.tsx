@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Activity, ArrowLeftRight, ShieldCheck } from "lucide-react";
+import { DemoControls } from "./demo-controls";
 import { Navigation } from "./navigation";
 
 function AppShell({
@@ -53,6 +54,7 @@ function AppShell({
           <Navigation role={role} />
         </div>
       </header>
+      <DemoControls />
       <main id="main-content" tabIndex={-1}>
         {children}
       </main>
