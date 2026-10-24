@@ -8,6 +8,9 @@ test("review, edit and confirm a synthetic profile with unknown exam facts", asy
     .getByLabel("Age in the synthetic scenario", { exact: true })
     .fill("52");
   await page.getByRole("button", { name: "Save and continue" }).click();
+  await expect(
+    page.getByLabel("Age in the synthetic scenario", { exact: true }),
+  ).toBeHidden();
   for (const control of await page.getByRole("combobox").all())
     await control.selectOption("unknown");
   await page

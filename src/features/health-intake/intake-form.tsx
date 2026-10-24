@@ -95,8 +95,12 @@ export function IntakeForm() {
       setStatus("Draft saved in this browser only.");
       setError("");
       if (!intakeStarted.current) {
-        await startIntakeAction();
+        // Administrative start transition; never blocks local drafting. A failed
+        // start is retried on the next save, and submit stays fail-closed.
         intakeStarted.current = true;
+        void startIntakeAction().catch(() => {
+          intakeStarted.current = false;
+        });
       }
       setStep(target);
       if (target !== step) {
