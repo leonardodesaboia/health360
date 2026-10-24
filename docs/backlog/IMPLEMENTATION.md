@@ -122,7 +122,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 
 - Stable OpenSpec change ID: `p0-07-analysis-validation`.
 - Status: **done (PR open)**; [archived change](../../openspec/changes/archive/2026-10-24-p0-07-analysis-validation/) with [verification evidence](../../openspec/changes/archive/2026-10-24-p0-07-analysis-validation/tasks.md).
-- Implementation/archive evidence: PR link added after opening.
+- Implementation/archive evidence: [PR #20](https://github.com/leonardodesaboia/health360/pull/20).
 
 - Goal: validate evidence/category/required-field integrity and persist preliminary analysis safely.
 - Depends on: P0-06.
