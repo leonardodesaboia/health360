@@ -10,6 +10,8 @@
 - [ ] 5. Wire selector and case/reset controls, patient home, physician queue and case-scoped workspace with empty/error/pending states. Do not modify intake or plan routes owned by other workers.
 - [ ] 6. Add desktop/mobile e2e for shared case, refresh, reset, empty states, review 404 and retained labels; verify UI and archive only once the complete task is implemented.
 
+Phase B progress (PR b): case selector and Reset in both shells with loading/error/pending states and a "Select a demo case" entry state; patient home greeting/status read the session. Shell routes stay static (session read via no-store `/api/demo-session`) so unknown review IDs keep their 404. Physician queue rows and the case-scoped review workspace were deliberately left unchanged at orchestrator direction, so tasks 5 and 6 stay open. Evidence: pnpm verify exit 0 (250 passed, 1 optional skipped); `PORT=3130 pnpm test:e2e` 42/42 desktop/mobile, including the new demo-session spec (entry state, shared case across views, refresh, reset, switch); format:check passed; strict OpenSpec 11/0.
+
 ## Evidence
 
 - Red: PostgreSQL suite failed because src/server/demo/store did not exist. Existing 15 persistence/workflow tests passed in that failing run.
