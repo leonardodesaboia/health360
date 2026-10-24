@@ -17,7 +17,7 @@ export function PlanContent({
       >
         <p>
           {previous
-            ? "A new evaluation is in progress. This earlier plan has been preserved and does not include your latest information."
+            ? "This earlier plan has been preserved. It reflects the information and review recorded for that version."
             : "This plan contains only decisions from the finalized demonstration physician review."}
         </p>
         <p className="mt-2">

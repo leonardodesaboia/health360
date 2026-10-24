@@ -74,6 +74,22 @@ linked finalized decisions before returning a plan; it never returns proposal
 records to the patient UI. An earlier plan remains identified as previous while
 a new cycle is unfinished. Demonstration review is not medical validation.
 
+## Patient history and reassessment
+
+`src/server/health-timeline` reads only the selected demo dataset and uses the
+P0-11 reviewed-plan guard for historical content. The pure history projection in
+`features/health-timeline` checks entity/version links, filters the selected
+patient, removes duplicate semantic events and sorts actual recorded timestamps.
+It exposes event metadata and provenance, never preliminary analysis text.
+
+`/patient/history` links preserved reviewed plan versions and starts or resumes a
+reassessment. Its server action acquires the canonical workflow lock, checks the
+expected latest plan/profile and legally transitions PLAN_AVAILABLE to
+REASSESSMENT_PENDING. It appends only its own request event and redirects to the
+existing intake route. Opening an edit form does not invent a new profile; the
+intake producer must save the updated version and invoke analysis. A second
+review and publication are still required before a new plan becomes available.
+
 ## Future server boundaries
 
 P0-05 implements the restricted server-only `src/server/clinical-rules` layer:

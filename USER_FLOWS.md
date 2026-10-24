@@ -2,7 +2,7 @@
 
 ## Foundation routes
 
-`/` redirects to `/patient`. Patient navigation is Home and My plan; the home
+`/` redirects to `/patient`. Patient navigation is Home, My plan and History; the home
 links to the read-only `/patient/intake` reference. The plan page loads the selected
 dataset's reviewed plan or explains the current session, review, clarification or
 blocked state. It never displays preliminary proposals. Previous reviewed content
@@ -12,10 +12,26 @@ remains identified as previous during a new cycle.
 `/showcase` is the shared-component verification route, linked in the shell/footer.
 
 The demo role link changes between `/patient` and `/doctor`. It is neither login
-nor authorization. The plan page reads persisted records and never publishes on a
+nor authorization. Reassessment mutations go through the server workflow service;
+navigation alone does not complete an analysis, review or publication.
+The plan page reads persisted records and never publishes on a
 page visit. The review finalization service invokes guarded plan publication inside
 the same serialized dataset transaction.
 No route reveals unreviewed proposals as patient guidance.
+
+## Patient history
+
+`/patient/history` lists actual linked events with provenance and versions, and
+links reviewed plan versions through `/patient/history/[planId]`. Historical
+URLs are scoped to the selected demo dataset and patient; missing or unreviewed
+plans return 404. Earlier plans remain labeled previous while a new cycle is
+unfinished. A missing session shows case-selection guidance without records.
+
+Updating information from a reviewed plan starts REASSESSMENT_PENDING through
+the canonical workflow service, records the request and opens the existing
+intake. Intake submission owns the new profile version and analysis trigger;
+analysis and physician review must complete again before the next plan is
+published. Repeating an unfinished update does not duplicate the start event.
 
 ## Administrative lifecycle
 

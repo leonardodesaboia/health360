@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import {
   ClipboardList,
   Home,
+  History,
   Layers,
   ListChecks,
   type LucideIcon,
@@ -17,6 +18,7 @@ export function Navigation({ role }: { role: "patient" | "doctor" }) {
       ? [
           { href: "/patient", label: "Home", icon: Home },
           { href: "/patient/plan", label: "My plan", icon: ListChecks },
+          { href: "/patient/history", label: "History", icon: History },
         ]
       : [
           { href: "/doctor", label: "Reviews", icon: ClipboardList },
@@ -32,6 +34,8 @@ export function Navigation({ role }: { role: "patient" | "doctor" }) {
       {items.map(({ href, label, icon: Icon }) => {
         const active =
           pathname === href ||
+          (href === "/patient/history" &&
+            pathname.startsWith("/patient/history/")) ||
           (href === "/doctor" && pathname.startsWith("/doctor/reviews/"));
         return (
           <Link
