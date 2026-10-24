@@ -177,7 +177,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-11 — Reviewed preventive plan
 
 - Stable OpenSpec change ID: `p0-11-reviewed-plan`.
-- Status: **planned**; change not yet picked up.
+- Status: **in progress**; [change](../../openspec/changes/p0-11-reviewed-plan/).
 - Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
 
 - Goal: publish a patient-facing version derived solely from finalized physician decisions.

@@ -54,7 +54,25 @@ must enforce actor identity, freshness, evidence and finalized physician review.
 
 Integration tests require TEST_DATABASE_URL pointing to a disposable database.
 Apply migrations with DATABASE_URL set to that URL, then run pnpm test:integration.
-Default unit tests never connect to PostgreSQL. No runtime UI reads this storage yet.
+Default unit tests never connect to PostgreSQL.
+
+## Reviewed preventive plan
+
+`src/server/preventive-plan` publishes immutable plans from finalized, current
+demonstration physician decisions and reads only the selected session dataset.
+The finalization producer calls `publishReviewedPlan(tx, datasetId, patientId, reviewId)`
+inside its dataset transaction after `MEDICAL_REVIEW_COMPLETED`. The canonical
+workflow read acquires the patient advisory lock before record/version reads.
+Publication appends only a plan, its publication event and the canonical workflow
+transition; it never writes analyses or medical reviews. Repeated calls for the
+same review return the original plan. Pending or clarification decisions, stale
+versions, missing evidence and cross-patient references fail closed.
+
+`/patient/plan` displays persisted reviewed content or explicit session, review,
+clarification and blocked states. The reader verifies stored text against the
+linked finalized decisions before returning a plan; it never returns proposal
+records to the patient UI. An earlier plan remains identified as previous while
+a new cycle is unfinished. Demonstration review is not medical validation.
 
 ## Future server boundaries
 
