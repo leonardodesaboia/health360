@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   transaction: vi.fn(),
   read: vi.fn(),
   disconnect: vi.fn(),
+  status: vi.fn(),
 }));
 vi.mock("../demo/session", () => ({ getDemoSession: mocks.session }));
 vi.mock("../db/client", () => ({ createDatabase: mocks.database }));
@@ -13,14 +14,16 @@ vi.mock("../db/repository", () => ({
   inDatasetTransaction: mocks.transaction,
 }));
 vi.mock("./reader", () => ({ readPatientPlan: mocks.read }));
+vi.mock("../workflow/state", () => ({ getWorkflowStatus: mocks.status }));
 import { loadPatientPlan } from "./load";
 
 beforeEach(() => {
   vi.resetAllMocks();
   mocks.database.mockReturnValue({ $disconnect: mocks.disconnect });
   mocks.transaction.mockImplementation(async (_db, _dataset, operation) =>
-    operation("scoped-repository"),
+    operation("scoped-repository", "transaction"),
   );
+  mocks.status.mockResolvedValue("MEDICAL_REVIEW_PENDING");
 });
 
 it("does not access storage without a trusted demo session", async () => {
@@ -45,7 +48,11 @@ it("uses the session dataset and patient rather than a client supplied scope", a
     "dataset-a",
     expect.any(Function),
   );
-  expect(mocks.read).toHaveBeenCalledWith("scoped-repository", "patient-a");
+  expect(mocks.read).toHaveBeenCalledWith(
+    "scoped-repository",
+    "patient-a",
+    "MEDICAL_REVIEW_PENDING",
+  );
   expect(mocks.disconnect).toHaveBeenCalledOnce();
 });
 

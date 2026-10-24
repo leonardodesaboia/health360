@@ -2,18 +2,23 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { buildReviewedPlan } from "../../features/preventive-plan/build";
-import type { DatasetRepository } from "../db/repository";
+import type { Prisma } from "../../generated/prisma/client";
+import { datasetRepository } from "../db/repository";
 import { getWorkflowStatus, transitionWorkflow } from "../workflow/state";
 import { validatePublicationContext } from "./context";
 
 /** Call within the producer's serialized dataset transaction after finalization. */
 export async function publishReviewedPlan(
-  repo: DatasetRepository,
+  tx: Prisma.TransactionClient,
+  datasetId: string,
   patientId: string,
   reviewId: string,
 ) {
   z.string().min(1).parse(patientId);
   z.string().min(1).parse(reviewId);
+  // This canonical read locks the patient before any cycle/version reads.
+  const status = await getWorkflowStatus(tx, datasetId, patientId);
+  const repo = datasetRepository(tx, datasetId);
   const [patients, profiles, analyses, reviews, contexts, plans] =
     await Promise.all([
       repo.list("patient"),
@@ -46,7 +51,6 @@ export async function publishReviewedPlan(
   );
   // A repeat publication never creates a new plan, even after reassessment starts.
   if (existing) return existing;
-  const status = await getWorkflowStatus(repo, patientId);
   validatePublicationContext(context);
   const plan = buildReviewedPlan({
     id: randomUUID(),
@@ -58,7 +62,11 @@ export async function publishReviewedPlan(
     latestAnalysisVersion: analysis.version,
     latestReviewVersion: Math.max(
       ...ownedReviews
-        .filter((r) => r.analysisId === analysis.id)
+        .filter(
+          (r) =>
+            r.analysisId === analysis.id &&
+            r.analysisVersion === analysis.version,
+        )
         .map((r) => r.version),
     ),
     previousPlan: ownedPlans.sort((a, b) => b.version - a.version)[0] ?? null,
@@ -66,11 +74,16 @@ export async function publishReviewedPlan(
     status,
   });
   await repo.append("plan", plan);
-  await transitionWorkflow(repo, {
+  await transitionWorkflow(tx, datasetId, {
     patientId,
     to: "PLAN_AVAILABLE",
     expectedFrom: "MEDICAL_REVIEW_COMPLETED",
-    actor: "SYSTEM",
+    actor: "system",
+    expectedRefs: {
+      reviewId: review.id,
+      analysisId: analysis.id,
+      profileVersion: profile.version,
+    },
     refs: {
       planId: plan.id,
       reviewId: review.id,

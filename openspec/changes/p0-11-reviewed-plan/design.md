@@ -10,7 +10,7 @@ Publish only physician-decided content with current profile, analysis and contex
 
 - Pure plan derivation in `features/preventive-plan` consumes shared typed records; validates ownership, exact proposal coverage, finalized decisions, required reasons, evidence integrity and current cycle links before deriving content.
 - Approved proposal titles or modified reviewed text become actions, reviewed redundancy text, or pending information according to category. Reject decisions never become advice. Pending decisions block publication. CLARIFY decisions block publication until the clarification cycle is resolved; pending-information content can only derive from explicitly approved clarification text.
-- Server publication runs inside a dataset transaction with serialization against competing publication/cycle writes. It appends only plan and publication event, uses the shared legal workflow transition, and returns an existing plan for the same review on retry.
+- Server publication accepts the transaction client, dataset ID, patient ID and review ID. It calls the canonical workflow read to acquire the patient lock before version reads, constructs the dataset repository, appends only plan and publication event, uses the shared legal workflow transition, and returns an existing plan for the same review on retry.
 - The route loads only session-owned persisted plans and never renders raw proposals. Missing session, blocked analysis, pending review and stale cycle states use explicit English notices. A failed load uses the route error boundary.
 - Reuse existing layout, notice and surface components. Patient language stays tied to reviewed text; generic next steps add no clinical advice.
 

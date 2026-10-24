@@ -1,13 +1,15 @@
 import "server-only";
 import type { DatasetRepository } from "../db/repository";
 import { buildReviewedPlan } from "../../features/preventive-plan/build";
-import { getWorkflowStatus } from "../workflow/state";
+import type { WorkflowStatus } from "../../features/workflow/workflow";
 import { validatePublicationContext } from "./context";
 
 /** Never returns proposal records to the patient UI. */
 export async function readPatientPlan(
   repo: DatasetRepository,
   patientId: string,
+  status: WorkflowStatus,
+  planId?: string,
 ) {
   const [patients, plans, reviews, analyses, profiles, contexts] =
     await Promise.all([
@@ -20,10 +22,13 @@ export async function readPatientPlan(
     ]);
   if (!patients.some((p) => p.id === patientId))
     throw new Error("Demo patient unavailable");
-  const status = await getWorkflowStatus(repo, patientId);
-  const plan = plans
+  const ownedPlans = plans
     .filter((p) => p.patientId === patientId)
-    .sort((a, b) => b.version - a.version)[0];
+    .sort((a, b) => b.version - a.version);
+  const plan =
+    planId === undefined
+      ? ownedPlans[0]
+      : ownedPlans.find((p) => p.id === planId);
   if (!plan) return { status, plan: null };
   const review = reviews.find(
     (r) =>
@@ -88,6 +93,8 @@ export async function readPatientPlan(
     status,
     plan,
     previous:
-      status !== "PLAN_AVAILABLE" || latestProfile !== plan.profileVersion,
+      status !== "PLAN_AVAILABLE" ||
+      latestProfile !== plan.profileVersion ||
+      ownedPlans[0].id !== plan.id,
   };
 }

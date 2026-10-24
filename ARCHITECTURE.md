@@ -60,8 +60,9 @@ Default unit tests never connect to PostgreSQL.
 
 `src/server/preventive-plan` publishes immutable plans from finalized, current
 demonstration physician decisions and reads only the selected session dataset.
-The finalization producer calls `publishReviewedPlan(repo, patientId, reviewId)`
-inside its serialized dataset transaction after `MEDICAL_REVIEW_COMPLETED`.
+The finalization producer calls `publishReviewedPlan(tx, datasetId, patientId, reviewId)`
+inside its dataset transaction after `MEDICAL_REVIEW_COMPLETED`. The canonical
+workflow read acquires the patient advisory lock before record/version reads.
 Publication appends only a plan, its publication event and the canonical workflow
 transition; it never writes analyses or medical reviews. Repeated calls for the
 same review return the original plan. Pending or clarification decisions, stale
