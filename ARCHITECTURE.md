@@ -130,8 +130,10 @@ or end-to-end MVP flows. Future flow specifications are in the backlog.
 `src/features/health-intake` owns the configuration-driven RHF/Zod intake and its
 async `IntakeDraftRepository` port. The temporary browser-local adapter validates
 draft envelopes, scopes by synthetic patient ID and checks expected revisions.
-It stores synthetic drafts only; no physician sharing, database persistence,
-identity enforcement or clinical workflow transition is implemented by this adapter.
+P0-04 adds atomic confirmed intake/profile snapshots, idempotent submit and immutable
+history in the same browser storage envelope. Web Locks serialize cross-tab writes.
+No physician sharing, database persistence, identity enforcement or clinical workflow
+transition is implemented by this temporary adapter.
 A server adapter must enforce ownership and atomic revision checks.
 
 ## Persisted workflow API
@@ -183,10 +185,17 @@ OpenAI uses the official SDK Responses API, strict structured output and store:f
 with no tools, reasoning summaries or automatic retries. Configuration uses
 LLM_PROVIDER=openai, LLM_MODEL (ADR0003 selects gpt-6-astra), OPENAI_API_KEY and
 LLM_TIMEOUT_MS (default 30000, bounded to 1–120000 ms). Missing/invalid configuration
-blocks. LLM_PROVIDER=mock explicitly selects a deterministic empty preliminary
-response; failures never switch providers. No prompts, raw errors, responses or
+blocks. LLM_PROVIDER=mock explicitly selects deterministic preliminary explanations of
+supplied allowed findings; failures never switch providers. No prompts, raw errors, responses or
 private chain-of-thought are logged or persisted. Provider retention policies still
 apply; store:false is not a claim of zero provider retention.
+
+The default mock copies rationale records from minimized SYSTEM_STRUCTURED personal
+history using `Rule <id>, version <n>; evidence version <n>: <rationale>`. Each allowed
+finding must have one unambiguous record with matching supplied evidence versions.
+It emits exact supplied rule/evidence scope, never new rules; absent or ambiguous
+support blocks. Empty allowed scope stays empty. Explicit test-result injection is
+unchanged. The mock is demonstrative engineering behavior, never clinical approval.
 
 Results are BLOCKED with a bounded reason, or NEEDS_REVIEW with AI_GENERATED
 provenance, demonstrative validation, structured data and prompt/profile/context/
@@ -204,3 +213,50 @@ and the installed SDK declarations (OpenAI 7.43.0).
 
 For shared-machine e2e verification, Playwright honors PORT (default 3100) for both
 the production server and test base URL. A busy port is never reused or stopped.
+
+## Demonstration session module (P0-02 phase A)
+
+Server-only src/server/demo/session.ts resolves an opaque httpOnly cookie to one
+synthetic dataset. getDemoSession returns null for absent/malformed/unknown sessions
+and otherwise returns datasetId, patientId, caseId, patient, latest profile and
+linked examinations, plus the stored canonical clinicalContext (including id/version,
+evidence metadata, rules and demonstrative labels). Patient status comes from the authoritative workflow API.
+Page reads never seed data; database/incomplete-record errors propagate.
+
+selectDemoCaseForSession(caseId: unknown): Promise<void> validates a prepared case,
+transactionally replaces only the cookie-derived dataset, then sets the cookie.
+resetDemoSession(): Promise<boolean> resets that dataset's current stored case,
+returning false for no selection. Invoke mutations only from Server Actions or
+Route Handlers; they are not public endpoints or authentication.
+
+Storage helpers in store.ts accept (db: PrismaClient, datasetId: string):
+loadDemoCase returns Promise<StoredDemoCase | null>; resetDemoDataset returns
+Promise<boolean>; replaceDemoDataset adds caseId: DemoCaseId and returns Promise<void>.
+These are internal APIs: request handlers derive dataset scope through getDemoSession,
+never from client-supplied record IDs. Reads use one repeatable-read snapshot; reset
+serializes the dataset and current patient workflow locks before replacing records.
+No analysis, decision or plan is fabricated by selection/reset.
+
+Case IDs are first-screening and repeat-screening, reusing P0-05 fixtures.
+DEMO_COOKIE_SECURE=true enables Secure cookies for HTTPS deployment; local HTTP
+preview and CI leave it false. getDatabase lazily creates one server-only Prisma
+pool per process. This phase has no route changes: case-selection UI and shell
+integration remain planned. Intake and plan workers own their session wiring.
+
+Selection/reset also persists loadClinicalContext(caseId, 1) as a validated P0-05
+context snapshot. This uses the extended P0-05 schema directly so its issuer/year,
+rule versions and demonstrative labels survive the narrower legacy core context
+repository parser. The session returns that stored snapshot; analysis can reference
+clinicalContext.id/version through its dataset-scoped foreign key.
+
+## Clinical profile (P0-04)
+
+The optional typed `HealthProfile.intakeFacts` preserves patient-reported boolean/null
+CRC symptoms and risk facts, prior screening and colonoscopy quality. Existing arrays
+remain compatible. Examination `datePrecision` and `approximateDate` are optional;
+`performedAt` remains null unless the date is exact. The pure projection stores
+completed IntakeResponse plus examinations and a new immutable HealthProfile together.
+`/patient/profile` shows structured version/date metadata separately from declared and
+unknown answers. No score, clinical eligibility, analysis or plan publication occurs.
+Server integration must resolve P0-02 getDemoSession and bind datasetRepository to its
+trusted datasetId; patientId alone is not a storage isolation boundary.

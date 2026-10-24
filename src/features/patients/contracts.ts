@@ -27,14 +27,38 @@ export const previousExaminationSchema = z.object({
   patientId: id,
   name: z.string(),
   performedAt: z.iso.date().nullable(),
+  datePrecision: z.enum(["EXACT", "APPROXIMATE", "UNKNOWN"]).optional(),
+  approximateDate: z
+    .string()
+    .regex(/^\d{4}(-(?:0[1-9]|1[0-2]))?$/)
+    .nullable()
+    .optional(),
   result: sourcedText,
   notes: z.string(),
+});
+export const intakeFactsSchema = z.object({
+  provenance: z.literal("PATIENT_REPORTED"),
+  rectalBleeding: z.boolean().nullable(),
+  bowelChange: z.boolean().nullable(),
+  weightLoss: z.boolean().nullable(),
+  colorectalCancer: z.boolean().nullable(),
+  polyps: z.boolean().nullable(),
+  ibd: z.boolean().nullable(),
+  hereditaryCancerSyndrome: z.boolean().nullable(),
+  serratedPolyposis: z.boolean().nullable(),
+  familyCrc: z.boolean().nullable(),
+  familySyndrome: z.boolean().nullable(),
+  colonoscopyNormal: z.boolean().nullable(),
+  colonoscopyComplete: z.boolean().nullable(),
+  colonoscopyAdequatePrep: z.boolean().nullable(),
+  priorScreening: z.enum(["NEVER_SCREENED", "COLONOSCOPY", "OTHER"]).nullable(),
 });
 export const healthProfileSchema = z.object({
   id,
   patientId: id,
   version,
   age: z.number().int().min(0).max(120).nullable(),
+  intakeFacts: intakeFactsSchema.optional(),
   personalHistory: z.array(sourcedText),
   familyHistory: z.array(sourcedText),
   medications: z.array(sourcedText),

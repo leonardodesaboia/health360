@@ -64,7 +64,12 @@ answers. Unknown is explicit and never treated as a negative answer. Save and
 continue validates the current step; Back preserves unvalidated draft answers.
 Save draft permits incomplete answers and restores the saved step after refresh.
 Storage and stale-revision failures remain visible; reloading the saved draft
-replaces unsaved form edits. This slice does not complete intake or start analysis.
+replaces unsaved form edits. P0-04 extends this journey through habits, previous screening/examinations and review.
+Review supports editing any step. Explicit confirmation saves one immutable profile
+version and completed intake atomically in the browser-local demonstrator. Repeating
+unchanged confirmation does not create another version. Stale edits fail visibly.
+The consolidated `/patient/profile` shows declared versus unknown data and structured
+version/update metadata, with no score or medical approval claim. No analysis starts.
 
 ## Persisted administrative state
 

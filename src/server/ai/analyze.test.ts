@@ -9,7 +9,13 @@ export const input = {
   profileVersion: 1,
   profile: {
     age: null,
-    personalHistory: [],
+    personalHistory: [
+      {
+        value:
+          "Rule demo-rule, version 1; evidence version 1: Explain supplied deterministic finding.",
+        provenance: "SYSTEM_STRUCTURED",
+      },
+    ],
     familyHistory: [],
     medications: [],
     habits: [],
