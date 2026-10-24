@@ -7,6 +7,8 @@ import type {
   PreviousExamination,
 } from "../patients/contracts";
 import type { WorkflowStatus } from "../workflow/workflow";
+import type { DemoContext } from "../../server/clinical-rules/contracts";
+import { fields } from "../health-intake/contracts";
 
 export type ReviewRecords = {
   patients: Patient[];
@@ -16,6 +18,7 @@ export type ReviewRecords = {
   contexts: ClinicalContext[];
   reviews: MedicalReview[];
   workflowStatus?: WorkflowStatus;
+  contextDetails?: DemoContext;
 };
 
 export function workspaceId(analysis: AIAnalysis) {
@@ -28,8 +31,15 @@ export function findWorkspace(
   id: string,
 ) {
   const patient = data.patients.find((p) => p.id === patientId);
+  const linkedReview = data.reviews
+    .filter((r) => r.patientId === patientId && r.id === id)
+    .sort((a, b) => b.version - a.version)[0];
   const analysis = data.analyses.find(
-    (a) => a.patientId === patientId && workspaceId(a) === id,
+    (a) =>
+      a.patientId === patientId &&
+      (workspaceId(a) === id ||
+        (linkedReview?.analysisId === a.id &&
+          linkedReview.analysisVersion === a.version)),
   );
   if (!patient || !analysis) return null;
   const profiles = data.profiles.filter((p) => p.patientId === patientId);
@@ -58,6 +68,11 @@ export function findWorkspace(
     analysis,
     profile,
     context,
+    contextDetails:
+      data.contextDetails?.id === context.id &&
+      data.contextDetails.version === context.version
+        ? data.contextDetails
+        : null,
     stale,
     review,
     examinations: data.examinations.filter(
@@ -67,6 +82,27 @@ export function findWorkspace(
 }
 
 export type ReviewWorkspace = NonNullable<ReturnType<typeof findWorkspace>>;
+
+export function reviewableProposals(analysis: AIAnalysis) {
+  return analysis.status === "PRELIMINARY" ? analysis.proposals : [];
+}
+
+export function declaredFacts(profile: HealthProfile) {
+  return Object.entries(profile.intakeFacts ?? {}).flatMap(([key, value]) => {
+    const field = fields.find((item) => item.id === key);
+    if (!field) return [];
+    const text =
+      value === null
+        ? "Unknown"
+        : value === true
+          ? "Yes"
+          : value === false
+            ? "No"
+            : (field.options?.find(([option]) => option === value)?.[1] ??
+              "Unknown");
+    return [{ id: key, label: field.label, text }];
+  });
+}
 
 export function buildQueue(data: ReviewRecords, patientId: string) {
   const latest = data.analyses

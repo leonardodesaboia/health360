@@ -1,4 +1,10 @@
-## ADDED Requirements
+# physician-reader Specification
+
+## Purpose
+
+Provide a dataset-scoped physician queue and read-only workspace for exact analysis, profile and evidence versions, preserving unknown data and explicit demonstrative boundaries.
+
+## Requirements
 
 ### Requirement: Dataset-scoped physician queue
 

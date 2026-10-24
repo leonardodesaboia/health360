@@ -78,7 +78,6 @@ a new cycle is unfinished. Demonstration review is not medical validation.
 
 The physician queue and workspace read this storage after resolving the current demo session; no session yields no patient records. All reads use datasetRepository with the server-resolved dataset ID, then filter to its patient. The reader joins the exact analyzed profile and context versions, reports newer versions as stale, and never falls back to display fixtures on errors.
 
-
 ## Future server boundaries
 
 P0-05 implements the restricted server-only `src/server/clinical-rules` layer:

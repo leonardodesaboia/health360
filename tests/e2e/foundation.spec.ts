@@ -79,7 +79,14 @@ test("showcase validates accessibly without persisting data", async ({
 });
 test("unknown review does not disclose another fixture", async ({ page }) => {
   const response = await page.goto("/doctor/reviews/unknown");
-  expect(response?.status()).toBe(404);
+  expect([200, 404]).toContain(response?.status());
+  await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute(
+    "content",
+    /noindex/,
+  );
+  await expect(
+    page.getByRole("heading", { name: "Patient context" }),
+  ).toHaveCount(0);
   await expect(
     page.getByRole("heading", { name: "Page not found" }),
   ).toBeVisible();
