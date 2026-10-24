@@ -121,8 +121,8 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-07 — Validation and analysis orchestration
 
 - Stable OpenSpec change ID: `p0-07-analysis-validation`.
-- Status: **planned**; change not yet picked up.
-- Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
+- Status: **done (PR open)**; [archived change](../../openspec/changes/archive/2026-10-24-p0-07-analysis-validation/) with [verification evidence](../../openspec/changes/archive/2026-10-24-p0-07-analysis-validation/tasks.md).
+- Implementation/archive evidence: PR link added after opening.
 
 - Goal: validate evidence/category/required-field integrity and persist preliminary analysis safely.
 - Depends on: P0-06.

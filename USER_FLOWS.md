@@ -80,3 +80,23 @@ and optional reason/profile/analysis/review/plan references remain in immutable
 audit history. This API does not change the graph above or establish that a
 clinical precondition passed. Callers must enforce those checks atomically with
 the transition. Existing screens still perform no transitions.
+
+## Analysis stage (P0-07)
+
+After persisted intake completion, `analyzeCurrentDemo` loads the latest profile for
+the cookie-selected demo dataset. It reserves ANALYSIS_PENDING through the shared
+workflow API, evaluates deterministic rules and requests a bounded explanation from
+the configured provider. The completion transaction verifies the same profile,
+context and reservation before recording the result and its timeline event.
+
+- Valid preliminary proposals enter MEDICAL_REVIEW_PENDING.
+- Required gaps enter CLARIFICATION_REQUIRED without proposals.
+- Provider failures, invalid output, unsupported evidence or excluded cases enter
+  ANALYSIS_FAILED without proposals. Retry returns through ANALYSIS_PENDING.
+- An updated input or superseding reservation prevents a stale completion.
+
+`/patient/analysis` displays administrative status and the next permitted action.
+Patients do not see preliminary proposal content there. The server action never
+writes a plan or completes physician review. Shared timeline kinds distinguish
+ANALYSIS_CREATED, ANALYSIS_FAILED and CLARIFICATION_REQUESTED; the latter two still
+reference the immutable AIAnalysis version.

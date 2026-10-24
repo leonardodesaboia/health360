@@ -106,6 +106,20 @@ export const recommendationProposalSchema = z.object({
   uncertainties: z.array(z.string()),
   provenance: z.literal("AI_GENERATED"),
 });
+export const analysisFailureReasonSchema = z.enum([
+  "configuration",
+  "invalid_input",
+  "timeout",
+  "api_error",
+  "refused",
+  "invalid_output",
+  "unsupported_evidence",
+  "unsupported_scope",
+  "missing_information",
+  "out_of_scope",
+  "stale_input",
+  "unsupported_context",
+]);
 export const aiAnalysisSchema = z.object({
   id,
   version,
@@ -116,6 +130,8 @@ export const aiAnalysisSchema = z.object({
   provider: z.string(),
   model: z.string(),
   promptVersion: version,
+  promptId: z.string().min(1).optional(),
+  failureReason: analysisFailureReasonSchema.optional(),
   createdAt: timestamp,
   summary: z.string(),
   relevantInformation: z.array(z.string()),
