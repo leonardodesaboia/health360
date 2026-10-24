@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
@@ -14,6 +14,7 @@ import {
   type IntakeAnswers,
 } from "./contracts";
 import { createDraftRepository } from "./repository";
+import { startIntakeAction, submitIntakeAction } from "./actions";
 import { IntakeField } from "./intake-field";
 import { AnswerSummary } from "./answer-summary";
 
@@ -30,6 +31,7 @@ export function IntakeForm() {
   const revision = useRef(0),
     profileVersion = useRef(0);
   const submissionId = useRef<string | null>(null);
+  const intakeStarted = useRef(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const {
     control,
@@ -92,6 +94,14 @@ export function IntakeForm() {
       revision.current = saved.revision;
       setStatus("Draft saved in this browser only.");
       setError("");
+      if (!intakeStarted.current) {
+        // Administrative start transition; never blocks local drafting. A failed
+        // start is retried on the next save, and submit stays fail-closed.
+        intakeStarted.current = true;
+        void startIntakeAction().catch(() => {
+          intakeStarted.current = false;
+        });
+      }
       setStep(target);
       if (target !== step) {
         setConfirmed(false);
@@ -135,6 +145,18 @@ export function IntakeForm() {
     try {
       const repo = createDraftRepository(window.localStorage);
       submissionId.current ??= crypto.randomUUID();
+      // With a demo session this persists to its dataset and redirects to analysis.
+      const persisted = await submitIntakeAction(
+        getValues(),
+        submissionId.current,
+      );
+      if (persisted?.status !== "NO_SESSION") {
+        if (persisted?.status === "STALE")
+          setError(
+            "This intake was already submitted or changed elsewhere. Reload the page to see the latest status.",
+          );
+        return;
+      }
       const result = await repo.submit(localPatientId, {
         answers: getValues(),
         expectedRevision: revision.current,

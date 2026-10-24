@@ -242,3 +242,14 @@ completed IntakeResponse plus examinations and a new immutable HealthProfile tog
 unknown answers. No score, clinical eligibility, analysis or plan publication occurs.
 Server integration must resolve P0-02 getDemoSession and bind datasetRepository to its
 trusted datasetId; patientId alone is not a storage isolation boundary.
+
+## Intake session wiring
+
+Server-only src/server/intake/service.ts runs inside one inDatasetTransaction per call.
+startIntake moves NOT_STARTED to INTAKE_IN_PROGRESS (actor patient) and leaves later
+states unchanged. completeIntake stores examinations, the next immutable HealthProfile
+version and the IntakeResponse, together with INTAKE_IN_PROGRESS to INTAKE_COMPLETED
+(actor patient, refs.profileVersion). A stale or repeated submission rolls back every write.
+The server actions in features/health-intake/actions.ts derive the dataset only from
+getDemoSession. The first draft save starts intake. A successful submit redirects to
+/patient/analysis. Without a demo session the form keeps its browser-local synthetic flow.
