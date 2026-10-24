@@ -89,10 +89,10 @@ REASSESSMENT_PENDING. It appends only its own request event and redirects to the
 existing intake route. Opening an edit form does not invent a new profile; the
 intake producer must save the updated version and invoke analysis. A second
 review and publication are still required before a new plan becomes available.
+
 ## Physician queue and reader
 
 The physician queue and workspace read this storage after resolving the current demo session; no session yields no patient records. All reads use datasetRepository with the server-resolved dataset ID, then filter to its patient. The reader joins the exact analyzed profile and context versions, reports newer versions as stale, and never falls back to display fixtures on errors.
-
 
 
 ## Future server boundaries

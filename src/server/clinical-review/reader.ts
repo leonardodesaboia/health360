@@ -4,17 +4,22 @@ import {
   findWorkspace,
   type ReviewRecords,
 } from "../../features/clinical-review/reader";
-import { createDatabase } from "../db/client";
-import { datasetRepository } from "../db/repository";
+import { getDatabase } from "../db/client";
+import { inDatasetTransaction } from "../db/repository";
 import { getDemoSession } from "../demo/session";
 import { getWorkflowStatus } from "../workflow/state";
 
 async function readDataset() {
   const session = await getDemoSession();
   if (!session) return null;
-  const db = createDatabase();
-  try {
-    const repository = datasetRepository(db, session.datasetId);
+  const db = getDatabase();
+  return inDatasetTransaction(db, session.datasetId, async (repository, tx) => {
+    // The shared state reader takes the patient lock before any versioned record reads.
+    const workflowStatus = await getWorkflowStatus(
+      tx,
+      session.datasetId,
+      session.patientId,
+    );
     const [patients, profiles, examinations, analyses, contexts, reviews] =
       await Promise.all([
         repository.list("patient"),
@@ -24,12 +29,8 @@ async function readDataset() {
         repository.list("context"),
         repository.list("review"),
       ]);
-    const workflowStatus = await getWorkflowStatus(
-      db,
-      session.datasetId,
-      session.patientId,
-    );
     const data: ReviewRecords = {
+      contextDetails: session.clinicalContext,
       workflowStatus,
       patients,
       profiles,
@@ -39,9 +40,7 @@ async function readDataset() {
       reviews,
     };
     return { session, data };
-  } finally {
-    await db.$disconnect();
-  }
+  });
 }
 
 export async function getReviewQueue() {

@@ -4,7 +4,13 @@ import {
   Surface,
 } from "@/components/shared/primitives";
 import { formatDate } from "@/lib/format";
-import { safeEvidenceUrl, type ReviewWorkspace } from "./reader";
+import { formatExaminationDate } from "../health-intake/profile";
+import {
+  safeEvidenceUrl,
+  reviewableProposals,
+  declaredFacts,
+  type ReviewWorkspace,
+} from "./reader";
 
 const provenanceLabels = {
   PATIENT_REPORTED: "Patient-reported",
@@ -21,7 +27,10 @@ const categories = {
 };
 
 export function WorkspaceReader({ workspace }: { workspace: ReviewWorkspace }) {
-  const { profile, analysis, context, examinations, stale } = workspace;
+  const { profile, analysis, context, contextDetails, examinations, stale } =
+    workspace;
+  const proposals = reviewableProposals(analysis);
+  const facts = declaredFacts(profile);
   return (
     <>
       <Notice title="DEMONSTRATIVE — NOT CLINICALLY VALIDATED" tone="warning">
@@ -83,6 +92,24 @@ export function WorkspaceReader({ workspace }: { workspace: ReviewWorkspace }) {
                 </div>
               ))}
             </dl>
+            {facts.length > 0 && (
+              <details className="mt-4 border-t pt-4 text-sm">
+                <summary className="min-h-11 cursor-pointer content-center font-medium">
+                  View declared screening facts
+                </summary>
+                <p className="mt-3 text-muted-foreground">
+                  Patient-reported; unknown answers remain unknown.
+                </p>
+                <dl className="mt-3 space-y-3">
+                  {facts.map((fact) => (
+                    <div key={fact.id}>
+                      <dt className="text-muted-foreground">{fact.label}</dt>
+                      <dd>{fact.text}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </details>
+            )}
             <h3 className="mt-6">Previous examinations</h3>
             {examinations.length ? (
               examinations.map((exam) => (
@@ -90,9 +117,10 @@ export function WorkspaceReader({ workspace }: { workspace: ReviewWorkspace }) {
                   <p className="font-medium">{exam.name}</p>
                   <p>
                     Date:{" "}
-                    {exam.performedAt
-                      ? formatDate(exam.performedAt)
-                      : "Unknown"}
+                    {formatExaminationDate(
+                      exam.performedAt,
+                      exam.approximateDate,
+                    )}
                   </p>
                   <p>
                     Result: {exam.result.value ?? "Unknown"} · Patient-reported
@@ -156,10 +184,10 @@ export function WorkspaceReader({ workspace }: { workspace: ReviewWorkspace }) {
             <p className="mt-3 text-sm text-muted-foreground">
               Preliminary proposals, awaiting physician review.
             </p>
-            {!analysis.proposals.length && (
+            {!proposals.length && (
               <p className="mt-4 text-sm">No proposals available.</p>
             )}
-            {analysis.proposals.map((proposal) => (
+            {proposals.map((proposal) => (
               <article className="mt-6 border-t pt-6" key={proposal.id}>
                 <p className="text-xs text-muted-foreground">
                   {categories[proposal.category]} · AI-generated explanation
@@ -177,6 +205,24 @@ export function WorkspaceReader({ workspace }: { workspace: ReviewWorkspace }) {
                     items={proposal.ruleIds}
                     empty="No rule references supplied."
                   />
+                  {proposal.ruleIds.map((id) => {
+                    const rule = contextDetails?.rules.find(
+                      (item) => item.id === id,
+                    );
+                    return rule ? (
+                      <p className="mt-3" key={id}>
+                        {rule.id} · Rule v{rule.version} · Configured age range{" "}
+                        {rule.minAge}–{rule.maxAge} · Routine interval{" "}
+                        {rule.intervalYears} years. These demonstrative
+                        parameters alone do not establish eligibility; review
+                        exclusions, patient context and uncertainty.
+                      </p>
+                    ) : (
+                      <p className="mt-3" key={id}>
+                        Rule details unavailable for {id}.
+                      </p>
+                    );
+                  })}
                   <p className="mt-3 font-medium">Data considered</p>
                   <TextList
                     items={proposal.consideredData}
@@ -201,6 +247,13 @@ export function WorkspaceReader({ workspace }: { workspace: ReviewWorkspace }) {
                   )}
                   {proposal.evidenceIds.map((id) => {
                     const source = context.evidence.find((e) => e.id === id);
+                    const metadata = contextDetails?.evidence.find(
+                      (e) =>
+                        e.id === id &&
+                        e.version === source?.version &&
+                        e.sourceUrl === source?.sourceUrl &&
+                        e.title === source?.title,
+                    );
                     const url = safeEvidenceUrl(source?.sourceUrl ?? null);
                     return (
                       <div className="mt-3 space-y-2 break-words" key={id}>
@@ -210,6 +263,16 @@ export function WorkspaceReader({ workspace }: { workspace: ReviewWorkspace }) {
                             ? `Evidence v${source.version}`
                             : "Version unknown"}
                         </p>
+                        <p>
+                          {metadata
+                            ? `${metadata.issuer} · ${metadata.year}`
+                            : "Issuer and year unavailable; source metadata is unverified."}
+                        </p>
+                        {metadata?.evidenceStatus === "placeholder" && (
+                          <p>
+                            Evidence: placeholder — cannot support publication.
+                          </p>
+                        )}
                         {url ? (
                           <a
                             className="inline-flex min-h-11 items-center underline"

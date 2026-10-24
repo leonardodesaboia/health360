@@ -1,14 +1,51 @@
 import { readerFixture } from "../../../tests/fixtures/clinical-review";
 import { describe, expect, it } from "vitest";
 import { demoPatient, demoExamination } from "../patients/fixtures";
+import { intakeFactsSchema } from "../patients/contracts";
 import {
   buildQueue,
   findWorkspace,
   workspaceId,
   safeEvidenceUrl,
+  reviewableProposals,
+  declaredFacts,
 } from "./reader";
 
 describe("physician reader", () => {
+  it("distinguishes declared yes, no and unknown screening facts", () => {
+    const data = readerFixture();
+    const facts = intakeFactsSchema.parse(
+      Object.fromEntries(
+        Object.keys(intakeFactsSchema.shape).map((key) => [
+          key,
+          key === "provenance" ? "PATIENT_REPORTED" : null,
+        ]),
+      ),
+    );
+    facts.rectalBleeding = true;
+    facts.bowelChange = false;
+    const displayed = declaredFacts({
+      ...data.profiles[0],
+      intakeFacts: facts,
+    });
+    expect(displayed.find((item) => item.id === "rectalBleeding")?.text).toBe(
+      "Yes",
+    );
+    expect(displayed.find((item) => item.id === "bowelChange")?.text).toBe(
+      "No",
+    );
+    expect(displayed.find((item) => item.id === "weightLoss")?.text).toBe(
+      "Unknown",
+    );
+    expect(declaredFacts(data.profiles[0])).toEqual([]);
+  });
+  it("does not expose proposal content from a blocked analysis", () => {
+    const { analyses } = readerFixture();
+    expect(reviewableProposals(analyses[0])).toHaveLength(1);
+    expect(reviewableProposals({ ...analyses[0], status: "BLOCKED" })).toEqual(
+      [],
+    );
+  });
   it("rejects unsafe evidence links", () => {
     expect(safeEvidenceUrl("javascript:alert(1)")).toBeNull();
     expect(safeEvidenceUrl("file:///private")).toBeNull();
@@ -32,6 +69,23 @@ describe("physician reader", () => {
     expect(
       findWorkspace(data, "foreign", workspaceId(data.analyses[0])),
     ).toBeNull();
+  });
+  it("resolves a persisted review ID to its exact analysis without cross-patient disclosure", () => {
+    const data = readerFixture();
+    data.reviews.push({
+      id: "persisted-review",
+      version: 1,
+      patientId: demoPatient.id,
+      analysisId: data.analyses[0].id,
+      analysisVersion: 1,
+      reviewerId: "demo-physician",
+      completedAt: null,
+      decisions: [],
+    });
+    expect(
+      findWorkspace(data, demoPatient.id, "persisted-review")?.analysis.id,
+    ).toBe(data.analyses[0].id);
+    expect(findWorkspace(data, "foreign", "persisted-review")).toBeNull();
   });
   it("preserves exact profile, unknowns and evidence versions", () => {
     const data = readerFixture();
