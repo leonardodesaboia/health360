@@ -3,8 +3,10 @@
 ## Foundation routes
 
 `/` redirects to `/patient`. Patient navigation is Home, My plan and History; the home
-links to the read-only `/patient/intake` reference. The plan page explains why no
-plan exists; history is described there for later versioned cycles, without a dead link.
+links to the read-only `/patient/intake` reference. The plan page loads the selected
+dataset's reviewed plan or explains the current session, review, clarification or
+blocked state. It never displays preliminary proposals. Previous reviewed content
+remains identified as previous during a new cycle.
 `/doctor` lists one synthetic reference record; opening it navigates to
 `/doctor/reviews/demo-review-01`. Unrecognized IDs return 404.
 `/showcase` is the shared-component verification route, linked in the shell/footer.
@@ -12,6 +14,9 @@ plan exists; history is described there for later versioned cycles, without a de
 The demo role link changes between `/patient` and `/doctor`. It is neither login
 nor authorization. Reassessment mutations go through the server workflow service;
 navigation alone does not complete an analysis, review or publication.
+The plan page reads persisted records and never publishes on a
+page visit. The review finalization service invokes guarded plan publication inside
+the same serialized dataset transaction.
 No route reveals unreviewed proposals as patient guidance.
 
 ## Patient history
@@ -75,7 +80,12 @@ answers. Unknown is explicit and never treated as a negative answer. Save and
 continue validates the current step; Back preserves unvalidated draft answers.
 Save draft permits incomplete answers and restores the saved step after refresh.
 Storage and stale-revision failures remain visible; reloading the saved draft
-replaces unsaved form edits. This slice does not complete intake or start analysis.
+replaces unsaved form edits. P0-04 extends this journey through habits, previous screening/examinations and review.
+Review supports editing any step. Explicit confirmation saves one immutable profile
+version and completed intake atomically in the browser-local demonstrator. Repeating
+unchanged confirmation does not create another version. Stale edits fail visibly.
+The consolidated `/patient/profile` shows declared versus unknown data and structured
+version/update metadata, with no score or medical approval claim. No analysis starts.
 
 ## Persisted administrative state
 

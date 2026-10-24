@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 const routes = [
   ["/patient", "Hello, Marina"],
   ["/patient/intake", "Guided health intake"],
+  ["/patient/profile", "Clinical profile"],
   ["/patient/plan", "Preventive follow-up"],
   ["/doctor", "Review queue"],
   ["/doctor/reviews/demo-review-01", "Marina Example"],
@@ -40,7 +41,7 @@ test("patient and doctor navigation and review boundary", async ({ page }) => {
   await page.getByRole("link", { name: "My plan", exact: true }).click();
   await expect(
     page.getByRole("heading", {
-      name: "No plan available in this example",
+      name: "Select a demonstration case",
     }),
   ).toBeVisible();
   await page.getByRole("link", { name: /View as physician/ }).click();

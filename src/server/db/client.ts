@@ -10,3 +10,12 @@ export function createDatabase(connectionString = process.env.DATABASE_URL) {
     transactionOptions: { maxWait: 15000, timeout: 15000 },
   });
 }
+
+const processDatabase = globalThis as typeof globalThis & {
+  health360Database?: PrismaClient;
+};
+
+/** Lazy server-only connection pool; route renders without a cookie need no database. */
+export function getDatabase(): PrismaClient {
+  return (processDatabase.health360Database ??= createDatabase());
+}

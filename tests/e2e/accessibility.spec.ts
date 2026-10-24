@@ -7,6 +7,7 @@ test("main demo routes have no serious or critical axe violations", async ({
   for (const route of [
     "/patient",
     "/patient/intake",
+    "/patient/profile",
     "/patient/plan",
     "/doctor",
     "/doctor/reviews/demo-review-01",
