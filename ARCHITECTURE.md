@@ -287,3 +287,30 @@ version and the IntakeResponse, together with INTAKE_IN_PROGRESS to INTAKE_COMPL
 The server actions in features/health-intake/actions.ts derive the dataset only from
 getDemoSession. The first draft save starts intake. A successful submit redirects to
 /patient/analysis. Without a demo session the form keeps its browser-local synthetic flow.
+
+## Analysis orchestration (P0-07)
+
+`src/server/analysis` connects the current dataset-scoped profile to the deterministic
+screening evaluator and the shared P0-06 structured-output contract. Intake facts use
+tri-state OR for symptoms and risk histories; unknown values never become negative.
+The provider receives rule-derived facts, findings, limitations and public evidence,
+without profile/patient identifiers, unrelated history free text or examination notes.
+Only proposals matching the exact supplied category, rule and evidence set can enter
+physician review. Deterministic data and limitations remain attached to proposals.
+
+A locked dataset transaction reserves ANALYSIS_PENDING with an analysis ID and profile
+version. The provider runs outside the transaction. A second locked transaction checks
+profile/context freshness and reservation ownership before atomically appending the
+immutable analysis, nested proposals, timeline event and legal workflow transition.
+Successful requests reuse the existing profile/context result. Failed attempts preserve
+history and can retry; stale or superseded calls cannot complete another attempt.
+Optional AIAnalysis `promptId` and bounded `failureReason` fields extend historical JSON
+records without a SQL migration. No raw provider errors, prompts or private reasoning
+are retained. Unknown required information routes to CLARIFICATION_REQUIRED; failed,
+out-of-scope or unsupported results contain no proposals and go to ANALYSIS_FAILED.
+
+The cookie-bound `analyzeCurrentDemo` server action accepts no client-selected record
+scope. `/patient/analysis` reads administrative status only and offers analysis/retry
+when allowed; it never reads or renders preliminary proposals. Missing sessions and
+storage errors have explicit states. This service writes no MedicalReview or
+PreventivePlan. Physician review and explicit finalization remain mandatory.
