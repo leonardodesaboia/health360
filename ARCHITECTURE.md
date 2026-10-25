@@ -333,3 +333,7 @@ Server-only `runAnalysisForSession(db, session)` in `src/server/analysis/run.ts`
 for other server code (for example clarification re-runs from CLARIFICATION_REQUIRED or
 reassessment) and is not a server action; callers must pass a session resolved by
 getDemoSession. The cookie-bound `analyzeCurrentDemo` action delegates to it.
+Optional `beforeClaim(repo, tx, status)` runs inside the claim transaction after the
+workflow lock is held and a claim is legal, before the latest profile is read. A caller
+such as clarification can append profile vN+1 atomically with the ANALYSIS_PENDING
+transition; a thrown error rolls back both. It is never called when a claim is illegal.
