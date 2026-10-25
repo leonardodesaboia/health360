@@ -50,7 +50,7 @@ const test = base.extend<{
   reviewCase: [
     async ({ baseURL }, provideReviewCase) => {
       if (!baseURL) throw new Error("A loopback e2e baseURL is required");
-      await provideSeededCase("seed", provideReviewCase);
+      await provideSeededCase("seed-real", provideReviewCase);
     },
     { timeout: 60000 },
   ],
@@ -62,9 +62,12 @@ const test = base.extend<{
     { timeout: 60000 },
   ],
   staleCase: [
-    async ({ reviewCase }, provideReviewCase) => {
-      fixture("stale-profile", reviewCase.token);
-      await provideReviewCase(reviewCase);
+    async ({ baseURL }, provideReviewCase) => {
+      if (!baseURL) throw new Error("A loopback e2e baseURL is required");
+      await provideSeededCase("seed", async (reviewCase) => {
+        fixture("stale-profile", reviewCase.token);
+        await provideReviewCase(reviewCase);
+      });
     },
     { timeout: 60000 },
   ],
@@ -82,6 +85,7 @@ test("physician reads stored time, exact versions, unknown facts and evidence wi
   baseURL,
   reviewCase,
 }, testInfo) => {
+  const reader = page.getByRole("main");
   await page.context().addCookies([
     {
       name: reviewCase.cookieName,
@@ -93,52 +97,56 @@ test("physician reads stored time, exact versions, unknown facts and evidence wi
   ]);
   await page.goto("/doctor");
   await expect(
-    page
+    reader
       .getByText(reviewCase.patientName, { exact: true })
       .filter({ visible: true }),
   ).toBeVisible();
   await expect(
-    page
+    reader
       .locator(`time[datetime="${reviewCase.analysisTime}"]`)
       .filter({ visible: true }),
   ).toBeVisible();
-  await page
+  await reader
     .getByRole("link", { name: "Open review", exact: true })
     .filter({ visible: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Patient context", exact: true }),
+    reader.getByRole("heading", { name: "Patient context", exact: true }),
   ).toBeVisible();
   await expect(
-    page
+    reader
       .getByRole("listitem")
       .filter({ hasText: /^Unknown/ })
       .first(),
   ).toBeVisible();
   await expect(
-    page.getByText(
+    reader.getByText(
       "This is a synthetic reader fixture; no live AI analysis was performed.",
     ),
   ).toBeVisible();
-  const rationale = page.getByText("View rationale and criteria", {
+  const rationale = reader.getByText("View rationale and criteria", {
     exact: true,
   });
   await rationale.focus();
   await page.keyboard.press("Enter");
   await expect(
-    page.getByText(
+    reader.getByText(
       "Synthetic rendering fixture only; physician review is required.",
     ),
   ).toBeVisible();
-  const evidence = page.getByText("View evidence and sources", { exact: true });
+  const evidence = reader.getByText("View evidence and sources", {
+    exact: true,
+  });
   await evidence.focus();
   await page.keyboard.press("Enter");
   await expect(
-    page.getByRole("link", { name: "Open source: uspstf-crc-2021" }),
+    reader.getByRole("link", { name: "Open source: uspstf-crc-2021" }),
   ).toHaveAttribute("href", /uspreventiveservicestaskforce\.org/);
-  await expect(page.getByText(/Evidence v1/)).toBeVisible();
+  await expect(reader.getByText(/Evidence v1/)).toBeVisible();
   await expect(
-    page.getByText("US Preventive Services Task Force · 2021", { exact: true }),
+    reader.getByText("US Preventive Services Task Force · 2021", {
+      exact: true,
+    }),
   ).toBeVisible();
   expect(
     await page.evaluate(
@@ -151,7 +159,7 @@ test("physician reads stored time, exact versions, unknown facts and evidence wi
   });
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: reviewCase.patientName, exact: true }),
+    reader.getByRole("heading", { name: reviewCase.patientName, exact: true }),
   ).toBeVisible();
 });
 

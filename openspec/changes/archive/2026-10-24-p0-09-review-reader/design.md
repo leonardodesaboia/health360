@@ -1,6 +1,6 @@
 ## Context
 
-Shared patient contracts and datasetRepository are authoritative. getDemoSession supplies datasetId, caseId and patientId; a demo session scopes synthetic records and is not real physician authentication. Analysis producers remain in flight; contract-parsed fixtures are tests only.
+Shared patient contracts and datasetRepository are authoritative. getDemoSession supplies datasetId, caseId and patientId; a demo session scopes synthetic records and is not real physician authentication. The landed P0-07 producer drives the positive browser test through its real evaluator, validation and persistence service with MockProvider; direct contract fixtures remain test-only negative controls.
 
 ## Goals / Non-Goals
 
