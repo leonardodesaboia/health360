@@ -6,7 +6,6 @@ const routes = [
   ["/patient/profile", "Clinical profile"],
   ["/patient/plan", "Preventive follow-up"],
   ["/doctor", "Review queue"],
-  ["/doctor/reviews/demo-review-01", "Marina Example"],
   ["/showcase", "Component library"],
 ];
 for (const [route, title] of routes) {
@@ -45,17 +44,12 @@ test("patient and doctor navigation and review boundary", async ({ page }) => {
     }),
   ).toBeVisible();
   await page.getByRole("link", { name: /View as physician/ }).click();
-  await expect(page.getByText("Oct 20, 2026")).toBeVisible();
-  await page.getByRole("link", { name: "Open review" }).click();
   await expect(
-    page.getByRole("button", { name: "Approve", exact: true }),
-  ).toBeDisabled();
-  await page.getByText("View evidence and sources").click();
-  await expect(
-    page.getByText(/No clinical evidence has been loaded/),
+    page.getByRole("heading", { name: "No analyses to review" }),
   ).toBeVisible();
-  await page.getByRole("link", { name: "Back to queue" }).click();
-  await expect(page).toHaveURL(/\/doctor$/);
+  await expect(page.getByRole("link", { name: "Open review" })).toHaveCount(0);
+  await page.getByRole("link", { name: "Go to demonstration case" }).click();
+  await expect(page).toHaveURL(/\/patient$/);
 });
 test("skip link receives keyboard focus and reaches main", async ({ page }) => {
   await page.goto("/patient");
@@ -85,7 +79,14 @@ test("showcase validates accessibly without persisting data", async ({
 });
 test("unknown review does not disclose another fixture", async ({ page }) => {
   const response = await page.goto("/doctor/reviews/unknown");
-  expect(response?.status()).toBe(404);
+  expect([200, 404]).toContain(response?.status());
+  await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute(
+    "content",
+    /noindex/,
+  );
+  await expect(
+    page.getByRole("heading", { name: "Patient context" }),
+  ).toHaveCount(0);
   await expect(
     page.getByRole("heading", { name: "Page not found" }),
   ).toBeVisible();

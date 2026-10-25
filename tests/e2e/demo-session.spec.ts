@@ -22,7 +22,7 @@ test("shows the select-a-case entry state without a session", async ({
       0,
     );
     await expect(
-      page.getByText(/DEMONSTRATIVE — NOT CLINICALLY VALIDATED/),
+      page.getByText(/DEMONSTRATIVE — NOT CLINICALLY VALIDATED/).first(),
     ).toBeVisible();
   }
 });

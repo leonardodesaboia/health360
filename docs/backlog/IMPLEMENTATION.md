@@ -149,8 +149,8 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-09 — Persisted physician queue and proposal reader
 
 - Stable OpenSpec change ID: `p0-09-review-reader`.
-- Status: **planned**; change not yet picked up.
-- Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
+- Status: **done**; [archive](../../openspec/changes/archive/2026-10-24-p0-09-review-reader/).
+- Verification: [390 unit tests, 58 PostgreSQL integration tests, 64 e2e tests, format and strict validation](../../openspec/changes/archive/2026-10-24-p0-09-review-reader/tasks.md). [PR #21](https://github.com/leonardodesaboia/health360/pull/21).
 
 - Goal: replace the static queue/workspace data with current versioned synthetic analyses.
 - Depends on: P0-07, P0-08.
