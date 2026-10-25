@@ -9,8 +9,8 @@ Synthetic data only. **DEMONSTRATIVE — NOT CLINICALLY VALIDATED**.
 
 Implemented describes landed code, not a complete MVP or an archived change.
 Some merged slices retain active OpenSpec checklists. P0-10 remains in progress
-outside main with no provider PR listed at this snapshot. P0-14 is reported as
-starting; its change and suite are not on main.
+outside main with no provider PR listed at this snapshot. P0-14 part 1 is in
+progress; its change and suite are not on main.
 
 | Item                         | State on main                                                 | PRs and remaining boundary                                                                                                                                                                   |
 | ---------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -27,7 +27,7 @@ starting; its change and suite are not on main.
 | P0-11 Reviewed plan          | Guarded publisher/reader implemented; integration in progress | [#11](https://github.com/leonardodesaboia/health360/pull/11); P0-10 must call publication atomically                                                                                         |
 | P0-12 Clarification          | Patient loop implemented; physician-origin requests pending   | [#24](https://github.com/leonardodesaboia/health360/pull/24), [#26](https://github.com/leonardodesaboia/health360/pull/26): bounded questions, profile vN+1, reanalysis; CLARIFY needs P0-10 |
 | P0-13 History/reassessment   | History/restart implemented; full second cycle in progress    | [#14](https://github.com/leonardodesaboia/health360/pull/14), [#25](https://github.com/leonardodesaboia/health360/pull/25) now merged; second finalized plan needs remaining producers       |
-| P0-14 Demo/acceptance        | Starting; not on main                                         | Complete A–E suite, presenter script and rehearsal outstanding                                                                                                                               |
+| P0-14 Demo/acceptance        | Part 1 in progress; not on main                               | Complete A–E suite, presenter script and rehearsal outstanding                                                                                                                               |
 
 Shared infrastructure: [#12 workflow API](https://github.com/leonardodesaboia/health360/pull/12),
 [#13 timeline kinds](https://github.com/leonardodesaboia/health360/pull/13),
