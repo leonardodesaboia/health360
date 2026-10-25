@@ -8,31 +8,27 @@ import { readPatientPlan } from "../preventive-plan/reader";
 import { getWorkflowStatus } from "../workflow/state";
 
 export async function loadPatientHistory() {
-  try {
-    const session = await getDemoSession();
-    if (session) {
-      const db = createDatabase();
-      try {
-        return await inDatasetTransaction(
-          db,
-          session.datasetId,
-          async (repo, tx) =>
-            readPatientHistory(
-              repo,
+  const session = await getDemoSession().catch(() => null);
+  if (session) {
+    const db = createDatabase();
+    try {
+      return await inDatasetTransaction(
+        db,
+        session.datasetId,
+        async (repo, tx) =>
+          readPatientHistory(
+            repo,
+            session.patientId,
+            await getWorkflowStatus(
+              tx,
+              session.datasetId,
               session.patientId,
-              await getWorkflowStatus(
-                tx,
-                session.datasetId,
-                session.patientId,
-              ),
             ),
-        );
-      } finally {
-        await db.$disconnect();
-      }
+          ),
+      );
+    } finally {
+      await db.$disconnect();
     }
-  } catch {
-    // Fall back to local scenario state when PostgreSQL is offline.
   }
 
   const local = await getActiveLocalFallback();
@@ -56,32 +52,28 @@ export async function loadPatientHistory() {
 }
 
 export async function loadHistoricalPlan(planId: string) {
-  try {
-    const session = await getDemoSession();
-    if (session) {
-      const db = createDatabase();
-      try {
-        return await inDatasetTransaction(
-          db,
-          session.datasetId,
-          async (repo, tx) =>
-            readPatientPlan(
-              repo,
+  const session = await getDemoSession().catch(() => null);
+  if (session) {
+    const db = createDatabase();
+    try {
+      return await inDatasetTransaction(
+        db,
+        session.datasetId,
+        async (repo, tx) =>
+          readPatientPlan(
+            repo,
+            session.patientId,
+            await getWorkflowStatus(
+              tx,
+              session.datasetId,
               session.patientId,
-              await getWorkflowStatus(
-                tx,
-                session.datasetId,
-                session.patientId,
-              ),
-              planId,
             ),
-        );
-      } finally {
-        await db.$disconnect();
-      }
+            planId,
+          ),
+      );
+    } finally {
+      await db.$disconnect();
     }
-  } catch {
-    // Fall back to local scenario state when PostgreSQL is offline.
   }
 
   const local = await getActiveLocalFallback();

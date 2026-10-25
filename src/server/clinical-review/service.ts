@@ -330,11 +330,15 @@ export async function buildFallbackScenarioState(
 }
 
 export async function getActiveLocalFallback(): Promise<LocalFallbackRecord | null> {
-  const cookieStore = await cookies();
-  const raw = cookieStore.get(LOCAL_DEMO_COOKIE)?.value;
-  const parsed = demoCaseIdSchema.safeParse(raw);
-  if (!parsed.success) return null;
-  return buildFallbackScenarioState(parsed.data);
+  try {
+    const cookieStore = await cookies();
+    const raw = cookieStore.get(LOCAL_DEMO_COOKIE)?.value;
+    const parsed = demoCaseIdSchema.safeParse(raw);
+    if (!parsed.success) return null;
+    return buildFallbackScenarioState(parsed.data);
+  } catch {
+    return null;
+  }
 }
 
 export async function startLocalFallbackReassessment(
