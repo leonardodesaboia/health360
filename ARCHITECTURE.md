@@ -315,3 +315,15 @@ scope. `/patient/analysis` reads administrative status only and offers analysis/
 when allowed; it never reads or renders preliminary proposals. Missing sessions and
 storage errors have explicit states. This service writes no MedicalReview or
 PreventivePlan. Physician review and explicit finalization remain mandatory.
+
+## Do Not Test proposal traceability (P0-08)
+
+Each validated proposal carries optional `ruleReferences` (rule ID, rule version, evidence
+version, demonstrative validation and deterministic rationale). `prepareAnalysis` stamps
+them from the matching evaluator finding; the strict model output schema cannot supply
+them. The repeat-screening case (age 60, normal complete adequately prepared colonoscopy
+within ten years) yields a preliminary POSSIBLE_REDUNDANCY proposal with the examination
+data and the limitation that a recent test alone does not establish redundancy. An
+unknown date routes to clarification; an examination at or beyond the interval, or one
+that is abnormal, incomplete or inadequately prepared, never yields redundancy. The
+proposal stays out of patient reads until a finalized physician review publishes a plan.

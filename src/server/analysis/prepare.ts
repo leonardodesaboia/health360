@@ -133,6 +133,19 @@ export async function prepareAnalysis(
           ...new Set([...rules.limitations, ...proposal.uncertainties]),
         ],
         provenance: "AI_GENERATED",
+        ruleReferences: rules.findings
+          .filter(
+            (finding) =>
+              finding.category === proposal.category &&
+              proposal.ruleIds.includes(finding.ruleId),
+          )
+          .map((finding) => ({
+            ruleId: finding.ruleId,
+            ruleVersion: finding.ruleVersion,
+            evidenceVersion: finding.evidenceVersion,
+            validation: "demonstrative" as const,
+            rationale: finding.rationale,
+          })),
       })),
       status: "PRELIMINARY",
     };

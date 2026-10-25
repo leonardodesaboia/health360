@@ -64,7 +64,8 @@ status string or UI click as proof of completed analysis/review.
 First evaluation: intake → versioned profile → validated analysis → physician
 review → reviewed plan. Do Not Test: prior examination → restricted deterministic
 check → contextual explanation → physician decision → plan; recent does not mean
-unnecessary. Clarification returns through profile update and analysis. Reassessment
+unnecessary. The preliminary possible-redundancy proposal (rule ID/version, considered
+examination data, limits, evidence) exists through the review queue stage (P0-08). Clarification returns through profile update and analysis. Reassessment
 creates new versions and preserves earlier cycles. AI failure blocks analysis and
 publication until a safe retry succeeds.
 

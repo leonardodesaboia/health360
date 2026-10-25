@@ -135,7 +135,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-08 — Do Not Test slice
 
 - Stable OpenSpec change ID: `p0-08-do-not-test`.
-- Status: **planned**; change not yet picked up.
+- Status: **done (PR open)**; [archived change](../../openspec/changes/archive/2026-10-25-p0-08-do-not-test/) with [verification evidence](../../openspec/changes/archive/2026-10-25-p0-08-do-not-test/tasks.md).
 - Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
 
 - Goal: contextualize possible redundancy from an agent-authored demonstrative deterministic rule under ADR0003.
