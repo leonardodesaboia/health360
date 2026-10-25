@@ -86,15 +86,29 @@ export function AnalysisStatus({
           ) : null}
         </div>
         <div className="mt-6 flex flex-wrap gap-3">
+          {status === "CLARIFICATION_REQUIRED" ? (
+            <Button asChild>
+              <Link href="/patient/clarification">
+                Answer missing information
+              </Link>
+            </Button>
+          ) : null}
           {canAnalyze ? (
             <form action={analyzeAction}>
               <AnalyzeButton retry={status === "ANALYSIS_FAILED"} />
             </form>
           ) : null}
           {status === "ANALYSIS_PENDING" ? (
-            <Button asChild variant="outline">
-              <Link href="/patient/analysis">Refresh status</Link>
-            </Button>
+            <>
+              <Button asChild variant="outline">
+                <Link href="/patient/analysis">Refresh status</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/patient/clarification">
+                  Continue saved analysis
+                </Link>
+              </Button>
+            </>
           ) : null}
           {isReview ||
           status === "MEDICAL_REVIEW_COMPLETED" ||

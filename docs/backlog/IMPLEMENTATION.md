@@ -191,8 +191,8 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-12 — Deterministic clarification loop
 
 - Stable OpenSpec change ID: `p0-12-clarification`.
-- Status: **planned**; change not yet picked up.
-- Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
+- Status: **implemented; PR pending**; [archive](../../openspec/changes/archive/2026-10-25-p0-12-clarification/).
+- Implementation evidence: [verification](../../openspec/changes/archive/2026-10-25-p0-12-clarification/tasks.md): verify passes (407 unit tests), 74 PostgreSQL integration tests, 74 desktop/mobile e2e tests on port 3250, formatting and strict specs pass. Typed physician-origin requests remain explicitly unavailable until P0-10 supplies a reader, as agreed.
 
 - Goal: collect application-selected missing fields without a chatbot.
 - Depends on: P0-07, P0-10.
