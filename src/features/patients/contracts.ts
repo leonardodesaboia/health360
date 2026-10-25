@@ -105,6 +105,19 @@ export const recommendationProposalSchema = z.object({
   consideredData: z.array(z.string()),
   uncertainties: z.array(z.string()),
   provenance: z.literal("AI_GENERATED"),
+  // Server-stamped from deterministic rule findings, never from model output.
+  ruleReferences: z
+    .array(
+      z.object({
+        ruleId: id,
+        ruleVersion: version,
+        evidenceVersion: version,
+        validation: z.literal("demonstrative"),
+        rationale: z.string().min(1),
+      }),
+    )
+    .min(1)
+    .optional(),
 });
 export const analysisFailureReasonSchema = z.enum([
   "configuration",
