@@ -1,14 +1,20 @@
 import "dotenv/config";
 import { randomUUID } from "node:crypto";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it, vi } from "vitest";
 import { initialAnswers } from "../../src/features/health-intake/contracts";
+import { buildCompletedIntake } from "../../src/features/health-intake/profile";
 import { recommendationProposalSchema } from "../../src/features/patients/contracts";
 import { analyze } from "../../src/server/ai/analyze";
 import { MockProvider } from "../../src/server/ai/provider/mock";
 import type { AnalysisInput } from "../../src/server/ai/schemas/analysis";
+import { runAnalysisForSession } from "../../src/server/analysis/run";
+import type { ClaimHook } from "../../src/server/analysis/service";
 import { analyzeSession } from "../../src/server/analysis/service";
 import { createDatabase } from "../../src/server/db/client";
-import { datasetRepository } from "../../src/server/db/repository";
+import {
+  datasetRepository,
+  inDatasetTransaction,
+} from "../../src/server/db/repository";
 import { replaceDemoDataset } from "../../src/server/demo/store";
 import { completeIntake, startIntake } from "../../src/server/intake/service";
 import { readPatientPlan } from "../../src/server/preventive-plan/reader";
@@ -143,5 +149,146 @@ describe("Do Not Test flow through the proposal stage", () => {
         where: { datasetId: session.datasetId },
       }),
     ).toBe(0);
+  });
+
+  it("re-runs from CLARIFICATION_REQUIRED through runAnalysisForSession after a new profile version", async () => {
+    process.env.LLM_PROVIDER = "mock";
+    const session = await completedRepeatScreening({
+      ...jordan,
+      examDatePrecision: null,
+      examDate: null,
+    });
+    expect(await runAnalysisForSession(db, session)).toMatchObject({
+      workflowStatus: "CLARIFICATION_REQUIRED",
+    });
+    // Simulate the clarification answer: the next immutable profile version with the date.
+    await inDatasetTransaction(db, session.datasetId, async (repo) => {
+      const versions = (await repo.list("profile"))
+        .filter((profile) => profile.patientId === patientId)
+        .map((profile) => profile.version);
+      const completed = buildCompletedIntake(
+        patientId,
+        jordan,
+        Math.max(...versions) + 1,
+        randomUUID(),
+        new Date().toISOString(),
+      );
+      for (const exam of completed.examinations)
+        await repo.append("examination", exam);
+      await repo.append("profile", completed.profile);
+    });
+    expect(await runAnalysisForSession(db, session)).toMatchObject({
+      status: "RECORDED",
+      workflowStatus: "MEDICAL_REVIEW_PENDING",
+    });
+    const analyses = await datasetRepository(db, session.datasetId).list(
+      "analysis",
+    );
+    expect(analyses.map((analysis) => analysis.status)).toEqual(
+      expect.arrayContaining(["BLOCKED", "PRELIMINARY"]),
+    );
+    const latest = analyses.find(
+      (analysis) => analysis.status === "PRELIMINARY",
+    );
+    expect(latest?.proposals.map((proposal) => proposal.category)).toEqual([
+      "POSSIBLE_REDUNDANCY",
+    ]);
+  });
+
+  // Clarification-style hook: append the answered profile version inside the claim transaction.
+  const appendAnsweredProfile =
+    (seen: string[] = []): ClaimHook =>
+    async (repo, _tx, status) => {
+      seen.push(status);
+      const versions = (await repo.list("profile"))
+        .filter((profile) => profile.patientId === patientId)
+        .map((profile) => profile.version);
+      const completed = buildCompletedIntake(
+        patientId,
+        jordan,
+        Math.max(...versions) + 1,
+        randomUUID(),
+        new Date().toISOString(),
+      );
+      for (const exam of completed.examinations)
+        await repo.append("examination", exam);
+      await repo.append("profile", completed.profile);
+    };
+  const unknownDateSession = async () => {
+    process.env.LLM_PROVIDER = "mock";
+    const session = await completedRepeatScreening({
+      ...jordan,
+      examDatePrecision: null,
+      examDate: null,
+    });
+    expect(await runAnalysisForSession(db, session)).toMatchObject({
+      workflowStatus: "CLARIFICATION_REQUIRED",
+    });
+    return session;
+  };
+  const profileVersions = async (datasetId: string) =>
+    (await datasetRepository(db, datasetId).list("profile"))
+      .map((profile) => profile.version)
+      .sort();
+
+  it("atomically appends the answered profile and claims from CLARIFICATION_REQUIRED via beforeClaim", async () => {
+    const session = await unknownDateSession();
+    const before = await profileVersions(session.datasetId);
+    const seen: string[] = [];
+    expect(
+      await runAnalysisForSession(db, session, {
+        beforeClaim: appendAnsweredProfile(seen),
+      }),
+    ).toMatchObject({
+      status: "RECORDED",
+      workflowStatus: "MEDICAL_REVIEW_PENDING",
+    });
+    expect(seen).toEqual(["CLARIFICATION_REQUIRED"]);
+    const after = await profileVersions(session.datasetId);
+    expect(after).toHaveLength(before.length + 1);
+    const state = await workflow.getWorkflowState(
+      db,
+      session.datasetId,
+      patientId,
+    );
+    expect(state.status).toBe("MEDICAL_REVIEW_PENDING");
+    const analyses = await datasetRepository(db, session.datasetId).list(
+      "analysis",
+    );
+    const preliminary = analyses.find((a) => a.status === "PRELIMINARY");
+    expect(preliminary?.profileVersion).toBe(Math.max(...after));
+    expect(preliminary?.proposals.map((p) => p.category)).toEqual([
+      "POSSIBLE_REDUNDANCY",
+    ]);
+  });
+
+  it("rolls back the appended profile and claim when the hook fails", async () => {
+    const session = await unknownDateSession();
+    const before = await profileVersions(session.datasetId);
+    const append = appendAnsweredProfile();
+    await expect(
+      runAnalysisForSession(db, session, {
+        beforeClaim: async (repo, tx, status) => {
+          await append(repo, tx, status);
+          throw new Error("synthetic clarification failure");
+        },
+      }),
+    ).rejects.toThrow("synthetic clarification failure");
+    expect(await profileVersions(session.datasetId)).toEqual(before);
+    expect(
+      (await workflow.getWorkflowState(db, session.datasetId, patientId))
+        .status,
+    ).toBe("CLARIFICATION_REQUIRED");
+  });
+
+  it("never runs the hook when a claim is not legal", async () => {
+    const session = await completedRepeatScreening(jordan);
+    process.env.LLM_PROVIDER = "mock";
+    await runAnalysisForSession(db, session);
+    const hook = vi.fn<ClaimHook>(async () => {});
+    expect(
+      await runAnalysisForSession(db, session, { beforeClaim: hook }),
+    ).toEqual({ status: "NOT_READY" });
+    expect(hook).not.toHaveBeenCalled();
   });
 });

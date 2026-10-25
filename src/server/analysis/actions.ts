@@ -6,11 +6,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getDemoSession } from "../demo/session";
 import { getDatabase } from "../db/client";
-import { analyze } from "../ai/analyze";
-import { configuredProvider } from "../ai/provider/config";
-import { promptMetadata } from "../ai/prompts/analysis-v1";
-import * as workflow from "../workflow/state";
-import { analyzeSession, type AnalysisServiceResult } from "./service";
+import { runAnalysisForSession } from "./run";
+import type { AnalysisServiceResult } from "./service";
 
 export type AnalyzeActionResult =
   AnalysisServiceResult | { status: "NO_SESSION" | "UNAVAILABLE" };
@@ -21,19 +18,7 @@ export async function analyzeCurrentDemo(): Promise<AnalyzeActionResult> {
     const session = await getDemoSession();
     if (!session) return { status: "NO_SESSION" };
     const db = getDatabase();
-    const config = configuredProvider(process.env);
-    const result = await analyzeSession(db, session, {
-      workflow,
-      audit: {
-        provider: config?.provider.id ?? "unconfigured",
-        model: config?.provider.model ?? "unconfigured",
-        promptVersion: promptMetadata.promptVersion,
-        promptId: promptMetadata.promptId,
-      },
-      explain: config
-        ? (input) => analyze(input, config.provider, config.timeoutMs)
-        : async () => ({ status: "BLOCKED", reason: "configuration" }),
-    });
+    const result = await runAnalysisForSession(db, session);
     for (const path of [
       "/patient/analysis",
       "/patient",

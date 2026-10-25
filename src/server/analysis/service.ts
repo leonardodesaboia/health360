@@ -7,16 +7,19 @@ import {
   type ClinicalContext,
 } from "../../features/patients/contracts";
 import { DEMONSTRATIVE_LABEL } from "../clinical-rules/contracts";
-import type { PrismaClient } from "../../generated/prisma/client";
+import type { Prisma, PrismaClient } from "../../generated/prisma/client";
 import type {
   AIAnalysis,
   HealthProfile,
   PreviousExamination,
 } from "../../features/patients/contracts";
-import { canTransition } from "../../features/workflow/workflow";
+import {
+  canTransition,
+  type WorkflowStatus,
+} from "../../features/workflow/workflow";
 import type { DemoSession } from "../demo/contracts";
 import type * as Workflow from "../workflow/state";
-import { inDatasetTransaction } from "../db/repository";
+import { inDatasetTransaction, type DatasetRepository } from "../db/repository";
 import { loadClinicalContext } from "../clinical-rules/context";
 import { mapIntakeFacts } from "./facts";
 import {
@@ -34,8 +37,19 @@ export type AnalysisServiceResult =
     }
   | { status: "EXISTING"; analysisId: string }
   | { status: "BUSY" | "STALE" | "NOT_READY" };
+/**
+ * Runs inside the claim transaction after the workflow lock is held and a claim is
+ * legal, before the latest profile is read. Throwing rolls back every write, so a
+ * caller can append a new profile version atomically with ANALYSIS_PENDING.
+ */
+export type ClaimHook = (
+  repo: DatasetRepository,
+  tx: Prisma.TransactionClient,
+  status: WorkflowStatus,
+) => Promise<void>;
 export type AnalysisDependencies = {
   workflow: Pick<typeof Workflow, "getWorkflowStatus" | "transitionWorkflow">;
+  beforeClaim?: ClaimHook;
   explain: Explanation;
   audit: Pick<
     AnalysisIdentity,
@@ -88,6 +102,15 @@ export async function analyzeSession(
     datasetId,
     async (repo, tx) => {
       const status = await workflow.getWorkflowStatus(tx, datasetId, patientId);
+      if (deps.beforeClaim) {
+        if (!canTransition(status, "ANALYSIS_PENDING"))
+          return {
+            result: {
+              status: status === "ANALYSIS_PENDING" ? "BUSY" : "NOT_READY",
+            },
+          };
+        await deps.beforeClaim(repo, tx, status);
+      }
       const profile = latest(
         (await repo.list("profile")).filter(
           (record) => record.patientId === patientId,
