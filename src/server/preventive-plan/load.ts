@@ -18,11 +18,7 @@ export async function loadPatientPlan() {
           readPatientPlan(
             repo,
             session.patientId,
-            await getWorkflowStatus(
-              tx,
-              session.datasetId,
-              session.patientId,
-            ),
+            await getWorkflowStatus(tx, session.datasetId, session.patientId),
           ),
       );
     } finally {

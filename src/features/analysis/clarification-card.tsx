@@ -96,8 +96,8 @@ export function ClarificationCard() {
             onClick={handleKeepUnknown}
             disabled={isPending}
           >
-            <CircleHelp aria-hidden="true" className="size-4" />
-            I don&apos;t know (Keep unknown)
+            <CircleHelp aria-hidden="true" className="size-4" />I don&apos;t
+            know (Keep unknown)
           </Button>
         </div>
 

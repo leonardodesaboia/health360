@@ -83,7 +83,12 @@ export async function prepareScenarioAnalysisForReviewAction(
     path: "/",
   });
   const local = await buildFallbackScenarioState(targetCase);
-  for (const path of ["/doctor", "/patient", "/patient/plan", "/patient/history"]) {
+  for (const path of [
+    "/doctor",
+    "/patient",
+    "/patient/plan",
+    "/patient/history",
+  ]) {
     revalidatePath(path);
   }
   return { ok: true, analysisId: local.analysis.id };
@@ -143,7 +148,12 @@ export async function submitMedicalReviewAction(
       path: "/",
     });
     const result = await recordLocalFallbackReview(caseId, rawInput);
-    for (const path of ["/doctor", "/patient", "/patient/plan", "/patient/history"]) {
+    for (const path of [
+      "/doctor",
+      "/patient",
+      "/patient/plan",
+      "/patient/history",
+    ]) {
       revalidatePath(path);
     }
     return result;

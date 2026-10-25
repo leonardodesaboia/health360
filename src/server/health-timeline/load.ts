@@ -19,11 +19,7 @@ export async function loadPatientHistory() {
           readPatientHistory(
             repo,
             session.patientId,
-            await getWorkflowStatus(
-              tx,
-              session.datasetId,
-              session.patientId,
-            ),
+            await getWorkflowStatus(tx, session.datasetId, session.patientId),
           ),
       );
     } finally {
@@ -33,8 +29,7 @@ export async function loadPatientHistory() {
 
   const local = await getActiveLocalFallback();
   if (!local) return null;
-  const plansHistory =
-    local.plansHistory ?? (local.plan ? [local.plan] : []);
+  const plansHistory = local.plansHistory ?? (local.plan ? [local.plan] : []);
   const eventsHistory = local.eventsHistory ?? [];
   return {
     status: local.status,
@@ -63,11 +58,7 @@ export async function loadHistoricalPlan(planId: string) {
           readPatientPlan(
             repo,
             session.patientId,
-            await getWorkflowStatus(
-              tx,
-              session.datasetId,
-              session.patientId,
-            ),
+            await getWorkflowStatus(tx, session.datasetId, session.patientId),
             planId,
           ),
       );
@@ -78,8 +69,7 @@ export async function loadHistoricalPlan(planId: string) {
 
   const local = await getActiveLocalFallback();
   if (!local) return null;
-  const plansHistory =
-    local.plansHistory ?? (local.plan ? [local.plan] : []);
+  const plansHistory = local.plansHistory ?? (local.plan ? [local.plan] : []);
   const plan = plansHistory.find((p) => p.id === planId) ?? null;
   if (!plan) return null;
   return {

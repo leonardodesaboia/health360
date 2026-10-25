@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { ArrowUpRight, ClipboardCheck, ShieldCheck } from "lucide-react";
 import { ContentContainer, PageHeader } from "@/components/layout/page";
-import { Notice, StatusIndicator, Surface } from "@/components/shared/primitives";
+import {
+  Notice,
+  StatusIndicator,
+  Surface,
+} from "@/components/shared/primitives";
 import { Button } from "@/components/ui/button";
 import { PrepareAnalysisButton } from "@/features/clinical-review/prepare-analysis-button";
 import { demoPatient, demoReview } from "@/features/patients/fixtures";
@@ -56,9 +60,8 @@ export default async function Queue() {
                 )}
               </div>
               <p className="mt-1 text-xs text-muted-foreground tabular-nums">
-                Scenario: {state.caseId} · Age{" "}
-                {state.profile.age ?? "unknown"} · Profile v
-                {state.profile.version}
+                Scenario: {state.caseId} · Age {state.profile.age ?? "unknown"}{" "}
+                · Profile v{state.profile.version}
                 {state.latestAnalysis
                   ? ` · Analysis v${state.latestAnalysis.version}`
                   : ""}

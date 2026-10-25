@@ -129,10 +129,7 @@ export function ReviewWorkspace({
       status === "MEDICAL_REVIEW_IN_PROGRESS");
 
   const missingItems = [
-    ...new Set([
-      ...profile.missingInformation,
-      ...analysis.missingInformation,
-    ]),
+    ...new Set([...profile.missingInformation, ...analysis.missingInformation]),
   ];
 
   const facts = profile.intakeFacts;
@@ -187,8 +184,7 @@ export function ReviewWorkspace({
             proposalId: proposal.id,
             decision: state.decision,
             reason: state.reason,
-            revisedText:
-              state.decision === "MODIFY" ? state.revisedText : null,
+            revisedText: state.decision === "MODIFY" ? state.revisedText : null,
           };
         }),
       };
@@ -217,7 +213,10 @@ export function ReviewWorkspace({
           className="flex flex-wrap items-center justify-between gap-4 rounded-lg border bg-success p-5 text-success-foreground"
         >
           <div className="flex items-start gap-3">
-            <CheckCircle2 aria-hidden="true" className="mt-0.5 size-5 shrink-0" />
+            <CheckCircle2
+              aria-hidden="true"
+              className="mt-0.5 size-5 shrink-0"
+            />
             <div>
               <p className="font-semibold">
                 Demonstration physician review finalized · Plan published
@@ -241,10 +240,7 @@ export function ReviewWorkspace({
         </div>
       ) : submissionOutcome === "CLARIFICATION_REQUESTED" ||
         status === "CLARIFICATION_REQUIRED" ? (
-        <Notice
-          tone="warning"
-          title="Clarification requested from patient"
-        >
+        <Notice tone="warning" title="Clarification requested from patient">
           This evaluation is awaiting complementary patient information before a
           preventive plan can be published.
         </Notice>
@@ -316,7 +312,8 @@ export function ReviewWorkspace({
                   {profile.habits
                     .map((h) => h.value)
                     .filter(Boolean)
-                    .join(" · ") || "No smoking risk reported; regular physical activity"}
+                    .join(" · ") ||
+                    "No smoking risk reported; regular physical activity"}
                 </dd>
                 <dd className="mt-1 text-xs text-muted-foreground">
                   Medications:{" "}
@@ -344,7 +341,7 @@ export function ReviewWorkspace({
                             Date:{" "}
                             {exam.performedAt
                               ? formatDate(exam.performedAt)
-                              : exam.approximateDate ?? "Unknown"}
+                              : (exam.approximateDate ?? "Unknown")}
                           </span>
                         </div>
                         <p className="mt-1 text-xs font-medium">
@@ -481,8 +478,8 @@ export function ReviewWorkspace({
                           follow-up interval for average-risk patients. Avoiding
                           an early repeat colonoscopy protects the patient from
                           unnecessary bowel preparation, sedation and procedural
-                          perforation risk, pending physician verification of the
-                          original report.
+                          perforation risk, pending physician verification of
+                          the original report.
                         </p>
                       </div>
                     )}

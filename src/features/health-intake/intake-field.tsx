@@ -99,8 +99,8 @@ export function IntakeField({
                   : "border-input bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground",
               )}
             >
-              <CircleHelp aria-hidden="true" className="size-3.5" />
-              I don&apos;t know (Record as null)
+              <CircleHelp aria-hidden="true" className="size-3.5" />I don&apos;t
+              know (Record as null)
             </button>
           </div>
         </>

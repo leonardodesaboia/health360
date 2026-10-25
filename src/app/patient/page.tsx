@@ -20,9 +20,7 @@ export default async function PatientHome() {
     sessionPatient = null;
   }
   const patient =
-    sessionPatient ??
-    (await getActiveLocalFallback())?.patient ??
-    demoPatient;
+    sessionPatient ?? (await getActiveLocalFallback())?.patient ?? demoPatient;
   return (
     <ContentContainer>
       <PageHeader

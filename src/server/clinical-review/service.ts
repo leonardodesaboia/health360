@@ -938,9 +938,7 @@ export async function recordPhysicianReview(
     }
 
     const proposalIds = new Set(analysis.proposals.map((p) => p.id));
-    const decisionMap = new Map(
-      input.decisions.map((d) => [d.proposalId, d]),
-    );
+    const decisionMap = new Map(input.decisions.map((d) => [d.proposalId, d]));
     if (
       proposalIds.size !== decisionMap.size ||
       [...proposalIds].some((id) => !decisionMap.has(id))
