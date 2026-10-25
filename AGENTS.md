@@ -4,7 +4,8 @@ Read this first. This is the canonical guide for Claude Code and Codex.
 
 ## Scope and source of truth
 
-This repository currently contains the **foundation**, not the functioning MVP.
+This repository contains an **incomplete synthetic MVP** built on the foundation.
+Read [current status](docs/STATUS.md) for landed slices and remaining integration gaps.
 Read [ARCHITECTURE.md](ARCHITECTURE.md) for implemented boundaries,
 [product context](docs/product/PRODUCT_CONTEXT.md) for future requirements, and
 [canonical ordered index](docs/backlog/IMPLEMENTATION.md) for ordered implementation tasks.

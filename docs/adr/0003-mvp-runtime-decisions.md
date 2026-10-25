@@ -1,9 +1,9 @@
 # ADR 0003: MVP runtime and demonstrative scenarios
 
-Accepted 2026-10-22 by the user. These decisions prepare the MVP; the current
-foundation still has no persistence or LLM integration.
+Accepted 2026-10-22 by the user. Persistence and the LLM adapter have since landed;
+see [current status](../STATUS.md) for delivery and remaining integration gaps.
 
-- Local database: PostgreSQL 17 in Docker Compose; Prisma remains the planned ORM
+- Local database: PostgreSQL 17 in Docker Compose; Prisma is the implemented ORM
   for P0-01. The local database environment decision is resolved.
 - Provider: OpenAI, with the model selected through `LLM_MODEL`, never application
   code. The user's "Astra" selection maps to `gpt-6-astra` in the

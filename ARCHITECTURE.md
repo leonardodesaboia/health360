@@ -1,10 +1,9 @@
 # Architecture
 
-## Implemented foundation
+## Implemented application
 
 Single Next.js App Router application. Routes are Server Components by default;
-only active navigation, the component form example and route error recovery need
-client state. No global store is necessary. Geist is bundled from the `geist` package,
+interactive intake, demo controls, navigation and route recovery use client state. No global store is necessary. Geist is bundled from the `geist` package,
 so font loading does not require Google Fonts access during build.
 
 ```text
@@ -27,8 +26,8 @@ do not perform database access, invoke providers or decide clinical eligibility.
 `features/patients/contracts.ts` defines Patient, HealthProfile, IntakeResponse,
 PreviousExamination, ClinicalContext, AIAnalysis, RecommendationProposal,
 MedicalReview, PreventivePlan and TimelineEvent with matching inferred types.
-These are starting contracts, not persistence models. Add constraints as the owning
-task introduces real use cases. Schema-valid does not mean evidence-valid or
+These contracts validate persisted payloads as well as feature boundaries. Add
+constraints with the owning task and coordinate shared contract changes. Schema-valid does not mean evidence-valid or
 clinically reviewed. A future service must check referential integrity, ownership,
 allowed categories, decision reasons and version consistency.
 
@@ -60,7 +59,7 @@ Default unit tests never connect to PostgreSQL.
 
 `src/server/preventive-plan` publishes immutable plans from finalized, current
 demonstration physician decisions and reads only the selected session dataset.
-The finalization producer calls `publishReviewedPlan(tx, datasetId, patientId, reviewId)`
+The pending P0-10 finalization producer must call `publishReviewedPlan(tx, datasetId, patientId, reviewId)`
 inside its dataset transaction after `MEDICAL_REVIEW_COMPLETED`. The canonical
 workflow read acquires the patient advisory lock before record/version reads.
 Publication appends only a plan, its publication event and the canonical workflow
@@ -118,7 +117,7 @@ field-request reader, so that origin remains explicitly unsupported.
 unsupported requests, unavailable storage, pending analysis and no-current-request
 states show bounded English feedback. Preliminary proposals never enter this form.
 
-## Future server boundaries
+## Server boundaries and remaining work
 
 P0-05 implements the restricted server-only `src/server/clinical-rules` layer:
 versioned demonstrative colorectal screening context, synthetic scenario inputs,
@@ -127,9 +126,9 @@ It wraps existing profile/examination contracts with explicit nullable screening
 facts; it has no database, provider or publication dependency. Findings require
 physician review and always deny publication authority. See the
 [scenario pack](docs/product/DEMO_SCENARIOS.md) for limits and source verification.
-Other server services below remain future work.
-
-When authorized, add `src/server` modules marked with `import "server-only"`:
+The following boundaries now have server-only modules. Review finalization and
+clarification producers remain in progress; see [STATUS](docs/STATUS.md).
+Keep `src/server` modules marked with `import "server-only"`:
 
 - DB/repositories: synthetic data, transactions, immutable versions and reset isolation.
 - Clinical context/rules: restricted demonstrative scenarios under ADR0003, versioned evidence,
@@ -140,7 +139,7 @@ When authorized, add `src/server` modules marked with `import "server-only"`:
   completed review and explicit finalization; atomically publish only reviewed decisions.
 
 The LLM is replaceable via `LLM_PROVIDER`, `LLM_MODEL`, `OPENAI_API_KEY` and
-`LLM_TIMEOUT_MS`. The adapter is implemented under `src/server/ai`; no route invokes it yet. Keep secrets server-only;
+`LLM_TIMEOUT_MS`. The adapter is implemented under `src/server/ai` and invoked by analysis orchestration. Keep secrets server-only;
 do not retain chain-of-thought or log raw prompts/identifiers. Avoid sending display names.
 Timeouts, invalid outputs and insufficient evidence fail closed with bounded retries.
 
@@ -154,7 +153,7 @@ The workflow function checks legal edges only; it cannot prove medical review oc
 No UI invokes the transition function to fabricate progress.
 
 Unrecognized or foreign physician workspace IDs return no patient content (404 UI). All demo content remains clearly marked.
-The current fixture state is illustrative and does not mean a real analysis exists.
+Reference fixtures remain illustrative; the physician reader loads persisted analyses only.
 The public repository includes local Postgres Compose and a production
 Dockerfile. The selected deployment target is a VPS with Easypanel and a separate
 Postgres service; see [the runbook](docs/deploy/easypanel.md). No deployment has
@@ -169,7 +168,7 @@ An axe smoke checks the main routes for serious/critical violations.
 These are technical smoke tests, not clinical validation, a complete accessibility audit,
 or end-to-end MVP flows. Future flow specifications are in the backlog.
 
-## Guided intake draft (P0-03)
+## Guided intake draft and current server adapter
 
 `src/features/health-intake` owns the configuration-driven RHF/Zod intake and its
 async `IntakeDraftRepository` port. The temporary browser-local adapter validates
@@ -178,7 +177,8 @@ P0-04 adds atomic confirmed intake/profile snapshots, idempotent submit and immu
 history in the same browser storage envelope. Web Locks serialize cross-tab writes.
 No physician sharing, database persistence, identity enforcement or clinical workflow
 transition is implemented by this temporary adapter.
-A server adapter must enforce ownership and atomic revision checks.
+The selected-session path uses the server adapter described below; the
+browser-local demonstrator remains available without a session.
 
 ## Persisted workflow API
 
@@ -198,7 +198,7 @@ references are profileVersion, analysisId, reviewId and planId.
 
 This is administrative persistence, not authentication or clinical authorization.
 The calling service must validate identity, reference ownership/freshness, evidence
-and finalized physician review before advancing state. No UI calls the API yet.
+and finalized physician review before advancing state. Intake, analysis and reassessment server actions use this API; page navigation alone never advances it.
 
 getWorkflowState(db, datasetId, patientId) returns {status,lastTransition}, with
 null history for the initial snapshot. Its patient lock lasts through the caller's
@@ -285,8 +285,8 @@ No analysis, decision or plan is fabricated by selection/reset.
 Case IDs are first-screening and repeat-screening, reusing P0-05 fixtures.
 DEMO_COOKIE_SECURE=true enables Secure cookies for HTTPS deployment; local HTTP
 preview and CI leave it false. getDatabase lazily creates one server-only Prisma
-pool per process. This phase has no route changes: case-selection UI and shell
-integration remain planned. Intake and plan workers own their session wiring.
+pool per process. The header case selector and reset controls now use this module. Intake, analysis,
+physician, plan and history routes resolve the shared demo session.
 
 Selection/reset also persists loadClinicalContext(caseId, 1) as a validated P0-05
 context snapshot. This uses the extended P0-05 schema directly so its issuer/year,
@@ -301,9 +301,9 @@ CRC symptoms and risk facts, prior screening and colonoscopy quality. Existing a
 remain compatible. Examination `datePrecision` and `approximateDate` are optional;
 `performedAt` remains null unless the date is exact. The pure projection stores
 completed IntakeResponse plus examinations and a new immutable HealthProfile together.
-`/patient/profile` shows structured version/date metadata separately from declared and
-unknown answers. No score, clinical eligibility, analysis or plan publication occurs.
-Server integration must resolve P0-02 getDemoSession and bind datasetRepository to its
+`/patient/profile` shows browser-local structured version/date metadata separately from declared and
+unknown answers; it does not read the selected session's persisted profile. No score, clinical eligibility, analysis or plan publication occurs.
+The server integration resolves getDemoSession and binds datasetRepository to its
 trusted datasetId; patientId alone is not a storage isolation boundary.
 
 ## Intake session wiring
