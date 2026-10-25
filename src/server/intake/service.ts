@@ -8,18 +8,18 @@ import { answersSchema } from "../../features/health-intake/contracts";
 import { inDatasetTransaction } from "../db/repository";
 import { getWorkflowStatus, transitionWorkflow } from "../workflow/state";
 
-/** First draft save: NOT_STARTED → INTAKE_IN_PROGRESS. Later states are left unchanged. */
+/** First draft save starts either the initial intake or a requested reassessment. */
 export async function startIntake(
   db: PrismaClient,
   datasetId: string,
   patientId: string,
 ): Promise<void> {
   await inDatasetTransaction(db, datasetId, async (_repo, tx) => {
-    if ((await getWorkflowStatus(tx, datasetId, patientId)) !== "NOT_STARTED")
-      return;
+    const status = await getWorkflowStatus(tx, datasetId, patientId);
+    if (status !== "NOT_STARTED" && status !== "REASSESSMENT_PENDING") return;
     await transitionWorkflow(tx, datasetId, {
       patientId,
-      expectedFrom: "NOT_STARTED",
+      expectedFrom: status,
       to: "INTAKE_IN_PROGRESS",
       actor: "patient",
     });

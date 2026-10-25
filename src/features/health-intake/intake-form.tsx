@@ -19,7 +19,13 @@ import { IntakeField } from "./intake-field";
 import { AnswerSummary } from "./answer-summary";
 
 export const localPatientId = "demo-patient-01";
-export function IntakeForm() {
+export function IntakeForm({
+  scope = localPatientId,
+  prefill,
+}: {
+  scope?: string;
+  prefill?: IntakeAnswers;
+}) {
   const [step, setStep] = useState(0);
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(true);
@@ -48,10 +54,10 @@ export function IntakeForm() {
     try {
       const repo = createDraftRepository(window.localStorage);
       const [draft, latest] = await Promise.all([
-        repo.load(localPatientId),
-        repo.latest(localPatientId),
+        repo.load(scope),
+        repo.latest(scope),
       ]);
-      reset(draft?.answers ?? initialAnswers);
+      reset(draft?.answers ?? prefill ?? initialAnswers);
       revision.current = draft?.revision ?? 0;
       profileVersion.current = latest?.profile.version ?? 0;
       submissionId.current = null;
@@ -72,7 +78,7 @@ export function IntakeForm() {
     } finally {
       setBusy(false);
     }
-  }, [reset]);
+  }, [reset, scope, prefill]);
   useEffect(() => {
     let active = true;
     queueMicrotask(() => {
@@ -86,7 +92,7 @@ export function IntakeForm() {
     setBusy(true);
     try {
       const saved = await createDraftRepository(window.localStorage).save(
-        localPatientId,
+        scope,
         getValues(),
         target,
         revision.current,
@@ -146,6 +152,7 @@ export function IntakeForm() {
       const repo = createDraftRepository(window.localStorage);
       submissionId.current ??= crypto.randomUUID();
       // With a demo session this persists to its dataset and redirects to analysis.
+      await startIntakeAction();
       const persisted = await submitIntakeAction(
         getValues(),
         submissionId.current,
@@ -157,14 +164,13 @@ export function IntakeForm() {
           );
         return;
       }
-      const result = await repo.submit(localPatientId, {
+      const result = await repo.submit(scope, {
         answers: getValues(),
         expectedRevision: revision.current,
         expectedProfileVersion: profileVersion.current,
         submissionId: submissionId.current,
       });
-      revision.current =
-        (await repo.load(localPatientId))?.revision ?? revision.current;
+      revision.current = (await repo.load(scope))?.revision ?? revision.current;
       profileVersion.current = result.profile.version;
       setCompleted(true);
       setError("");
@@ -184,9 +190,9 @@ export function IntakeForm() {
   return (
     <>
       <Notice title="DEMONSTRATIVE — NOT CLINICALLY VALIDATED">
-        Use synthetic answers only. Drafts and profiles stay in this browser and
-        are not shared with the physician or a database. Unknown information is
-        not a negative answer.
+        Use synthetic answers only. Drafts stay in this browser. With a selected
+        demo case, confirmed answers are saved to its demonstration dataset.
+        Unknown information is not a negative answer.
       </Notice>
       {error && (
         <div role="alert" className="space-y-3 text-sm text-destructive">

@@ -13,6 +13,69 @@ import { publishReviewedPlan } from "../../src/server/preventive-plan/publicatio
 import { getWorkflowStatus } from "../../src/server/workflow/state";
 import { seedReviewedCycle } from "../support/reviewed-cycle";
 import { completeReassessmentFixture } from "../support/reassessment-cycle";
+import { startIntake, completeIntake } from "../../src/server/intake/service";
+import { readIntakePrefill } from "../../src/server/intake/read";
+import { analyzeSession } from "../../src/server/analysis/service";
+import * as workflow from "../../src/server/workflow/state";
+
+it("resumes real intake after reassessment and preserves the reviewed plan", async () => {
+  const { datasetId, patientId, profile, plan, repo } = await fixture();
+  await inDatasetTransaction(db, datasetId, (_repo, tx) =>
+    beginReassessment(tx, datasetId, patientId, {
+      planId: plan.id,
+      profileVersion: profile.version,
+    }),
+  );
+  await startIntake(db, datasetId, patientId);
+  expect(await getWorkflowStatus(db, datasetId, patientId)).toBe(
+    "INTAKE_IN_PROGRESS",
+  );
+  const prefill = await readIntakePrefill(db, datasetId, patientId);
+  expect(prefill.answers.age).toBe(String(profile.age));
+  const completed = await completeIntake(
+    db,
+    datasetId,
+    patientId,
+    { ...prefill.answers, age: "61" },
+    randomUUID(),
+  );
+  expect(completed.profile.version).toBe(profile.version + 1);
+  const restored = await readIntakePrefill(db, datasetId, patientId);
+  expect(restored.profileVersion).toBe(profile.version + 1);
+  expect(restored.answers).toEqual({ ...prefill.answers, age: "61" });
+  expect(await getWorkflowStatus(db, datasetId, patientId)).toBe(
+    "INTAKE_COMPLETED",
+  );
+  const result = await analyzeSession(
+    db,
+    { datasetId, patientId, caseId: "first-screening" },
+    {
+      workflow,
+      audit: {
+        provider: "mock",
+        model: "deterministic-v1",
+        promptId: "analysis",
+        promptVersion: 1,
+      },
+      explain: async () => {
+        throw new Error("Unknown facts must not reach the provider");
+      },
+    },
+  );
+  expect(result).toMatchObject({
+    status: "RECORDED",
+    workflowStatus: "CLARIFICATION_REQUIRED",
+  });
+  expect(
+    (await repo.list("analysis")).some(
+      (a) => a.profileVersion === completed.profile.version,
+    ),
+  ).toBe(true);
+  expect(await repo.list("plan")).toEqual([plan]);
+  expect((await repo.list("profile")).find((p) => p.id === profile.id)).toEqual(
+    profile,
+  );
+});
 
 if (!process.env.TEST_DATABASE_URL)
   throw new Error(

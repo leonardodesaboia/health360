@@ -7,12 +7,21 @@ import {
   StatusIndicator,
   Surface,
 } from "@/components/shared/primitives";
-import { demoPatient } from "@/features/patients/fixtures";
 import { getDemoSession } from "@/server/demo/session";
 
 export default async function PatientHome() {
-  // Without a selected demo case, the reference fixture keeps the page illustrative.
-  const patient = (await getDemoSession())?.patient ?? demoPatient;
+  const session = await getDemoSession();
+  if (!session)
+    return (
+      <ContentContainer>
+        <PageHeader
+          eyebrow="My follow-up"
+          title="Select a demo case"
+          description="Choose a synthetic case using the demo controls to begin your evaluation."
+        />
+      </ContentContainer>
+    );
+  const patient = session.patient;
   return (
     <ContentContainer>
       <PageHeader

@@ -15,6 +15,14 @@ test("shows the select-a-case entry state without a session", async ({
 }) => {
   for (const route of ["/patient", "/doctor"]) {
     await page.goto(route);
+    if (route === "/patient") {
+      await expect(
+        page.getByRole("heading", { name: "Select a demo case", level: 1 }),
+      ).toBeVisible();
+      await expect(page.getByRole("heading", { name: /Hello,/ })).toHaveCount(
+        0,
+      );
+    }
     await expect(
       page.getByRole("heading", { name: "Select a demo case", level: 2 }),
     ).toBeVisible();

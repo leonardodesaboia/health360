@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 const routes = [
-  ["/patient", "Hello, Marina"],
+  ["/patient", "Select a demo case"],
   ["/patient/intake", "Guided health intake"],
   ["/patient/profile", "Clinical profile"],
   ["/patient/plan", "Preventive follow-up"],
@@ -35,7 +35,7 @@ for (const [route, title] of routes) {
 }
 test("patient and doctor navigation and review boundary", async ({ page }) => {
   await page.goto("/patient");
-  await page.getByRole("link", { name: "View my history" }).click();
+  await page.goto("/patient/intake");
   await expect(page).toHaveURL(/\/patient\/intake$/);
   await page.getByRole("link", { name: "My plan", exact: true }).click();
   await expect(
