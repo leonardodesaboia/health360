@@ -38,6 +38,25 @@ intake. Intake submission owns the new profile version and analysis trigger;
 analysis and physician review must complete again before the next plan is
 published. Repeating an unfinished update does not duplicate the start event.
 
+## Clarification (P0-12)
+
+When analysis needs more information, `/patient/analysis` links to
+`/patient/clarification`. Each supported missing fact receives a bounded English
+question and an I don't know option. Known grouped facts are preserved; only their
+unknown underlying facts are asked. Reloading restores the current persisted
+version. Unsupported requests stay unavailable rather than becoming open-ended chat.
+
+Confirming answers atomically appends profile vN+1 and reserves ANALYSIS_PENDING,
+then invokes the exported analysis service. A new preliminary analysis must still
+go through physician review; no plan is published. Unknown answers can return to
+CLARIFICATION_REQUIRED, and timeouts keep the saved profile with explicit failure.
+An interrupted call can be resumed from Continue saved analysis, without another
+profile version. An old form cannot overwrite a newer profile or analysis.
+
+Physician-origin clarification will use a typed supported-field reader when one
+exists. The current queue/workspace reader exposes no such request contract; free
+text review reasons are never interpreted as patient questions.
+
 ## Administrative lifecycle
 
 The pure graph in `src/features/workflow/workflow.ts` is the canonical adjacency

@@ -1,5 +1,5 @@
 import "server-only";
-import type { PrismaClient } from "../../generated/prisma/client";
+import type { Prisma } from "../../generated/prisma/client";
 import { datasetRepository } from "../db/repository";
 import {
   answersSchema,
@@ -9,7 +9,7 @@ import {
 
 /** Restore only answers linked to the selected patient's latest immutable profile. */
 export async function readIntakePrefill(
-  db: PrismaClient,
+  db: Prisma.TransactionClient,
   datasetId: string,
   patientId: string,
 ) {

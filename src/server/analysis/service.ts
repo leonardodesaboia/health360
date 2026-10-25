@@ -95,7 +95,7 @@ export async function analyzeSession(
   deps: AnalysisDependencies,
 ): Promise<AnalysisServiceResult> {
   const { datasetId, patientId, caseId } = session;
-  const { workflow, explain } = deps;
+  const { workflow } = deps;
   const now = deps.now ?? (() => new Date());
   const snapshot = await inDatasetTransaction<AnalysisSnapshot>(
     db,
@@ -169,7 +169,104 @@ export async function analyzeSession(
       return { profile, context, examinations, identity, blockedContext };
     },
   );
+  return completeSnapshot(db, session, deps, snapshot);
+}
+
+/**
+ * Continues the open ANALYSIS_PENDING reservation recorded in the workflow (for example
+ * one created atomically by the clarification answer, or one left by an interrupted
+ * run). The reservation comes from stored workflow refs, never from the caller. A
+ * reservation whose profile version is no longer current fails as STALE so the patient
+ * can retry. Concurrent resumes may repeat provider work, but at most one analysis is
+ * recorded for the reservation.
+ */
+export async function resumePendingAnalysis(
+  db: PrismaClient,
+  session: Pick<DemoSession, "datasetId" | "patientId" | "caseId">,
+  deps: Omit<AnalysisDependencies, "beforeClaim">,
+): Promise<AnalysisServiceResult> {
+  const { datasetId, patientId, caseId } = session;
+  const { workflow } = deps;
+  const now = deps.now ?? (() => new Date());
+  const snapshot = await inDatasetTransaction<AnalysisSnapshot>(
+    db,
+    datasetId,
+    async (repo, tx) => {
+      const status = await workflow.getWorkflowStatus(tx, datasetId, patientId);
+      if (status !== "ANALYSIS_PENDING")
+        return { result: { status: "NOT_READY" } };
+      const reservation = latest(
+        (await repo.list("workflowTransition")).filter(
+          (record) => record.patientId === patientId,
+        ),
+      );
+      const analysisId = reservation?.refs?.analysisId;
+      const reservedVersion = reservation?.refs?.profileVersion;
+      const profile = latest(
+        (await repo.list("profile")).filter(
+          (record) => record.patientId === patientId,
+        ),
+      );
+      const contextRecord = latest(
+        (await repo.list("context")).filter(
+          (record) => record.scenarioId === caseId,
+        ),
+      );
+      if (
+        !analysisId ||
+        reservedVersion === undefined ||
+        !profile ||
+        !contextRecord
+      )
+        return { result: { status: "NOT_READY" } };
+      const analyses = (await repo.list("analysis")).filter(
+        (record) => record.patientId === patientId,
+      );
+      if (analyses.some((record) => record.id === analysisId))
+        return { result: { status: "EXISTING", analysisId } };
+      if (profile.version !== reservedVersion) {
+        await workflow.transitionWorkflow(tx, datasetId, {
+          patientId,
+          expectedFrom: status,
+          expectedRefs: { analysisId, profileVersion: reservedVersion },
+          to: "ANALYSIS_FAILED",
+          actor: "system",
+          reason:
+            "Analysis input versions changed. Retry with the current profile.",
+          refs: { analysisId, profileVersion: reservedVersion },
+        });
+        return { result: { status: "STALE" } };
+      }
+      const identity: AnalysisIdentity = {
+        ...deps.audit,
+        id: analysisId,
+        version: (latest(analyses)?.version ?? 0) + 1,
+        createdAt: now().toISOString(),
+      };
+      const examinations = (await repo.list("examination")).filter((exam) =>
+        profile.examinationIds.includes(exam.id),
+      );
+      return {
+        profile,
+        context: contextRecord,
+        examinations,
+        identity,
+        blockedContext: !contextMatches(contextRecord),
+      };
+    },
+  );
+  return completeSnapshot(db, session, deps, snapshot);
+}
+
+async function completeSnapshot(
+  db: PrismaClient,
+  session: Pick<DemoSession, "datasetId" | "patientId" | "caseId">,
+  deps: Omit<AnalysisDependencies, "beforeClaim">,
+  snapshot: AnalysisSnapshot,
+): Promise<AnalysisServiceResult> {
   if ("result" in snapshot) return snapshot.result;
+  const { datasetId, patientId, caseId } = session;
+  const { workflow, explain } = deps;
   const { profile, context, examinations, identity, blockedContext } = snapshot;
   const prepared = blockedContext
     ? {

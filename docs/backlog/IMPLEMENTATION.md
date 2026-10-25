@@ -191,8 +191,8 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-12 — Deterministic clarification loop
 
 - Stable OpenSpec change ID: `p0-12-clarification`.
-- Status: **planned**; change not yet picked up.
-- Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
+- Status: **done (PR open)**; [archive](../../openspec/changes/archive/2026-10-25-p0-12-clarification/); [PR #26](https://github.com/leonardodesaboia/health360/pull/26).
+- Implementation evidence: [verification](../../openspec/changes/archive/2026-10-25-p0-12-clarification/tasks.md): verify passes (407 unit tests), 74 PostgreSQL integration tests, 74 desktop/mobile e2e tests on port 3250, formatting and strict specs pass. Typed physician-origin requests remain explicitly unavailable until P0-10 supplies a reader, as agreed.
 
 - Goal: collect application-selected missing fields without a chatbot.
 - Depends on: P0-07, P0-10.
@@ -204,7 +204,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 
 ### P0-13 — Longitudinal history and reassessment
 
-- Intake integration follow-up: [verified fix](../../openspec/changes/archive/2026-10-25-fix-reassessment-intake/); resumes real intake and preserves the original reviewed plan. Full second physician-review cycle remains owned by the existing producers.
+- Intake integration follow-up: [verified fix](../../openspec/changes/archive/2026-10-25-fix-reassessment-intake/), [PR #25](https://github.com/leonardodesaboia/health360/pull/25); resumes real intake and preserves the original reviewed plan. Full second physician-review cycle remains owned by the existing producers.
 
 - Stable OpenSpec change ID: `p0-13-reassessment`.
 - Status: **in progress**; [change](../../openspec/changes/p0-13-reassessment/).

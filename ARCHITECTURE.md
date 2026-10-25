@@ -94,6 +94,30 @@ review and publication are still required before a new plan becomes available.
 
 The physician queue and workspace read this storage after resolving the current demo session; no session yields no patient records. All reads use datasetRepository with the server-resolved dataset ID, then filter to its patient. The reader joins the exact analyzed profile and context versions, reports newer versions as stale, and never falls back to display fixtures on errors.
 
+## Patient clarification (P0-12)
+
+`src/server/clarification` resolves the demo cookie scope and reads only the latest
+current deterministic clarification analysis. Its `missingInformation` stores the
+rule evaluator's missing field paths. Pure templates in `features/clarification`
+map supported paths and known intake labels to bounded patient questions; grouped
+rule gaps expand only to their underlying unknown facts. Unsupported paths and
+untyped physician requests stay unavailable, without interpreting free-text reasons.
+
+The answer service acquires the patient workflow lock inside a dataset transaction,
+checks expected profile/analysis references, validates only requested answers, and
+appends immutable profile/intake/examination snapshots plus patient-reported events.
+It reserves the legal CLARIFICATION_REQUIRED to ANALYSIS_PENDING transition with
+the new profile version and a fresh analysis ID. The action calls the analysis
+owner's exported `resumeAnalysisForSession` to perform reanalysis; no LLM or rule
+logic is duplicated. Interrupted calls can resume the stored reservation without
+another profile. Unknowns remain null and can require clarification again; failures
+publish no plan. The physician queue reader currently exposes no typed CLARIFY
+field-request reader, so that origin remains explicitly unsupported.
+
+`/patient/analysis` links to `/patient/clarification`; direct access without a session,
+unsupported requests, unavailable storage, pending analysis and no-current-request
+states show bounded English feedback. Preliminary proposals never enter this form.
+
 ## Future server boundaries
 
 P0-05 implements the restricted server-only `src/server/clinical-rules` layer:
@@ -341,3 +365,8 @@ Optional `beforeClaim(repo, tx, status)` runs inside the claim transaction after
 workflow lock is held and a claim is legal, before the latest profile is read. A caller
 such as clarification can append profile vN+1 atomically with the ANALYSIS_PENDING
 transition; a thrown error rolls back both. It is never called when a claim is illegal.
+`resumeAnalysisForSession(db, session)` (service: `resumePendingAnalysis`) continues an
+open ANALYSIS_PENDING reservation read from stored workflow refs `{analysisId,
+profileVersion}`, whether another server flow reserved it or a run was interrupted. The
+recorded analysis uses the reserved ID; a reservation for a superseded profile version
+moves to ANALYSIS_FAILED so the patient can retry.

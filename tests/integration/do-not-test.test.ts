@@ -7,7 +7,10 @@ import { recommendationProposalSchema } from "../../src/features/patients/contra
 import { analyze } from "../../src/server/ai/analyze";
 import { MockProvider } from "../../src/server/ai/provider/mock";
 import type { AnalysisInput } from "../../src/server/ai/schemas/analysis";
-import { runAnalysisForSession } from "../../src/server/analysis/run";
+import {
+  resumeAnalysisForSession,
+  runAnalysisForSession,
+} from "../../src/server/analysis/run";
 import type { ClaimHook } from "../../src/server/analysis/service";
 import { analyzeSession } from "../../src/server/analysis/service";
 import { createDatabase } from "../../src/server/db/client";
@@ -290,5 +293,87 @@ describe("Do Not Test flow through the proposal stage", () => {
       await runAnalysisForSession(db, session, { beforeClaim: hook }),
     ).toEqual({ status: "NOT_READY" });
     expect(hook).not.toHaveBeenCalled();
+  });
+
+  // Mirrors the clarification worker's own answer transaction (append + reserve).
+  async function reserveAfterAnswer(
+    datasetId: string,
+    reservedVersion?: (newVersion: number) => number,
+  ) {
+    const reservationId = randomUUID();
+    let profileVersion = 0;
+    await inDatasetTransaction(db, datasetId, async (repo, tx) => {
+      const status = await workflow.getWorkflowStatus(tx, datasetId, patientId);
+      await appendAnsweredProfile()(repo, tx, status);
+      profileVersion = Math.max(
+        ...(await repo.list("profile"))
+          .filter((profile) => profile.patientId === patientId)
+          .map((profile) => profile.version),
+      );
+      await workflow.transitionWorkflow(tx, datasetId, {
+        patientId,
+        expectedFrom: "CLARIFICATION_REQUIRED",
+        to: "ANALYSIS_PENDING",
+        actor: "patient",
+        refs: {
+          profileVersion: reservedVersion
+            ? reservedVersion(profileVersion)
+            : profileVersion,
+          analysisId: reservationId,
+        },
+      });
+    });
+    return { reservationId, profileVersion };
+  }
+
+  it("resumes an externally reserved clarification answer with the reservation ID", async () => {
+    const session = await unknownDateSession();
+    const { reservationId, profileVersion } = await reserveAfterAnswer(
+      session.datasetId,
+    );
+    expect(await runAnalysisForSession(db, session)).toEqual({
+      status: "BUSY",
+    });
+    expect(await resumeAnalysisForSession(db, session)).toEqual({
+      status: "RECORDED",
+      analysisId: reservationId,
+      workflowStatus: "MEDICAL_REVIEW_PENDING",
+    });
+    const recorded = (
+      await datasetRepository(db, session.datasetId).list("analysis")
+    ).find((analysis) => analysis.id === reservationId);
+    expect(recorded).toMatchObject({
+      status: "PRELIMINARY",
+      profileVersion,
+    });
+    expect(recorded?.proposals.map((p) => p.category)).toEqual([
+      "POSSIBLE_REDUNDANCY",
+    ]);
+    expect(await resumeAnalysisForSession(db, session)).toEqual({
+      status: "NOT_READY",
+    });
+  });
+
+  it("fails a stale reservation so the patient can retry with the current profile", async () => {
+    const session = await unknownDateSession();
+    await reserveAfterAnswer(session.datasetId, (version) => version - 1);
+    expect(await resumeAnalysisForSession(db, session)).toEqual({
+      status: "STALE",
+    });
+    expect(
+      (await workflow.getWorkflowState(db, session.datasetId, patientId))
+        .status,
+    ).toBe("ANALYSIS_FAILED");
+    expect(await runAnalysisForSession(db, session)).toMatchObject({
+      status: "RECORDED",
+      workflowStatus: "MEDICAL_REVIEW_PENDING",
+    });
+  });
+
+  it("does nothing when no analysis is pending", async () => {
+    const session = await unknownDateSession();
+    expect(await resumeAnalysisForSession(db, session)).toEqual({
+      status: "NOT_READY",
+    });
   });
 });
