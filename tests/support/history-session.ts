@@ -1,6 +1,10 @@
 import "dotenv/config";
 import { createDatabase } from "../../src/server/db/client";
-import { inDatasetTransaction } from "../../src/server/db/repository";
+import {
+  datasetRepository,
+  inDatasetTransaction,
+} from "../../src/server/db/repository";
+import { strict as assert } from "node:assert";
 import {
   demoDatasetId,
   newDemoSessionToken,
@@ -25,6 +29,16 @@ try {
     const selected = await loadDemoCase(db, datasetId);
     if (!selected) throw new Error("Synthetic session unavailable");
     await completeReassessmentFixture(db, datasetId, selected.patient.id);
+  } else if (process.argv[2] === "assert-intake") {
+    const repo = datasetRepository(db, demoDatasetId(process.argv[3]));
+    const profiles = (await repo.list("profile")).sort(
+      (a, b) => a.version - b.version,
+    );
+    assert.equal(profiles.length, 2);
+    assert.equal(profiles[0].age, 50);
+    assert.equal(profiles[1].age, 61);
+    assert.equal((await repo.list("analysis")).length, 2);
+    assert.equal((await repo.list("plan")).length, 1);
   } else if (process.argv[2] === "remove") {
     await db.dataset.deleteMany({
       where: { id: demoDatasetId(process.argv[3]) },

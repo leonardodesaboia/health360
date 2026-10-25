@@ -3,7 +3,12 @@
 ## Foundation routes
 
 `/` redirects to `/patient`. Patient navigation is Home, My plan and History; the home
-links to the read-only `/patient/intake` reference. The plan page loads the selected
+shows a case-selection entry state without a demo session. Once a case is selected,
+it links to `/patient/intake`. Requested reassessment resumes intake from
+REASSESSMENT_PENDING; the form restores answers for the latest profile version
+within that dataset. Confirming updates appends profile vN+1, completes intake and
+opens `/patient/analysis`. Analysis and a fresh physician review are required for a
+new plan; the prior reviewed plan stays preserved. The plan page loads the selected
 dataset's reviewed plan or explains the current session, review, clarification or
 blocked state. It never displays preliminary proposals. Previous reviewed content
 remains identified as previous during a new cycle.

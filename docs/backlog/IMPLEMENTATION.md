@@ -204,6 +204,8 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 
 ### P0-13 — Longitudinal history and reassessment
 
+- Intake integration follow-up: [verified fix](../../openspec/changes/archive/2026-10-25-fix-reassessment-intake/); resumes real intake and preserves the original reviewed plan. Full second physician-review cycle remains owned by the existing producers.
+
 - Stable OpenSpec change ID: `p0-13-reassessment`.
 - Status: **in progress**; [change](../../openspec/changes/p0-13-reassessment/).
 - Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
