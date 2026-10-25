@@ -127,7 +127,7 @@ No UI invokes the transition function to fabricate progress.
 
 Unrecognized review IDs return 404. All demo content remains clearly marked.
 The current fixture state is illustrative and does not mean a real analysis exists.
-The public repository includes local Postgres Compose and a production standalone
+The public repository includes local Postgres Compose and a production
 Dockerfile. The selected deployment target is a VPS with Easypanel and a separate
 Postgres service; see [the runbook](docs/deploy/easypanel.md). No deployment has
 been performed by this setup.
@@ -201,7 +201,8 @@ OpenAI uses the official SDK Responses API, strict structured output and store:f
 with no tools, reasoning summaries or automatic retries. Configuration uses
 LLM_PROVIDER=openai, LLM_MODEL (ADR0003 selects gpt-6-astra), OPENAI_API_KEY and
 LLM_TIMEOUT_MS (default 30000, bounded to 1–120000 ms). Missing/invalid configuration
-blocks. LLM_PROVIDER=mock explicitly selects deterministic preliminary explanations of
+blocks for explicit OpenAI. An unset LLM_PROVIDER defaults to mock (model
+deterministic-v1 when unset). LLM_PROVIDER=mock forces deterministic preliminary explanations of
 supplied allowed findings; failures never switch providers. No prompts, raw errors, responses or
 private chain-of-thought are logged or persisted. Provider retention policies still
 apply; store:false is not a claim of zero provider retention.

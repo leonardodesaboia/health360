@@ -8,12 +8,16 @@ import type { LlmProvider } from "./types";
 export const timeoutSchema = z.number().int().min(1).max(120000);
 const configSchema = z
   .object({
-    LLM_PROVIDER: z.enum(["openai", "mock"]),
-    LLM_MODEL: z.string().trim().min(1),
+    LLM_PROVIDER: z.enum(["openai", "mock"]).default("mock"),
+    LLM_MODEL: z.string().trim().min(1).optional(),
     LLM_TIMEOUT_MS: z.coerce.number().pipe(timeoutSchema).default(30000),
     OPENAI_API_KEY: z.string().trim().optional(),
   })
-  .refine((env) => env.LLM_PROVIDER !== "openai" || !!env.OPENAI_API_KEY);
+  .refine(
+    (env) =>
+      env.LLM_PROVIDER !== "openai" ||
+      (!!env.OPENAI_API_KEY && !!env.LLM_MODEL),
+  );
 
 export function configuredProvider(
   env: Record<string, string | undefined>,
@@ -26,9 +30,9 @@ export function configuredProvider(
     timeoutMs: value.LLM_TIMEOUT_MS,
     provider:
       value.LLM_PROVIDER === "mock"
-        ? new MockProvider(undefined, value.LLM_MODEL)
+        ? new MockProvider(undefined, value.LLM_MODEL ?? "deterministic-v1")
         : new OpenAIProvider(
-            value.LLM_MODEL,
+            value.LLM_MODEL!,
             new OpenAI({
               apiKey: value.OPENAI_API_KEY,
               timeout: value.LLM_TIMEOUT_MS,

@@ -249,7 +249,6 @@ describe("synthetic analysis boundary", () => {
       }),
     ).toMatchObject({ status: "NEEDS_REVIEW" });
     for (const env of [
-      {},
       { LLM_PROVIDER: "other" },
       { LLM_PROVIDER: "openai", LLM_MODEL: "configured" },
       { LLM_PROVIDER: "mock", LLM_MODEL: "test", LLM_TIMEOUT_MS: "invalid" },
