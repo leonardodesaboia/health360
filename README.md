@@ -4,8 +4,8 @@ Preventive-care coordination prototype for the HISIC demo on November 3, 2026.
 **Synthetic demonstration only. No clinical validation or real patient use.**
 UI, scenarios and docs use US English and en-US formatting ([ADR0004](docs/adr/0004-english-language.md)).
 
-Intake, persisted analysis and the physician reader work together. Physician
-finalization and clarification remain in progress; a new case cannot yet complete
+Intake, persisted analysis, patient clarification and the physician reader work
+together. Physician decisions and finalization remain in progress; a new case cannot yet complete
 the full patient-to-plan cycle. See [current status](docs/STATUS.md).
 
 ## Getting started
@@ -59,7 +59,7 @@ Selecting a case in the header creates that browser's dataset and clinical conte
 3. Run analysis there. Mock produces preliminary explanations without OpenAI access.
    Alex's complete no-prior-screening case supports a preventive opportunity;
    Jordan's normal, complete, adequately prepared 2022 colonoscopy supports a
-   **possible** redundancy proposal. Missing required data routes to clarification;
+   **possible** redundancy proposal. Missing required data routes to clarification (see below);
    excluded cases and provider failures block analysis.
 4. Switch to `/doctor`, open the analysis entry, and inspect the analyzed profile,
    criteria, evidence and uncertainty. **The current workspace is a reader:**
@@ -83,8 +83,10 @@ restore the examination date into the form; inspect and complete those fields.
 Other missing answers remain explicitly unknown rather than inferred from narrative
 history. These are fictional demonstration inputs, not medical advice.
 
-Clarification questions/answers (P0-12) and the complete A–E rehearsal suite (P0-14)
-are not yet available. `/showcase` is a component reference, not a clinical flow.
+If analysis needs more information, `/patient/analysis` links to
+`/patient/clarification` (bounded questions, each with I don't know); answers create
+a new profile version and rerun analysis. Physician decisions and finalization
+(P0-10) and the complete A–E rehearsal suite (P0-14) are not yet available. `/showcase` is a component reference, not a clinical flow.
 
 ## Scripts and ports
 

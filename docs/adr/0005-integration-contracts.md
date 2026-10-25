@@ -1,13 +1,13 @@
 # ADR0005: Shared integration contracts
 
-- Status: accepted for landed APIs; review/clarification producer policy pending implementation
+- Status: accepted for landed APIs; physician review producer policy pending implementation
 - Date: 2026-10-25
 
 ## Context
 
 Parallel owners share dataset-scoped immutable records and administrative workflow
 history. This records integration decisions and separates existing APIs from the
-remaining P0-10/P0-12 producer work. All data is synthetic and
+remaining P0-10 producer work. All data is synthetic and
 **DEMONSTRATIVE — NOT CLINICALLY VALIDATED**. Demo review is not medical validation.
 
 ## Decision
@@ -54,8 +54,9 @@ include entity ID/version, timestamp and provenance; readers validate links.
 | REVIEW_UPDATED, REVIEW_CLARIFICATION_REQUESTED, REVIEW_COMPLETED | MedicalReview                                                 |
 | PLAN_PUBLISHED                                                   | PreventivePlan                                                |
 
-Availability of a kind does not mean its producer exists. Review and clarification
-producers still belong to P0-10/P0-12.
+Availability of a kind does not mean its producer exists. Clarification answers
+append PROFILE_UPDATED and CLARIFICATION_ANSWERED (P0-12); review producers still
+belong to P0-10.
 
 ### Session and clinical context
 
@@ -113,13 +114,20 @@ excluded cases or invalid/provider-failed results block. Never publish a fallbac
 
 ### Clarification and physician finalization policy
 
-**P0-10/P0-12 producer contracts, not completed features on main:** questions come
-from deterministic analysis missing fields and physician CLARIFY requests, always
-with an explicit “I don't know” option. This is a restricted form, not a chatbot.
-Clarification appends profile vN+1 in `beforeClaim`, atomically with
-CLARIFICATION_REQUIRED → ANALYSIS_PENDING. Exceptions roll back both writes.
+**Patient clarification (P0-12, on main):** questions come only from supported
+deterministic analysis `missingInformation` paths, always with an explicit
+“I don't know” option. This is a restricted form, not a chatbot. One dataset
+transaction checks `expectedRefs` (current analysis and profile), appends profile
+vN+1 with intake/examination snapshots and PROFILE_UPDATED/CLARIFICATION_ANSWERED
+events, and reserves CLARIFICATION_REQUIRED → ANALYSIS_PENDING (actor patient,
+fresh `refs.analysisId`). The action then calls `resumeAnalysisForSession(db, session)`
+from `src/server/analysis/run.ts`, which continues the stored reservation and can
+also resume an interrupted one without another profile. Exceptions roll back the
+transaction. `beforeClaim` remains available but is not the path P0-12 uses.
 
-Intended decisions are APPROVE, MODIFY, REJECT, PENDING and CLARIFY. MODIFY needs
+**Physician decisions (P0-10 producer contract, not on main):** physician CLARIFY
+requests reach the patient only through a future typed supported-field reader; free
+text reasons are never interpreted as questions. Intended decisions are APPROVE, MODIFY, REJECT, PENDING and CLARIFY. MODIFY needs
 revised text and reason; REJECT needs reason; CLARIFY needs question text. CLARIFY
 saves a DRAFT MedicalReview and moves MEDICAL_REVIEW_IN_PROGRESS → CLARIFICATION_REQUIRED
 as demo-physician. The core decision enum already includes CLARIFY, but the producer and question
