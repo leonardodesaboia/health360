@@ -337,3 +337,8 @@ Optional `beforeClaim(repo, tx, status)` runs inside the claim transaction after
 workflow lock is held and a claim is legal, before the latest profile is read. A caller
 such as clarification can append profile vN+1 atomically with the ANALYSIS_PENDING
 transition; a thrown error rolls back both. It is never called when a claim is illegal.
+`resumeAnalysisForSession(db, session)` (service: `resumePendingAnalysis`) continues an
+open ANALYSIS_PENDING reservation read from stored workflow refs `{analysisId,
+profileVersion}`, whether another server flow reserved it or a run was interrupted. The
+recorded analysis uses the reserved ID; a reservation for a superseded profile version
+moves to ANALYSIS_FAILED so the patient can retry.

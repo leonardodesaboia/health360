@@ -8,9 +8,29 @@ import type { DemoSession } from "../demo/contracts";
 import * as workflow from "../workflow/state";
 import {
   analyzeSession,
+  resumePendingAnalysis,
+  type AnalysisDependencies,
   type AnalysisServiceResult,
   type ClaimHook,
 } from "./service";
+
+type Session = Pick<DemoSession, "datasetId" | "patientId" | "caseId">;
+
+function configuredDependencies(): Omit<AnalysisDependencies, "beforeClaim"> {
+  const config = configuredProvider(process.env);
+  return {
+    workflow,
+    audit: {
+      provider: config?.provider.id ?? "unconfigured",
+      model: config?.provider.model ?? "unconfigured",
+      promptVersion: promptMetadata.promptVersion,
+      promptId: promptMetadata.promptId,
+    },
+    explain: config
+      ? (input) => analyze(input, config.provider, config.timeoutMs)
+      : async () => ({ status: "BLOCKED", reason: "configuration" }),
+  };
+}
 
 /**
  * Runs analysis for an already-resolved demo session with the configured provider.
@@ -21,21 +41,23 @@ import {
  */
 export function runAnalysisForSession(
   db: PrismaClient,
-  session: Pick<DemoSession, "datasetId" | "patientId" | "caseId">,
+  session: Session,
   options: { beforeClaim?: ClaimHook } = {},
 ): Promise<AnalysisServiceResult> {
-  const config = configuredProvider(process.env);
   return analyzeSession(db, session, {
-    workflow,
+    ...configuredDependencies(),
     beforeClaim: options.beforeClaim,
-    audit: {
-      provider: config?.provider.id ?? "unconfigured",
-      model: config?.provider.model ?? "unconfigured",
-      promptVersion: promptMetadata.promptVersion,
-      promptId: promptMetadata.promptId,
-    },
-    explain: config
-      ? (input) => analyze(input, config.provider, config.timeoutMs)
-      : async () => ({ status: "BLOCKED", reason: "configuration" }),
   });
+}
+
+/**
+ * Continues the open ANALYSIS_PENDING reservation stored in the workflow, whether a
+ * caller reserved it atomically or an earlier run was interrupted. Same session rules
+ * as runAnalysisForSession. Not a server action.
+ */
+export function resumeAnalysisForSession(
+  db: PrismaClient,
+  session: Session,
+): Promise<AnalysisServiceResult> {
+  return resumePendingAnalysis(db, session, configuredDependencies());
 }
