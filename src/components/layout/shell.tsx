@@ -28,12 +28,18 @@ function AppShell({
           <Link
             href={role === "patient" ? "/patient" : "/doctor"}
             aria-label="Health360 — home"
-            className="flex items-center gap-2 text-xl font-semibold tracking-tight"
+            className="flex items-center gap-2 text-xl font-semibold tracking-tight text-sidebar-foreground"
           >
-            <Activity aria-hidden="true" className="size-7 text-primary" />
-            health<span className="-ml-2 font-normal text-primary">360</span>
+            <Activity
+              aria-hidden="true"
+              className="size-7 text-sidebar-foreground"
+            />
+            health
+            <span className="-ml-2 font-normal text-sidebar-foreground/90">
+              360
+            </span>
           </Link>
-          <p className="hidden text-xs text-muted-foreground lg:block">
+          <p className="hidden text-xs text-sidebar-foreground/85 lg:block">
             {role === "patient"
               ? "Your preventive follow-up"
               : "Physician workspace · Interface reference"}

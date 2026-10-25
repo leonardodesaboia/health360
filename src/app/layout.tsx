@@ -10,8 +10,10 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className={GeistSans.variable}>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={GeistSans.variable} suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }

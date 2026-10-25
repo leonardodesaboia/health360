@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -66,41 +66,62 @@ export function ProfileView() {
       ) : (
         <>
           <Surface>
-            <h2>Structured profile</h2>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2>Structured profile</h2>
+              <span className="rounded-sm bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+                Provenance: System-structured
+              </span>
+            </div>
             <p className="mt-2 text-sm text-muted-foreground">
               System-structured from patient-reported answers. Software
               validation is not medical approval.
             </p>
-            <dl className="mt-4 space-y-3 text-sm">
-              <div>
-                <dt className="text-muted-foreground">Profile version</dt>
-                <dd className="tabular-nums">{profile.profile.version}</dd>
+            <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-3">
+              <div className="rounded-md border bg-background p-3">
+                <dt className="text-xs text-muted-foreground">
+                  Profile version
+                </dt>
+                <dd className="mt-1 font-semibold tabular-nums">
+                  {profile.profile.version}
+                </dd>
               </div>
-              <div>
-                <dt className="text-muted-foreground">Last updated</dt>
-                <dd className="tabular-nums">
+              <div className="rounded-md border bg-background p-3">
+                <dt className="text-xs text-muted-foreground">Last updated</dt>
+                <dd className="mt-1 font-semibold tabular-nums">
                   {new Intl.DateTimeFormat("en-US", {
                     dateStyle: "medium",
                     timeStyle: "short",
                   }).format(new Date(profile.profile.updatedAt))}
                 </dd>
               </div>
-              <div>
-                <dt className="text-muted-foreground">
+              <div className="rounded-md border bg-background p-3">
+                <dt className="text-xs text-muted-foreground">
                   Age (patient-reported)
                 </dt>
-                <dd>{profile.profile.age ?? "Unknown"}</dd>
+                <dd className="mt-1 font-semibold tabular-nums">
+                  {profile.profile.age ?? "Unknown"}
+                </dd>
               </div>
             </dl>
           </Surface>
           <Surface>
-            <h2>Patient-reported information</h2>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2>Patient-reported information</h2>
+              <span className="rounded-sm bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+                Provenance: Patient-reported
+              </span>
+            </div>
             <div className="mt-6">
               {answers && <AnswerSummary answers={answers} />}
             </div>
           </Surface>
           <Surface>
-            <h2>Previous examinations</h2>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2>Previous examinations</h2>
+              <span className="rounded-sm bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+                Provenance: Patient-reported
+              </span>
+            </div>
             {profile.examinations.length === 0 ? (
               <p className="mt-3 text-sm text-muted-foreground">
                 {profile.profile.intakeFacts?.priorScreening ===
@@ -110,9 +131,12 @@ export function ProfileView() {
               </p>
             ) : (
               profile.examinations.map((exam) => (
-                <div key={exam.id} className="mt-4 space-y-2 text-sm">
+                <div
+                  key={exam.id}
+                  className="mt-4 space-y-2 rounded-md border bg-background p-4 text-sm"
+                >
                   <h3>{exam.name}</h3>
-                  <p>
+                  <p className="tabular-nums">
                     Date:{" "}
                     {formatExaminationDate(
                       exam.performedAt,
@@ -129,7 +153,12 @@ export function ProfileView() {
             )}
           </Surface>
           <Surface>
-            <h2>Unknown information</h2>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2>Unknown information</h2>
+              <span className="rounded-sm bg-warning px-2.5 py-1 text-xs font-medium text-warning-foreground">
+                Explicit null / Unknowns
+              </span>
+            </div>
             {profile.profile.missingInformation.length ? (
               <ul className="mt-3 list-inside list-disc space-y-2 text-sm">
                 {profile.profile.missingInformation.map((gap) => (

@@ -2,34 +2,34 @@
 @import "tw-animate-css";
 
 :root {
-  --background: #f8faf9;
-  --foreground: #163b44;
+  --background: #f8f9fa;
+  --foreground: #0a1128;
   --card: #ffffff;
-  --card-foreground: #163b44;
-  --primary: #167d75;
+  --card-foreground: #0a1128;
+  --primary: #1b2040;
   --primary-foreground: #ffffff;
-  --secondary: #eaf3ef;
-  --secondary-foreground: #163b44;
-  --muted: #f0f4f2;
-  --muted-foreground: #52655f;
-  --accent: #eaf3ef;
-  --accent-foreground: #163b44;
-  --border: #d9e2df;
-  --input: #71847e;
-  --ring: #167d75;
+  --secondary: #eef2f6;
+  --secondary-foreground: #1b2040;
+  --muted: #f1f5f9;
+  --muted-foreground: #475569;
+  --accent: #eef2f6;
+  --accent-foreground: #1b2040;
+  --border: #e2e8f0;
+  --input: #64748b;
+  --ring: #1b2040;
   --destructive: #a52b36;
   --destructive-foreground: #ffffff;
-  --success: #eaf3ef;
-  --success-foreground: #236349;
+  --success: #ecfdf5;
+  --success-foreground: #065f46;
   --warning: #fff4db;
   --warning-foreground: #795012;
   --information: #edf3f8;
-  --information-foreground: #305a7d;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #163b44;
-  --navigation-active: #eaf3ef;
-  --navigation-active-foreground: #163b44;
-  --navigation-hover: #f0f4f2;
+  --information-foreground: #1e3a5f;
+  --sidebar: #1b2040;
+  --sidebar-foreground: #ffffff;
+  --navigation-active: #ffffff;
+  --navigation-active-foreground: #1b2040;
+  --navigation-hover: #283059;
   --radius: 0.5rem;
 }
 
@@ -80,6 +80,8 @@
   }
   body {
     @apply bg-background font-sans text-base text-foreground antialiased;
+    font-feature-settings: "tnum" 1;
+    font-variant-numeric: tabular-nums;
   }
   h1,
   h2,

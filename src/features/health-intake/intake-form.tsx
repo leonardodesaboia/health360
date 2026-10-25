@@ -5,6 +5,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Notice, Surface } from "@/components/shared/primitives";
+import { cn } from "@/lib/utils";
 import {
   fields,
   initialAnswers,
@@ -250,10 +251,15 @@ export function IntakeForm() {
           className="space-y-6"
         >
           <fieldset disabled={busy} className="space-y-6">
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Step {step + 1} of {steps.length}
-              </p>
+            <div className="space-y-3 rounded-lg border bg-card p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-medium text-muted-foreground tabular-nums">
+                  Step {step + 1} of {steps.length}
+                </p>
+                <span className="rounded-sm bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
+                  Explicit &ldquo;I don&apos;t know&rdquo; supported
+                </span>
+              </div>
               <div
                 role="progressbar"
                 aria-label="Intake progress"
@@ -267,11 +273,33 @@ export function IntakeForm() {
                   style={{ width: `${((step + 1) / steps.length) * 100}%` }}
                 />
               </div>
+              <ol className="grid grid-cols-2 gap-2 pt-1 text-xs sm:grid-cols-5">
+                {steps.map((item, idx) => (
+                  <li
+                    key={item.title}
+                    className={cn(
+                      "rounded-sm px-2 py-1 font-medium tabular-nums",
+                      idx === step
+                        ? "bg-primary text-primary-foreground"
+                        : idx < step
+                          ? "bg-secondary text-secondary-foreground"
+                          : "bg-muted text-muted-foreground",
+                    )}
+                  >
+                    0{idx + 1}. {item.title}
+                  </li>
+                ))}
+              </ol>
             </div>
             <Surface>
-              <h2 ref={heading} tabIndex={-1}>
-                {steps[step].title}
-              </h2>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 ref={heading} tabIndex={-1}>
+                  {steps[step].title}
+                </h2>
+                <span className="text-xs text-muted-foreground tabular-nums">
+                  Stage 0{step + 1} / 0{steps.length}
+                </span>
+              </div>
               <div className="mt-6 space-y-6">
                 {step === steps.length - 1 ? (
                   <>
@@ -283,7 +311,7 @@ export function IntakeForm() {
                       answers={getValues()}
                       onEdit={(target) => void save(target)}
                     />
-                    <label className="flex min-h-11 items-center gap-3 text-sm">
+                    <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-md border bg-background px-4 py-3 text-sm font-medium">
                       <input
                         id="confirm-intake"
                         type="checkbox"

@@ -2,14 +2,32 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import {
+  getActiveLocalFallback,
+  startLocalFallbackReassessment,
+} from "../clinical-review/service";
 import { getDemoSession } from "../demo/session";
 import { createDatabase } from "../db/client";
 import { inDatasetTransaction } from "../db/repository";
 import { beginReassessment } from "./reassessment";
 
 export async function startReassessment(form: FormData) {
-  const session = await getDemoSession();
-  if (!session) redirect("/patient");
+  let session = null;
+  try {
+    session = await getDemoSession();
+  } catch {
+    session = null;
+  }
+
+  if (!session) {
+    const local = await getActiveLocalFallback();
+    if (!local) redirect("/patient");
+    await startLocalFallbackReassessment(local.caseId);
+    revalidatePath("/patient/plan");
+    revalidatePath("/patient/history");
+    redirect("/patient/intake");
+  }
+
   const db = createDatabase();
   let failed = false;
   try {

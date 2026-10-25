@@ -9,24 +9,62 @@ import {
   StatusIndicator,
   Surface,
 } from "@/components/shared/primitives";
+import { ReviewWorkspace } from "@/features/clinical-review/review-workspace";
 import {
   demoExamination,
   demoPatient,
   demoProfile,
   demoReview,
 } from "@/features/patients/fixtures";
-// Only the known synthetic case exists in this foundation. Resolve unknown IDs before streaming.
-export const dynamicParams = false;
-export function generateStaticParams() {
-  return [{ reviewId: demoReview.id }];
-}
+import { loadDoctorReview } from "@/server/clinical-review/service";
+import { getDemoSession } from "@/server/demo/session";
+
 export default async function Review({
   params,
 }: {
   params: Promise<{ reviewId: string }>;
 }) {
   const { reviewId } = await params;
+  let session = null;
+  try {
+    session = await getDemoSession();
+  } catch {
+    session = null;
+  }
+  const state = await loadDoctorReview(session, reviewId);
+  if (!state) notFound();
+
+  if (state.mode === "session") {
+    return (
+      <ContentContainer width="workspace">
+        <PageHeader
+          eyebrow={`Clinical review · Synthetic scenario (${state.caseId})`}
+          title={state.patient.displayName}
+          description={`Age ${state.profile.age ?? "unknown"} · Profile v${state.profile.version} · Analysis v${state.analysis.version} · Patient-reported information, awaiting physician verification`}
+          action={
+            <Button variant="outline" asChild>
+              <Link href="/doctor">Back to queue</Link>
+            </Button>
+          }
+        />
+        <ReviewWorkspace
+          caseId={state.caseId}
+          patient={state.patient}
+          status={state.status}
+          profile={state.profile}
+          examinations={state.examinations}
+          clinicalContext={state.clinicalContext}
+          analysis={state.analysis}
+          existingReview={state.existingReview}
+          publishedPlan={state.publishedPlan}
+          isCurrentAnalysis={state.isCurrentAnalysis}
+        />
+      </ContentContainer>
+    );
+  }
+
   if (reviewId !== demoReview.id) notFound();
+
   return (
     <ContentContainer width="workspace">
       <PageHeader

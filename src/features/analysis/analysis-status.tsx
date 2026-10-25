@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import type { WorkflowStatus } from "@/features/workflow/workflow";
 import { AnalyzeButton } from "./analyze-button";
+import { ClarificationCard } from "./clarification-card";
 
 export function AnalysisStatus({
   status,
@@ -107,11 +108,18 @@ export function AnalysisStatus({
               <Link href="/patient/intake">View my history</Link>
             </Button>
           )}
+          {isReview ? (
+            <Button asChild>
+              <Link href="/doctor">Open physician review queue</Link>
+            </Button>
+          ) : null}
           <Button asChild variant="ghost">
             <Link href="/patient">Back to home</Link>
           </Button>
         </div>
       </Surface>
+
+      {status === "CLARIFICATION_REQUIRED" ? <ClarificationCard /> : null}
     </ContentContainer>
   );
 }

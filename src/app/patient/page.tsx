@@ -8,11 +8,21 @@ import {
   Surface,
 } from "@/components/shared/primitives";
 import { demoPatient } from "@/features/patients/fixtures";
+import { getActiveLocalFallback } from "@/server/clinical-review/service";
 import { getDemoSession } from "@/server/demo/session";
 
 export default async function PatientHome() {
   // Without a selected demo case, the reference fixture keeps the page illustrative.
-  const patient = (await getDemoSession())?.patient ?? demoPatient;
+  let sessionPatient = null;
+  try {
+    sessionPatient = (await getDemoSession())?.patient ?? null;
+  } catch {
+    sessionPatient = null;
+  }
+  const patient =
+    sessionPatient ??
+    (await getActiveLocalFallback())?.patient ??
+    demoPatient;
   return (
     <ContentContainer>
       <PageHeader
