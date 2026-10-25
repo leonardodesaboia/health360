@@ -1,6 +1,6 @@
 # Navigation and workflow
 
-## Foundation routes
+## Current routes
 
 `/` redirects to `/patient`. Patient navigation is Home, My plan and History; the home
 shows a case-selection entry state without a demo session. Once a case is selected,
@@ -20,8 +20,8 @@ The demo role link changes between `/patient` and `/doctor`. It is neither login
 nor authorization. Reassessment mutations go through the server workflow service;
 navigation alone does not complete an analysis, review or publication.
 The plan page reads persisted records and never publishes on a
-page visit. The review finalization service invokes guarded plan publication inside
-the same serialized dataset transaction.
+page visit. The pending P0-10 review finalization service must invoke guarded plan publication
+inside the same serialized dataset transaction; no production caller exists yet.
 No route reveals unreviewed proposals as patient guidance.
 
 ## Patient history
@@ -110,7 +110,9 @@ Review supports editing any step. Explicit confirmation saves one immutable prof
 version and completed intake atomically in the browser-local demonstrator. Repeating
 unchanged confirmation does not create another version. Stale edits fail visibly.
 The consolidated `/patient/profile` shows declared versus unknown data and structured
-version/update metadata, with no score or medical approval claim. No analysis starts.
+version/update metadata, with no score or medical approval claim. For a selected
+session, confirmation instead persists through the server adapter and redirects to
+/patient/analysis; analysis starts through its separate action.
 
 ## Persisted administrative state
 
@@ -120,7 +122,8 @@ per-patient transaction lock serializes concurrent changes. Actor, time, version
 and optional reason/profile/analysis/review/plan references remain in immutable
 audit history. This API does not change the graph above or establish that a
 clinical precondition passed. Callers must enforce those checks atomically with
-the transition. Existing screens still perform no transitions.
+the transition. Intake, analysis and reassessment server actions now append transitions; the
+physician reader does not complete review or publish.
 
 ## Analysis stage (P0-07)
 

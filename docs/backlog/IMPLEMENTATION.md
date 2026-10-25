@@ -1,8 +1,8 @@
 # Canonical ordered implementation index
 
-Status at foundation handoff: **all tasks below are planned, not implemented**.
-Foundation routes, contracts and fixtures are available. They do not satisfy the
-functional MVP acceptance criteria. Source of truth for product substance:
+The foundation has been extended with implemented MVP slices; the complete MVP
+is still unfinished. See the dated [current-state inventory](../STATUS.md) for
+landed PRs and integration gaps; per-task lifecycle records remain below. Source of truth for product substance:
 [PRODUCT_CONTEXT.md](../product/PRODUCT_CONTEXT.md). See [AGENTS.md](../../AGENTS.md)
 for execution and definition of done. No issues have been published.
 
@@ -13,7 +13,7 @@ scenarios, rules and expected demo outcomes under [ADR0003](../adr/0003-mvp-runt
 data and UI carry **DEMONSTRATIVE — NOT CLINICALLY VALIDATED**, evidence is publicly
 verifiable (guideline, issuer, year, URL) or explicitly `evidence: placeholder`, and
 physician review gates remain mandatory. Placeholders cannot satisfy evidence validation.
-Real clinical use requires formal medical review. All entries below remain planned.
+Real clinical use requires formal medical review. Task states are recorded per entry.
 
 ## OpenSpec task lifecycle
 
@@ -27,7 +27,7 @@ OpenSpec1.14.3 is the adopted **per-task specification workflow**, installed as 
 
 The CLI's `status --json` `isComplete` flag describes planning artifacts, not delivered functionality. Inspect `instructions apply --change <stable-id> --json` for actual checklist progress. Dependencies and scenario-policy requirements are not automatically enforced by CLI readiness.
 
-All 18 entries remain **planned** in this setup. Pre-created unimplemented draft folders were removed when adopting this pickup lifecycle; no implementation or completed archive was discarded. Existing baseline specs describe implemented capabilities only. Workflow comparison and rationale: [ADR0002](../adr/0002-spec-driven-workflow.md); specialist mapping: [WORKFLOW.md](../ai/WORKFLOW.md).
+At workflow adoption, all 18 entries were planned. Pre-created unimplemented draft folders were removed; no implementation or completed archive was discarded. Current entries now include active and archived changes. Existing baseline specs describe implemented capabilities only. Workflow comparison and rationale: [ADR0002](../adr/0002-spec-driven-workflow.md); specialist mapping: [WORKFLOW.md](../ai/WORKFLOW.md).
 
 ## P0 — Required, ordered
 
@@ -36,11 +36,11 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-01 — Synthetic persistence and version boundaries
 
 - Stable OpenSpec change ID: `p0-01-persistence`.
-- Status: **implemented; PR pending**; [archive](../../openspec/changes/archive/2026-10-22-p0-01-persistence/).
+- Status: **implemented; PR #8 merged**; [archive](../../openspec/changes/archive/2026-10-22-p0-01-persistence/).
 - Implementation evidence: [verification](../../openspec/changes/archive/2026-10-22-p0-01-persistence/tasks.md): 169 unit tests, 7 PostgreSQL integration tests, 22 production e2e tests after rebase on main; verify/format/strict specs pass.
 
 - Goal: establish PostgreSQL/Prisma persistence for core records with immutable profile/analysis/plan versions.
-- Depends on: foundation. Local environment selected: PostgreSQL 17 via Docker Compose; Prisma remains the planned ORM (ADR0003).
+- Depends on: foundation. Local environment selected: PostgreSQL 17 via Docker Compose; Prisma is the implemented ORM (ADR0003).
 - Areas: future `src/server/db`, Prisma schema/migrations, contracts, `.env.example`, architecture.
 - Accept: synthetic seeds only; stable IDs/foreign keys; review/analysis/profile/context version links; previous versions cannot be silently overwritten; no clinical data in logs.
 - Tests: isolated DB migration/seed integration, referential integrity, rollback, unique version constraints, no fixture mutation.
@@ -51,7 +51,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 
 - Stable OpenSpec change ID: `p0-02-demo-session`.
 - Status: **in progress**; [change](../../openspec/changes/p0-02-demo-session/).
-- Implementation evidence: [phase A/B tasks](../../openspec/changes/p0-02-demo-session/tasks.md). Server session module first; presenter UI remains planned. No archive yet.
+- Implementation evidence: [phase A/B tasks](../../openspec/changes/p0-02-demo-session/tasks.md). Session and presenter UI landed in PRs [#16](https://github.com/leonardodesaboia/health360/pull/16) and [#19](https://github.com/leonardodesaboia/health360/pull/19). Lifecycle checklist remains active; no archive yet.
 
 - Goal: select a prepared synthetic case and share its state across patient/doctor views.
 - Depends on: P0-01.
@@ -65,7 +65,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 
 - Stable OpenSpec change ID: `p0-03-intake-draft`.
 - Status: **done**; [archive](../../openspec/changes/archive/2026-10-22-p0-03-intake-draft/).
-- Implementation/archive evidence: [verification](../../openspec/changes/archive/2026-10-22-p0-03-intake-draft/tasks.md); [PR #9](https://github.com/leonardodesaboia/health360/pull/9). Browser-local adapter; database/session integration follows Worker A.
+- Implementation/archive evidence: [verification](../../openspec/changes/archive/2026-10-22-p0-03-intake-draft/tasks.md); [PR #9](https://github.com/leonardodesaboia/health360/pull/9). Database/session integration landed in [PR #18](https://github.com/leonardodesaboia/health360/pull/18); drafts remain browser-local.
 
 - Goal: implement basic profile and clinical-history steps before extending questions.
 - Depends on: P0-01, P0-02; approved minimal scenario fields.
@@ -79,7 +79,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 
 - Stable OpenSpec change ID: `p0-04-clinical-profile`.
 - Status: **done**; [archive](../../openspec/changes/archive/2026-10-23-p0-04-clinical-profile/).
-- Implementation/archive evidence: [verification](../../openspec/changes/archive/2026-10-23-p0-04-clinical-profile/tasks.md); [PR #17](https://github.com/leonardodesaboia/health360/pull/17). Browser-local adapter; dataset/session wiring and workflow transitions follow in a separate PR after P0-02.
+- Implementation/archive evidence: [verification](../../openspec/changes/archive/2026-10-23-p0-04-clinical-profile/tasks.md); [PR #17](https://github.com/leonardodesaboia/health360/pull/17). Dataset/session wiring and workflow transitions landed in [PR #18](https://github.com/leonardodesaboia/health360/pull/18).
 
 - Goal: finish habits/medications/examination/review steps and consolidate the versioned profile.
 - Depends on: P0-03.
@@ -93,7 +93,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 
 - Stable OpenSpec change ID: `p0-05-clinical-context`.
 - Status: **done**; [archive](../../openspec/changes/archive/2026-10-22-p0-05-clinical-context/proposal.md).
-- Implementation/archive evidence: [verification and review](../../openspec/changes/archive/2026-10-22-p0-05-clinical-context/tasks.md); PR link follows after creation.
+- Implementation/archive evidence: [verification and review](../../openspec/changes/archive/2026-10-22-p0-05-clinical-context/tasks.md); [PR #7](https://github.com/leonardodesaboia/health360/pull/7).
 
 - Goal: load a small versioned demonstrative scenario/context authored by agents under the ADR0003 demonstrative safety policy.
 - Depends on: P0-04; agent-authored demonstrative criteria and expected outcomes, with verifiable source metadata or explicit evidence placeholders (ADR0003).
@@ -108,7 +108,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 - Stable OpenSpec change ID: `p0-06-llm-adapter`.
 - Status: **done**; [archive](../../openspec/changes/archive/2026-10-23-p0-06-llm-adapter/proposal.md); [PR #10](https://github.com/leonardodesaboia/health360/pull/10).
 - Implementation evidence: [verification and review](../../openspec/changes/archive/2026-10-23-p0-06-llm-adapter/tasks.md): 202 unit tests (live smoke skipped), 28 production e2e tests after rebase on main; verify/format/strict specs pass. Real API call not run.
-- Mock findings follow-up: **in progress**; [change](../../openspec/changes/p0-06-mock-findings/).
+- Mock findings follow-up: **merged in [PR #15](https://github.com/leonardodesaboia/health360/pull/15)**; [change](../../openspec/changes/p0-06-mock-findings/).
 
 - Goal: introduce a provider interface and one external API adapter using configurable provider/model.
 - Depends on: P0-05; OpenAI selected (ADR0003), model via `LLM_MODEL`; user supplies `OPENAI_API_KEY` separately. Provider selection is resolved.
@@ -121,7 +121,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-07 — Validation and analysis orchestration
 
 - Stable OpenSpec change ID: `p0-07-analysis-validation`.
-- Status: **done (PR open)**; [archived change](../../openspec/changes/archive/2026-10-24-p0-07-analysis-validation/) with [verification evidence](../../openspec/changes/archive/2026-10-24-p0-07-analysis-validation/tasks.md).
+- Status: **done (PR merged)**; [archived change](../../openspec/changes/archive/2026-10-24-p0-07-analysis-validation/) with [verification evidence](../../openspec/changes/archive/2026-10-24-p0-07-analysis-validation/tasks.md).
 - Implementation/archive evidence: [PR #20](https://github.com/leonardodesaboia/health360/pull/20).
 
 - Goal: validate evidence/category/required-field integrity and persist preliminary analysis safely.
@@ -135,7 +135,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-08 — Do Not Test slice
 
 - Stable OpenSpec change ID: `p0-08-do-not-test`.
-- Status: **done (PR open)**; [archived change](../../openspec/changes/archive/2026-10-25-p0-08-do-not-test/) with [verification evidence](../../openspec/changes/archive/2026-10-25-p0-08-do-not-test/tasks.md).
+- Status: **done (PR merged)**; [archived change](../../openspec/changes/archive/2026-10-25-p0-08-do-not-test/) with [verification evidence](../../openspec/changes/archive/2026-10-25-p0-08-do-not-test/tasks.md).
 - Implementation/archive evidence: [PR #23](https://github.com/leonardodesaboia/health360/pull/23).
 
 - Goal: contextualize possible redundancy from an agent-authored demonstrative deterministic rule under ADR0003.
@@ -163,7 +163,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-10 — Physician decisions and finalization
 
 - Stable OpenSpec change ID: `p0-10-physician-decisions`.
-- Status: **planned**; change not yet picked up.
+- Status: **in progress outside main**; decisions/finalization are not implemented on main. See [STATUS](../STATUS.md).
 - Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
 
 - Goal: persist approve/modify/reject/pending/clarify decisions with audit metadata.
@@ -191,7 +191,7 @@ All 18 entries remain **planned** in this setup. Pre-created unimplemented draft
 ### P0-12 — Deterministic clarification loop
 
 - Stable OpenSpec change ID: `p0-12-clarification`.
-- Status: **done (PR open)**; [archive](../../openspec/changes/archive/2026-10-25-p0-12-clarification/); [PR #26](https://github.com/leonardodesaboia/health360/pull/26).
+- Status: **done**; [archive](../../openspec/changes/archive/2026-10-25-p0-12-clarification/); [PR #26](https://github.com/leonardodesaboia/health360/pull/26) (merged).
 - Implementation evidence: [verification](../../openspec/changes/archive/2026-10-25-p0-12-clarification/tasks.md): verify passes (407 unit tests), 74 PostgreSQL integration tests, 74 desktop/mobile e2e tests on port 3250, formatting and strict specs pass. Typed physician-origin requests remain explicitly unavailable until P0-10 supplies a reader, as agreed.
 
 - Goal: collect application-selected missing fields without a chatbot.
