@@ -327,3 +327,9 @@ data and the limitation that a recent test alone does not establish redundancy. 
 unknown date routes to clarification; an examination at or beyond the interval, or one
 that is abnormal, incomplete or inadequately prepared, never yields redundancy. The
 proposal stays out of patient reads until a finalized physician review publishes a plan.
+
+Server-only `runAnalysisForSession(db, session)` in `src/server/analysis/run.ts` wraps
+`analyzeSession` with the configured provider and audit metadata. It is the stable entry
+for other server code (for example clarification re-runs from CLARIFICATION_REQUIRED or
+reassessment) and is not a server action; callers must pass a session resolved by
+getDemoSession. The cookie-bound `analyzeCurrentDemo` action delegates to it.

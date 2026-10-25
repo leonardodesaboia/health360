@@ -14,3 +14,4 @@
 - `PORT=3210 pnpm test:e2e`: 58 passed (desktop and mobile).
 - `pnpm format:check`: pass. `openspec validate --all --strict`: 15 passed, 0 failed.
 - Not covered here: physician presentation of `ruleReferences` (P0-09/P0-10 owners) and a live browser walkthrough.
+- Follow-up (orchestrator request): server-only `runAnalysisForSession(db, session)` in src/server/analysis/run.ts is the stable re-run entry for the clarification worker. Integration test proves CLARIFICATION_REQUIRED → new profile version → MEDICAL_REVIEW_PENDING with a POSSIBLE_REDUNDANCY proposal. Re-verified: verify 386 passed (1 skipped), integration 9 files / 61 passed, PORT=3210 e2e 58 passed, format pass, OpenSpec 15/15.
