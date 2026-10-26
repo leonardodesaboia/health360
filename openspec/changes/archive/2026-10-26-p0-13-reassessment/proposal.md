@@ -1,6 +1,6 @@
 ## Why
 
-P0-13 in [the ordered index](../../../docs/backlog/IMPLEMENTATION.md#p0-13) requires a patient history and preserved plan versions while a new evaluation is prepared for the HISIC demonstration.
+P0-13 in [the ordered index](../../../../docs/backlog/IMPLEMENTATION.md#p0-13) requires a patient history and preserved plan versions while a new evaluation is prepared for the HISIC demonstration.
 
 ## What Changes
 

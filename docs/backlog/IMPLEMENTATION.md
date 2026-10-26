@@ -50,8 +50,8 @@ At workflow adoption, all 18 entries were planned. Pre-created unimplemented dra
 ### P0-02 — Demonstration session and reset
 
 - Stable OpenSpec change ID: `p0-02-demo-session`.
-- Status: **in progress**; [change](../../openspec/changes/p0-02-demo-session/).
-- Implementation evidence: [phase A/B tasks](../../openspec/changes/p0-02-demo-session/tasks.md). Session and presenter UI landed in PRs [#16](https://github.com/leonardodesaboia/health360/pull/16) and [#19](https://github.com/leonardodesaboia/health360/pull/19). Lifecycle checklist remains active; no archive yet.
+- Status: **done**; [archive](../../openspec/changes/archive/2026-10-26-p0-02-demo-session/). Session module, presenter UI and case-scoped queue/workspace landed in PRs [#16](https://github.com/leonardodesaboia/health360/pull/16), [#19](https://github.com/leonardodesaboia/health360/pull/19) and [#21](https://github.com/leonardodesaboia/health360/pull/21).
+- Implementation evidence: [phase A/B tasks and closeout reconciliation](../../openspec/changes/archive/2026-10-26-p0-02-demo-session/tasks.md); archived by the P0-14 closeout PR. The superseded "disabled decisions / unavailable plan" demo-mode requirement was removed from the baseline.
 
 - Goal: select a prepared synthetic case and share its state across patient/doctor views.
 - Depends on: P0-01.
@@ -108,7 +108,7 @@ At workflow adoption, all 18 entries were planned. Pre-created unimplemented dra
 - Stable OpenSpec change ID: `p0-06-llm-adapter`.
 - Status: **done**; [archive](../../openspec/changes/archive/2026-10-23-p0-06-llm-adapter/proposal.md); [PR #10](https://github.com/leonardodesaboia/health360/pull/10).
 - Implementation evidence: [verification and review](../../openspec/changes/archive/2026-10-23-p0-06-llm-adapter/tasks.md): 202 unit tests (live smoke skipped), 28 production e2e tests after rebase on main; verify/format/strict specs pass. Real API call not run.
-- Mock findings follow-up: **merged in [PR #15](https://github.com/leonardodesaboia/health360/pull/15)**; [change](../../openspec/changes/p0-06-mock-findings/).
+- Mock findings follow-up: **merged in [PR #15](https://github.com/leonardodesaboia/health360/pull/15)**; [archive](../../openspec/changes/archive/2026-10-26-p0-06-mock-findings/).
 
 - Goal: introduce a provider interface and one external API adapter using configurable provider/model.
 - Depends on: P0-05; OpenAI selected (ADR0003), model via `LLM_MODEL`; user supplies `OPENAI_API_KEY` separately. Provider selection is resolved.
@@ -163,7 +163,7 @@ At workflow adoption, all 18 entries were planned. Pre-created unimplemented dra
 ### P0-10 — Physician decisions and finalization
 
 - Stable OpenSpec change ID: `p0-10-physician-decisions`.
-- Status: **done (PR open)**; [archive](../../openspec/changes/archive/2026-10-25-p0-10-physician-decisions/); [PR #28](https://github.com/leonardodesaboia/health360/pull/28).
+- Status: **done**; [archive](../../openspec/changes/archive/2026-10-25-p0-10-physician-decisions/); [PR #28](https://github.com/leonardodesaboia/health360/pull/28) (merged).
 - Implementation evidence: [verification](../../openspec/changes/archive/2026-10-25-p0-10-physician-decisions/tasks.md): verify passes (430 unit tests), 83 PostgreSQL integration tests, 84 desktop/mobile e2e tests on port 3220, formatting and strict specs pass. Exports the typed `listOpenClarificationRequests` reader for P0-12.
 
 - Goal: persist approve/modify/reject/pending/clarify decisions with audit metadata.
@@ -177,8 +177,8 @@ At workflow adoption, all 18 entries were planned. Pre-created unimplemented dra
 ### P0-11 — Reviewed preventive plan
 
 - Stable OpenSpec change ID: `p0-11-reviewed-plan`.
-- Status: **in progress**; [change](../../openspec/changes/p0-11-reviewed-plan/).
-- Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
+- Status: **done**; [archive](../../openspec/changes/archive/2026-10-26-p0-11-reviewed-plan/); [PR #11](https://github.com/leonardodesaboia/health360/pull/11) (merged).
+- Implementation evidence: [verification and closeout](../../openspec/changes/archive/2026-10-26-p0-11-reviewed-plan/tasks.md). P0-10 finalization ([#28](https://github.com/leonardodesaboia/health360/pull/28)) publishes atomically; acceptance Flows A/B ([#33](https://github.com/leonardodesaboia/health360/pull/33), [#35](https://github.com/leonardodesaboia/health360/pull/35)) prove publication through real browser controls.
 
 - Goal: publish a patient-facing version derived solely from finalized physician decisions.
 - Depends on: P0-10.
@@ -191,7 +191,7 @@ At workflow adoption, all 18 entries were planned. Pre-created unimplemented dra
 ### P0-12 — Deterministic clarification loop
 
 - Stable OpenSpec change ID: `p0-12-clarification`.
-- Physician-origin follow-up: **done (PR open)**; [PR #30](https://github.com/leonardodesaboia/health360/pull/30); [archive and verification](../../openspec/changes/archive/2026-10-26-physician-patient-clarification/) consumes the typed P0-10 reader for bounded and free-text patient answers. Verify passes (439 unit tests), 86 PostgreSQL integration tests, 90 desktop/mobile e2e tests on port 3250, formatting and strict specs pass.
+- Physician-origin follow-up: **done (merged)**; [PR #30](https://github.com/leonardodesaboia/health360/pull/30); [archive and verification](../../openspec/changes/archive/2026-10-26-physician-patient-clarification/) consumes the typed P0-10 reader for bounded and free-text patient answers. Verify passes (439 unit tests), 86 PostgreSQL integration tests, 90 desktop/mobile e2e tests on port 3250, formatting and strict specs pass.
 - Status: **done**; [archive](../../openspec/changes/archive/2026-10-25-p0-12-clarification/); [PR #26](https://github.com/leonardodesaboia/health360/pull/26) (merged).
 - Original delivery evidence: [verification](../../openspec/changes/archive/2026-10-25-p0-12-clarification/tasks.md): verify passes (407 unit tests), 74 PostgreSQL integration tests, 74 desktop/mobile e2e tests on port 3250, formatting and strict specs pass. That delivery covered AI-origin requests; the physician-origin follow-up above consumes P0-10's typed reader.
 
@@ -208,8 +208,8 @@ At workflow adoption, all 18 entries were planned. Pre-created unimplemented dra
 - Intake integration follow-up: [verified fix](../../openspec/changes/archive/2026-10-25-fix-reassessment-intake/), [PR #25](https://github.com/leonardodesaboia/health360/pull/25); resumes real intake and preserves the original reviewed plan. Full second physician-review cycle remains owned by the existing producers.
 
 - Stable OpenSpec change ID: `p0-13-reassessment`.
-- Status: **in progress**; [change](../../openspec/changes/p0-13-reassessment/).
-- Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
+- Status: **done**; [archive](../../openspec/changes/archive/2026-10-26-p0-13-reassessment/); PRs [#14](https://github.com/leonardodesaboia/health360/pull/14) and [#25](https://github.com/leonardodesaboia/health360/pull/25) (merged).
+- Implementation evidence: [verification and closeout](../../openspec/changes/archive/2026-10-26-p0-13-reassessment/tasks.md). Acceptance Flow D ([#33](https://github.com/leonardodesaboia/health360/pull/33), [#35](https://github.com/leonardodesaboia/health360/pull/35)) completes two real review cycles with plan v1 preserved.
 
 - Goal: preserve events and prior plans while a new cycle is prepared.
 - Depends on: P0-11, P0-12.
@@ -222,8 +222,8 @@ At workflow adoption, all 18 entries were planned. Pre-created unimplemented dra
 ### P0-14 — Prepared demonstration and complete acceptance suite
 
 - Stable OpenSpec change ID: `p0-14-demo-acceptance`.
-- Status: **in progress (part 1)**; [active change](../../openspec/changes/p0-14-demo-acceptance/). Part 1 covers the judge walkthrough and A–E browser acceptance; the 18-point acceptance audit and timed release rehearsal remain.
-- Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
+- Status: **in progress (closeout)**; [active change](../../openspec/changes/p0-14-demo-acceptance/). Part 1, the judge walkthrough and A–E browser acceptance, merged in [#33](https://github.com/leonardodesaboia/health360/pull/33) and [#35](https://github.com/leonardodesaboia/health360/pull/35). Part 2, prepared presentation starting points, merged in [#36](https://github.com/leonardodesaboia/health360/pull/36) ([archive](../../openspec/changes/archive/2026-10-26-p0-14-prepared-starting-points/)).
+- Implementation evidence: [18-point acceptance audit](../../openspec/changes/p0-14-demo-acceptance/tasks.md): 17 of 18 points covered. Remaining before archive: a separately authorized synthetic live OpenAI run (point 5) and the presenter's timed rehearsal on the release build using the [outline](../product/DEMO_SCRIPT.md#timed-rehearsal-outline).
 
 - Goal: assemble an explicitly synthetic reproducible HISIC demonstration across A–E.
 - Depends on: P0-01 through P0-13.

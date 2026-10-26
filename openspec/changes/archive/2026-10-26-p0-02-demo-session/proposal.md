@@ -2,7 +2,7 @@
 
 ## Why
 
-[P0-02](../../../docs/backlog/IMPLEMENTATION.md#p0-02) lets a presenter pick one prepared synthetic case and see the same stored case in the patient and physician views, then reset it. It depends on P0-01 persistence (PR #8) and reuses the P0-05 synthetic scenario inputs.
+[P0-02](../../../../docs/backlog/IMPLEMENTATION.md#p0-02) lets a presenter pick one prepared synthetic case and see the same stored case in the patient and physician views, then reset it. It depends on P0-01 persistence (PR #8) and reuses the P0-05 synthetic scenario inputs.
 
 ## What Changes
 

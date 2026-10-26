@@ -4,7 +4,13 @@
 - [x] 2. Implement dataset-scoped atomic publication and legal workflow transition with idempotence and service regression tests.
 - [x] 3. Replace static plan route with persisted reviewed content and explicit unavailable/error states; add desktop/mobile e2e coverage.
 - [x] 4. Run full verification and responsive/keyboard checks; self-review clinical, design, security and spec conformance; record real evidence.
-- [ ] 5. Archive the implemented change, update canonical docs/index, and open a PR to protected main; request AO review and address findings.
+- [x] 5. Archive the implemented change, update canonical docs/index, and open a PR to protected main; request AO review and address findings.
+
+## Closeout reconciliation (2026-10-26, origin/main 4445499)
+
+- The publisher and patient route merged in [PR #11](https://github.com/leonardodesaboia/health360/pull/11). The producer gap noted above is closed: P0-10 finalization ([PR #28](https://github.com/leonardodesaboia/health360/pull/28)) calls `publishReviewedPlan` inside its finalization transaction (`src/server/clinical-review/decisions.ts`).
+- Live-producer flows A/B are now proven through real browser controls by the merged acceptance suite ([PR #33](https://github.com/leonardodesaboia/health360/pull/33), [PR #35](https://github.com/leonardodesaboia/health360/pull/35)): "Flow A completion" publishes plan v1 with only approved wording; "Flow B completion" publishes only the physician's modified wording. Rejection exclusion is covered in `tests/e2e/physician-decisions.spec.ts` (fixture-seeded review, real decision UI) and `tests/integration/reviewed-plan.test.ts`.
+- Archive, index and STATUS updates land in the P0-14 closeout PR; fresh verification is recorded there.
 
 ## Verification evidence (2026-10-24)
 
