@@ -7,6 +7,7 @@ import type {
 } from "../../features/patients/contracts";
 import type { DemoContext } from "../clinical-rules/contracts";
 import { demoScenarios } from "../clinical-rules/scenarios";
+import type { PreparedDemoStateId } from "./starting-points";
 
 // Demonstration navigation state only. A demo session is never an identity or authorization.
 export const demoCaseIds = ["first-screening", "repeat-screening"] as const;
@@ -20,6 +21,7 @@ export const demoSessionTokenSchema = z
   .regex(/^[A-Za-z0-9_-]{43}$/, "Invalid demo session token");
 
 export type StoredDemoCase = {
+  preparedStateId?: PreparedDemoStateId;
   clinicalContext: DemoContext;
   caseId: DemoCaseId;
   patient: Patient;

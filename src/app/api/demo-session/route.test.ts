@@ -39,4 +39,20 @@ describe("demo presenter state", () => {
     expect(await response.json()).toEqual({ status: "unavailable" });
     expect(response.headers.get("Cache-Control")).toBe("no-store");
   });
+
+  it("exposes only the allowlisted prepared point label with demonstrative copy", async () => {
+    getSession.mockResolvedValue({
+      caseId: "first-screening",
+      preparedStateId: "alex-plan-v1",
+      datasetId: "private-dataset",
+      patient: { displayName: "Alex Example" },
+    });
+    const response = await GET();
+    const body = await response.json();
+    expect(body.preparedStateId).toBe("alex-plan-v1");
+    expect(body.summary).toContain("Alex — reviewed plan v1");
+    expect(body.summary).toContain("DEMONSTRATIVE — NOT CLINICALLY VALIDATED");
+    expect(body).not.toHaveProperty("datasetId");
+    expect(body).not.toHaveProperty("profile");
+  });
 });

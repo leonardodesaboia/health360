@@ -11,6 +11,7 @@ import {
   type StoredDemoCase,
 } from "./contracts";
 import { demoCaseRecords } from "./records";
+import { demoSelectionIdSchema, resolveDemoSelection } from "./starting-points";
 
 async function replaceRecords(
   tx: Prisma.TransactionClient,
@@ -83,9 +84,10 @@ export async function loadDemoCase(
   return db.$transaction(
     async (tx) => {
       const dataset = await tx.dataset.findUnique({ where: { id: datasetId } });
-      const parsed = demoCaseIdSchema.safeParse(dataset?.scenarioId);
+      const parsed = demoSelectionIdSchema.safeParse(dataset?.scenarioId);
       if (!parsed.success) return null;
-      const patientId = demoCaseRecords(parsed.data).patient.id;
+      const selection = resolveDemoSelection(parsed.data);
+      const patientId = demoCaseRecords(selection.caseId).patient.id;
       const repository = datasetRepository(tx, datasetId);
       const patient = (await repository.list("patient")).find(
         (p) => p.id === patientId,
@@ -101,7 +103,7 @@ export async function loadDemoCase(
       );
       if (examinations.length !== profile.examinationIds.length)
         throw new Error("Selected demo case is incomplete");
-      const reference = loadClinicalContext(parsed.data, 1);
+      const reference = loadClinicalContext(selection.caseId, 1);
       const storedContext = await tx.clinicalContext.findUnique({
         where: {
           datasetId_id_version: {
@@ -113,11 +115,14 @@ export async function loadDemoCase(
       });
       if (!storedContext) throw new Error("Selected demo case is incomplete");
       const clinicalContext = demoContextSchema.parse(storedContext.payload);
-      if (clinicalContext.scenarioId !== parsed.data)
+      if (clinicalContext.scenarioId !== selection.caseId)
         throw new Error("Selected demo context does not match case");
       return {
         clinicalContext,
-        caseId: parsed.data,
+        caseId: selection.caseId,
+        ...(selection.preparedStateId
+          ? { preparedStateId: selection.preparedStateId }
+          : {}),
         patient: {
           ...patient,
           status: await getWorkflowStatus(tx, datasetId, patientId),
