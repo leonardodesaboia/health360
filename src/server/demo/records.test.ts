@@ -1,10 +1,65 @@
 import { describe, expect, it } from "vitest";
-import { demoScenarios } from "../clinical-rules/scenarios";
+import { demoScenarios, scenarioVariant } from "../clinical-rules/scenarios";
+import { intakeFactsSchema } from "../../features/patients/contracts";
+import { mapIntakeFacts } from "../analysis/facts";
+import { evaluateScreening } from "../clinical-rules/evaluate";
 import { validateRecord } from "../db/records";
 import { demoCaseIdSchema, demoSessionTokenSchema } from "./contracts";
 import { demoCaseRecords, demoDatasetId, newDemoSessionToken } from "./records";
 
 describe("demo session records", () => {
+  it.each(demoScenarios)("seeds complete typed facts for $id", (scenario) => {
+    const records = demoCaseRecords(scenario.id);
+    const facts = intakeFactsSchema.parse(records.profile.intakeFacts);
+    expect(mapIntakeFacts(facts)).toEqual(scenario.input.facts);
+    expect(facts).toEqual({
+      provenance: "PATIENT_REPORTED",
+      rectalBleeding: false,
+      bowelChange: false,
+      weightLoss: false,
+      colorectalCancer: false,
+      polyps: false,
+      ibd: false,
+      hereditaryCancerSyndrome: false,
+      serratedPolyposis: false,
+      familyCrc: false,
+      familySyndrome: false,
+      priorScreening:
+        scenario.id === "first-screening" ? "NEVER_SCREENED" : "COLONOSCOPY",
+      colonoscopyNormal: scenario.id === "first-screening" ? null : true,
+      colonoscopyComplete: scenario.id === "first-screening" ? null : true,
+      colonoscopyAdequatePrep: scenario.id === "first-screening" ? null : true,
+    });
+    const result = evaluateScreening({
+      ...scenario.input,
+      profile: records.profile,
+      examinations: records.examination,
+      facts: mapIntakeFacts(facts),
+    });
+    expect(result.status).toBe("READY_FOR_REVIEW");
+    expect(result.findings.map((finding) => finding.category)).toEqual([
+      scenario.expectedCategory,
+    ]);
+    expect(result.mayPublish).toBe(false);
+    expect(result.label).toBe("DEMONSTRATIVE — NOT CLINICALLY VALIDATED");
+  });
+
+  it.each([
+    ["unknown-date", "NEEDS_CLARIFICATION"],
+    ["new-symptoms", "OUT_OF_SCOPE"],
+  ])("preserves the typed %s variant", (variant, status) => {
+    const input = scenarioVariant("repeat-screening", variant);
+    expect(mapIntakeFacts(input.profile.intakeFacts)).toEqual(input.facts);
+    const result = evaluateScreening({
+      ...input,
+      facts: mapIntakeFacts(input.profile.intakeFacts),
+    });
+    expect(result.status).toBe(status);
+    expect(result.findings).toEqual([]);
+    if (variant === "unknown-date")
+      expect(input.examinations[0].performedAt).toBeNull();
+  });
+
   it("maps each prepared case to valid not-started storage records only", () => {
     const before = JSON.stringify(demoScenarios);
     for (const caseId of demoCaseIdSchema.options) {

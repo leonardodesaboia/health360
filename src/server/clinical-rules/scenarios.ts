@@ -21,6 +21,25 @@ function preparedInput(
       patientId,
       version: 1,
       age,
+      // Explicit fictional answers for these demonstrative cases, not defaults
+      // inferred from missing data or the legacy narrative history below.
+      intakeFacts: {
+        provenance: "PATIENT_REPORTED",
+        rectalBleeding: false,
+        bowelChange: false,
+        weightLoss: false,
+        colorectalCancer: false,
+        polyps: false,
+        ibd: false,
+        hereditaryCancerSyndrome: false,
+        serratedPolyposis: false,
+        familyCrc: false,
+        familySyndrome: false,
+        priorScreening: repeat ? "COLONOSCOPY" : "NEVER_SCREENED",
+        colonoscopyNormal: repeat ? true : null,
+        colonoscopyComplete: repeat ? true : null,
+        colonoscopyAdequatePrep: repeat ? true : null,
+      },
       personalHistory: [
         {
           value: "No listed colorectal risk history",
@@ -93,6 +112,7 @@ export function scenarioVariant(
   else if (variant === "unknown-age") input.profile.age = null;
   else if (variant === "new-symptoms") {
     input.facts.symptoms = true;
+    input.profile.intakeFacts!.rectalBleeding = true;
     input.profile.version = 2;
     input.profile.updatedAt = "2026-11-03T12:00:00Z";
   } else if (variant !== "baseline")
