@@ -73,6 +73,9 @@ const test = base.extend<{ reviewCase: ReviewCase; repeatCase: ReviewCase }>({
 // results get more than the 5 s default assertion timeout.
 const committed = { timeout: 30_000 };
 test.describe.configure({ timeout: 120_000 });
+// Axe must read resting colors, not a mid-transition frame; globals.css disables
+// transitions under prefers-reduced-motion, so the contrast rule stays unchanged.
+test.use({ reducedMotion: "reduce" });
 async function openReview(page: Page, baseURL: string, reviewCase: ReviewCase) {
   await page.context().addCookies([
     {
