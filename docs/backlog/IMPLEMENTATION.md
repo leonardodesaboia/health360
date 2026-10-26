@@ -107,7 +107,7 @@ At workflow adoption, all 18 entries were planned. Pre-created unimplemented dra
 
 - Stable OpenSpec change ID: `p0-06-llm-adapter`.
 - Status: **done**; [archive](../../openspec/changes/archive/2026-10-23-p0-06-llm-adapter/proposal.md); [PR #10](https://github.com/leonardodesaboia/health360/pull/10).
-- Implementation evidence: [verification and review](../../openspec/changes/archive/2026-10-23-p0-06-llm-adapter/tasks.md): 202 unit tests (live smoke skipped), 28 production e2e tests after rebase on main; verify/format/strict specs pass. Real API call not run.
+- Implementation evidence: [verification and review](../../openspec/changes/archive/2026-10-23-p0-06-llm-adapter/tasks.md): 202 unit tests (live smoke skipped), 28 production e2e tests after rebase on main; verify/format/strict specs pass. Live OpenAI smoke and UI flows were later run by health360-22 at `fe63370` ([STATUS](../STATUS.md#live-provider-verification)); narrative quality not clinically assessed.
 - Mock findings follow-up: **merged in [PR #15](https://github.com/leonardodesaboia/health360/pull/15)**; [archive](../../openspec/changes/archive/2026-10-26-p0-06-mock-findings/).
 
 - Goal: introduce a provider interface and one external API adapter using configurable provider/model.
@@ -223,7 +223,7 @@ At workflow adoption, all 18 entries were planned. Pre-created unimplemented dra
 
 - Stable OpenSpec change ID: `p0-14-demo-acceptance`.
 - Status: **in progress (closeout)**; [active change](../../openspec/changes/p0-14-demo-acceptance/). Part 1, the judge walkthrough and A–E browser acceptance, merged in [#33](https://github.com/leonardodesaboia/health360/pull/33) and [#35](https://github.com/leonardodesaboia/health360/pull/35). Part 2, prepared presentation starting points, merged in [#36](https://github.com/leonardodesaboia/health360/pull/36) ([archive](../../openspec/changes/archive/2026-10-26-p0-14-prepared-starting-points/)).
-- Implementation evidence: [18-point acceptance audit](../../openspec/changes/p0-14-demo-acceptance/tasks.md): 17 of 18 points covered. Remaining before archive: a separately authorized synthetic live OpenAI run (point 5) and the presenter's timed rehearsal on the release build using the [outline](../product/DEMO_SCRIPT.md#timed-rehearsal-outline).
+- Implementation evidence: [18-point acceptance audit](../../openspec/changes/p0-14-demo-acceptance/tasks.md): all 18 points mapped to evidence; point 5 relies on the live OpenAI run reported by health360-22 at `fe63370` ([STATUS](../STATUS.md#live-provider-verification)). Remaining before archive: the presenter's timed rehearsal on the release build using the [outline](../product/DEMO_SCRIPT.md#timed-rehearsal-outline).
 
 - Goal: assemble an explicitly synthetic reproducible HISIC demonstration across A–E.
 - Depends on: P0-01 through P0-13.
