@@ -54,9 +54,9 @@ a user can finalize a review. No full A–E suite is claimed.
   The physician reader uses the analyzed persisted profile.
 - Explicit physician finalization now publishes the reviewed plan in the same
   transaction; demo reviewer decisions are never clinical validation.
-- Case selection seeds the legacy profile/exam snapshot without typed intakeFacts.
-  Intake prefill does not reconstruct every exam/date answer. Complete the synthetic
-  facts explicitly before analysis; narrative negative history is not a substitute.
+- Case selection/reset now seeds complete typed synthetic intakeFacts for Alex's
+  screening-due and Jordan's possible-redundancy paths. Unknown-date and new-symptom
+  variants still clarify or block; intake prefill does not reconstruct every exam/date answer.
 - Clarification resolves only analysis-selected supported fields. Physician-origin
   CLARIFY requests are exposed by `listOpenClarificationRequests`, but the patient
   clarification loop does not consume them yet. Unknown

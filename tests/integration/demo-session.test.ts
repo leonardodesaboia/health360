@@ -12,6 +12,11 @@ import {
   resetDemoDataset,
 } from "../../src/server/demo/store";
 import { transitionWorkflow } from "../../src/server/workflow/state";
+import * as workflow from "../../src/server/workflow/state";
+import { analyzeSession } from "../../src/server/analysis/service";
+import { analyze } from "../../src/server/ai/analyze";
+import { MockProvider } from "../../src/server/ai/provider/mock";
+import { scenarioVariant } from "../../src/server/clinical-rules/scenarios";
 
 if (!process.env.TEST_DATABASE_URL)
   throw new Error(
@@ -41,6 +46,83 @@ async function snapshot(datasetId: string) {
 }
 
 describe("demo session storage", () => {
+  it.each([
+    ["first-screening", "PREVENTIVE_OPPORTUNITY", "crc-screening-due"],
+    ["repeat-screening", "POSSIBLE_REDUNDANCY", "crc-routine-repeat"],
+  ] as const)(
+    "analyzes freshly selected %s without rewriting intake facts",
+    async (caseId, category, ruleId) => {
+      await replaceDemoDataset(db, a, caseId);
+      const selected = (await loadDemoCase(db, a))!;
+      expect(selected.profile.intakeFacts).toBeDefined();
+      expect(selected.patient.status).toBe("NOT_STARTED");
+      await completeIntake(selected.patient.id);
+      const result = await analyzeSelected(caseId, selected.patient.id);
+      expect(result).toMatchObject({
+        status: "RECORDED",
+        workflowStatus: "MEDICAL_REVIEW_PENDING",
+      });
+      const repo = datasetRepository(db, a);
+      expect(await repo.list("profile")).toEqual([selected.profile]);
+      const analyses = await repo.list("analysis");
+      expect(analyses).toHaveLength(1);
+      expect(analyses[0]).toMatchObject({
+        status: "PRELIMINARY",
+        provider: "mock",
+        profileVersion: 1,
+      });
+      expect(analyses[0].proposals).toHaveLength(1);
+      expect(analyses[0].proposals[0]).toMatchObject({
+        category,
+        ruleIds: [ruleId],
+      });
+      expect(analyses[0].summary).toContain(
+        "DEMONSTRATIVE — NOT CLINICALLY VALIDATED",
+      );
+      expect(await repo.list("review")).toEqual([]);
+      expect(await repo.list("plan")).toEqual([]);
+    },
+  );
+
+  it.each([
+    ["unknown-date", "CLARIFICATION_REQUIRED", "missing_information"],
+    ["new-symptoms", "ANALYSIS_FAILED", "out_of_scope"],
+  ] as const)(
+    "preserves %s through persisted mock analysis",
+    async (variant, workflowStatus, failureReason) => {
+      await replaceDemoDataset(db, a, "repeat-screening");
+      const input = scenarioVariant("repeat-screening", variant);
+      const repo = datasetRepository(db, a);
+      const examinations = input.examinations.map((exam) => ({
+        ...exam,
+        id: `${exam.id}-${variant}`,
+      }));
+      for (const examination of examinations)
+        await repo.append("examination", examination);
+      await repo.append("profile", {
+        ...input.profile,
+        id: `profile-${variant}`,
+        version: 2,
+        examinationIds: examinations.map((exam) => exam.id),
+      });
+      await completeIntake(input.profile.patientId);
+      expect(
+        await analyzeSelected("repeat-screening", input.profile.patientId),
+      ).toMatchObject({ status: "RECORDED", workflowStatus });
+      const [analysis] = await repo.list("analysis");
+      expect(analysis).toMatchObject({
+        status: "BLOCKED",
+        failureReason,
+        proposals: [],
+      });
+      if (variant === "unknown-date")
+        expect(analysis.missingInformation).toContain(
+          "examinations.performedAt",
+        );
+      expect(await repo.list("plan")).toEqual([]);
+    },
+  );
+
   it("returns null for a dataset that does not exist", async () => {
     expect(await loadDemoCase(db, `test-demo-${randomUUID()}`)).toBeNull();
   });
@@ -199,3 +281,34 @@ describe("demo session storage", () => {
     ).toEqual(rows);
   });
 });
+
+async function completeIntake(patientId: string) {
+  await transitionWorkflow(db, a, {
+    patientId,
+    expectedFrom: "NOT_STARTED",
+    to: "INTAKE_IN_PROGRESS",
+    actor: "patient",
+  });
+  await transitionWorkflow(db, a, {
+    patientId,
+    expectedFrom: "INTAKE_IN_PROGRESS",
+    to: "INTAKE_COMPLETED",
+    actor: "patient",
+  });
+}
+
+function analyzeSelected(
+  caseId: "first-screening" | "repeat-screening",
+  patientId: string,
+) {
+  return analyzeSession(
+    db,
+    { datasetId: a, patientId, caseId },
+    {
+      workflow,
+      explain: (input) => analyze(input, new MockProvider(), 1000),
+      audit: { provider: "mock", model: "deterministic-v1", promptVersion: 1 },
+      now: () => new Date("2026-11-03T12:00:00Z"),
+    },
+  );
+}
