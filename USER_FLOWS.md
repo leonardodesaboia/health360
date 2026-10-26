@@ -12,7 +12,7 @@ new plan; the prior reviewed plan stays preserved. The plan page loads the selec
 dataset's reviewed plan or explains the current session, review, clarification or
 blocked state. It never displays preliminary proposals. Previous reviewed content
 remains identified as previous during a new cycle.
-`/doctor` lists the latest persisted analysis for the selected demo session patient. Without a session or analysis it shows an empty state. Opening an entry navigates to `/doctor/reviews/<analysis-id>--v<version>`. The reader shows the exact analyzed profile/context, proposal criteria, evidence versions, uncertainty and stale-version warnings. Unknown or foreign IDs disclose no records. No reader action completes a review or publishes a plan.
+`/doctor` lists the latest persisted analysis for the selected demo session patient. Without a session or analysis it shows an empty state. Opening an entry navigates to `/doctor/reviews/<analysis-id>--v<version>`. The reader shows the exact analyzed profile/context, proposal criteria, evidence versions, uncertainty and stale-version warnings. Unknown or foreign IDs disclose no records. Opening a current review moves it from awaiting review to review in progress; it never completes a review or publishes a plan.
 
 `/showcase` is the shared-component verification route, linked in the shell/footer.
 
@@ -23,6 +23,32 @@ The plan page reads persisted records and never publishes on a
 page visit. The pending P0-10 review finalization service must invoke guarded plan publication
 inside the same serialized dataset transaction; no production caller exists yet.
 No route reveals unreviewed proposals as patient guidance.
+
+## Physician decisions
+
+In the versioned workspace, each preliminary proposal supports Approve, Modify,
+Reject, Leave pending and Request clarification. Modify requires a reason and
+revised text; Reject requires a reason. Save decisions creates an immutable draft
+with the server-assigned demonstration reviewer, actual time and analysis version.
+Reloading restores the committed decisions. A competing draft or stale analysis
+fails visibly and retains unsaved input until the reviewer reloads.
+
+Finalize review is explicit and unavailable while any proposal is pending or asks
+for clarification. The server independently checks completeness, dataset/patient
+ownership, current profile/context/analysis versions, evidence and expected review
+version. Finalization and guarded plan publication commit atomically through the
+existing owner service. A failed transaction publishes no partial result; a
+finalized review cannot be changed or finalized again.
+
+Request clarification requires a plain-English question for the patient and can
+name one related intake question. Saving it keeps completedAt empty and transitions
+through CLARIFICATION_REQUIRED. Updated information and a new analysis are required;
+there is no direct return to review or publication. Blocked records display
+system-generated status and rule-generated context rather than AI attribution.
+A read-only decision history lists each saved review version with its decisions,
+reasons, revised text and questions; the reviewer is labeled as a demo reviewer,
+not a real clinician. All decisions remain synthetic demonstrations, without
+clinical validation.
 
 ## Patient history
 
@@ -122,8 +148,7 @@ per-patient transaction lock serializes concurrent changes. Actor, time, version
 and optional reason/profile/analysis/review/plan references remain in immutable
 audit history. This API does not change the graph above or establish that a
 clinical precondition passed. Callers must enforce those checks atomically with
-the transition. Intake, analysis and reassessment server actions now append transitions; the
-physician reader does not complete review or publish.
+the transition. Implemented intake, analysis, review and reassessment actions use these guarded server transitions. The only navigation-triggered transition is opening a current physician review (pending to in progress).
 
 ## Analysis stage (P0-07)
 

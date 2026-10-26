@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import {
   InformationGap,
   Notice,
@@ -9,6 +10,7 @@ import {
   safeEvidenceUrl,
   reviewableProposals,
   declaredFacts,
+  analysisPresentation,
   type ReviewWorkspace,
 } from "./reader";
 
@@ -26,16 +28,27 @@ const categories = {
   CLARIFICATION: "Clarification",
 };
 
-export function WorkspaceReader({ workspace }: { workspace: ReviewWorkspace }) {
+export function WorkspaceReader({
+  workspace,
+  children,
+}: {
+  workspace: ReviewWorkspace;
+  children?: ReactNode;
+}) {
   const { profile, analysis, context, contextDetails, examinations, stale } =
     workspace;
   const proposals = reviewableProposals(analysis);
   const facts = declaredFacts(profile);
+  const presentation = analysisPresentation(analysis);
+  const completed = Boolean(workspace.review?.completedAt);
   return (
     <>
       <Notice title="DEMONSTRATIVE — NOT CLINICALLY VALIDATED" tone="warning">
-        Synthetic data. AI-generated proposals are preliminary and require
-        physician review. A demo reviewer does not provide clinical validation.
+        {analysis.status === "BLOCKED"
+          ? "Synthetic data. This analysis is blocked. System and rule context are shown without an AI recommendation. A demo reviewer does not provide clinical validation."
+          : completed
+            ? "Synthetic data. Original AI text remains preliminary; the recorded physician decisions determine the reviewed plan. A demo reviewer does not provide clinical validation."
+            : "Synthetic data. AI-generated proposals are preliminary and require physician review. A demo reviewer does not provide clinical validation."}
       </Notice>
       {stale && (
         <Notice title="Stale analysis" tone="warning">
@@ -145,15 +158,21 @@ export function WorkspaceReader({ workspace }: { workspace: ReviewWorkspace }) {
         </div>
         <div className="space-y-6">
           <Surface>
-            <h2>AI-structured summary</h2>
+            <h2>{presentation.summaryHeading}</h2>
             <p className="mt-3 text-sm">{analysis.summary}</p>
             <p className="mt-3 text-xs text-muted-foreground">
-              AI-generated · Analysis v{analysis.version} · Profile v
-              {analysis.profileVersion} · Context v{analysis.contextVersion} ·
-              Prompt v{analysis.promptVersion}
+              {presentation.summaryProvenance} · Analysis v{analysis.version} ·
+              Profile v{analysis.profileVersion} · Context v
+              {analysis.contextVersion} ·
+              {presentation.showProvider ? "Prompt" : "Configured prompt"} v
+              {analysis.promptVersion}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {analysis.provider} / {analysis.model} ·{" "}
+              {presentation.showProvider && (
+                <span>
+                  {analysis.provider} / {analysis.model};{" "}
+                </span>
+              )}
               {new Intl.DateTimeFormat("en-US", {
                 dateStyle: "medium",
                 timeStyle: "short",
@@ -182,7 +201,11 @@ export function WorkspaceReader({ workspace }: { workspace: ReviewWorkspace }) {
           <Surface>
             <h2>Proposals for review</h2>
             <p className="mt-3 text-sm text-muted-foreground">
-              Preliminary proposals, awaiting physician review.
+              {analysis.status === "BLOCKED"
+                ? "This blocked result contains no reviewable proposals."
+                : completed
+                  ? "Original proposal text; see the finalized physician decisions below."
+                  : "Preliminary proposals, awaiting physician review."}
             </p>
             {!proposals.length && (
               <p className="mt-4 text-sm">No proposals available.</p>
@@ -298,6 +321,7 @@ export function WorkspaceReader({ workspace }: { workspace: ReviewWorkspace }) {
               </article>
             ))}
           </Surface>
+          {children}
         </div>
       </div>
     </>

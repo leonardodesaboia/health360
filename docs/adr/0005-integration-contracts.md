@@ -1,6 +1,6 @@
 # ADR0005: Shared integration contracts
 
-- Status: accepted for landed APIs; physician review producer policy pending implementation
+- Status: accepted for landed APIs
 - Date: 2026-10-25
 
 ## Context
@@ -55,8 +55,8 @@ include entity ID/version, timestamp and provenance; readers validate links.
 | PLAN_PUBLISHED                                                   | PreventivePlan                                                |
 
 Availability of a kind does not mean its producer exists. Clarification answers
-append PROFILE_UPDATED and CLARIFICATION_ANSWERED (P0-12); review producers still
-belong to P0-10.
+append PROFILE_UPDATED and CLARIFICATION_ANSWERED (P0-12); review events are
+produced by P0-10.
 
 ### Session and clinical context
 
@@ -125,22 +125,30 @@ from `src/server/analysis/run.ts`, which continues the stored reservation and ca
 also resume an interrupted one without another profile. Exceptions roll back the
 transaction. `beforeClaim` remains available but is not the path P0-12 uses.
 
-**Physician decisions (P0-10 producer contract, not on main):** physician CLARIFY
-requests reach the patient only through a future typed supported-field reader; free
-text reasons are never interpreted as questions. Intended decisions are APPROVE, MODIFY, REJECT, PENDING and CLARIFY. MODIFY needs
-revised text and reason; REJECT needs reason; CLARIFY needs question text. CLARIFY
-saves a DRAFT MedicalReview and moves MEDICAL_REVIEW_IN_PROGRESS → CLARIFICATION_REQUIRED
-as demo-physician. The core decision enum already includes CLARIFY, but the producer and question
-validation are not implemented. DRAFT describes an unfinished review; the current
-core review uses nullable `completedAt`, not a persisted DRAFT status field.
+**Physician decisions (P0-10):** decisions are APPROVE, MODIFY, REJECT, PENDING and
+CLARIFY. MODIFY needs revised text and reason; REJECT needs reason. CLARIFY needs a
+plain-English patient question and stores the additive optional decision field
+`clarification: { question, targetField? }`, where `targetField` is an intake
+`FieldId` and may be absent; free-text reasons are never interpreted as questions.
+CLARIFY saves an unfinished review (nullable `completedAt`; there is no persisted
+DRAFT status) and moves MEDICAL_REVIEW_IN_PROGRESS → CLARIFICATION_REQUIRED as
+demo-physician. `listOpenClarificationRequests(db | tx, datasetId, patientId)` in
+`src/server/clinical-review/clarifications.ts` returns typed requests only while the
+latest transition is that demo-physician move referencing an incomplete review; it
+reuses a caller transaction and lock. The patient loop does not consume it yet.
 
-Explicit finalization must reject pending/clarification decisions, incomplete reviews
+Opening a current, reviewable workspace moves MEDICAL_REVIEW_PENDING →
+MEDICAL_REVIEW_IN_PROGRESS once (demo-physician, under the patient lock); queue
+links disable prefetch. This is the only navigation-triggered transition.
+
+Explicit finalization rejects pending/clarification decisions, incomplete reviews
 and stale versions. In the same serialized transaction it persists the finalized
 review, moves to MEDICAL_REVIEW_COMPLETED and calls the existing
 `publishReviewedPlan(tx, datasetId, patientId, reviewId)` → PLAN_AVAILABLE.
 Publication validates reviewed text, evidence and references, is idempotent for a
 review, and appends only its plan/event/transition. Page reads never publish.
-Physician decision history is still in progress.
+A read-only decision history lists every saved review version with the demo
+reviewer labeled as not a real clinician.
 
 ### Reassessment
 

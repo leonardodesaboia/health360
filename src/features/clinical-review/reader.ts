@@ -53,15 +53,15 @@ export function findWorkspace(
     data.analyses.some(
       (a) => a.patientId === patientId && a.version > analysis.version,
     );
-  const review =
-    data.reviews
-      .filter(
-        (r) =>
-          r.patientId === patientId &&
-          r.analysisId === analysis.id &&
-          r.analysisVersion === analysis.version,
-      )
-      .sort((a, b) => b.version - a.version)[0] ?? null;
+  const reviewHistory = data.reviews
+    .filter(
+      (r) =>
+        r.patientId === patientId &&
+        r.analysisId === analysis.id &&
+        r.analysisVersion === analysis.version,
+    )
+    .sort((a, b) => b.version - a.version);
+  const review = reviewHistory[0] ?? null;
   return {
     patient,
     workflowStatus: data.workflowStatus ?? patient.status,
@@ -75,6 +75,7 @@ export function findWorkspace(
         : null,
     stale,
     review,
+    reviewHistory,
     examinations: data.examinations.filter(
       (e) => e.patientId === patientId && profile.examinationIds.includes(e.id),
     ),
@@ -121,4 +122,17 @@ export function safeEvidenceUrl(value: string | null) {
   } catch {
     return null;
   }
+}
+
+export function analysisPresentation(analysis: AIAnalysis) {
+  const blocked = analysis.status === "BLOCKED";
+  return {
+    summaryHeading: blocked
+      ? "Blocked analysis summary"
+      : "AI-structured summary",
+    summaryProvenance: blocked
+      ? "System-generated status and rule-generated context"
+      : "AI-generated",
+    showProvider: !blocked,
+  };
 }

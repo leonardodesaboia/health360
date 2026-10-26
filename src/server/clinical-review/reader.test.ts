@@ -75,6 +75,27 @@ describe("dataset-scoped physician reader", () => {
     });
     expect(await getReviewWorkspace(workspaceId(data.analyses[0]))).toBeNull();
   });
+  it("returns no records when case replacement expires the session snapshot", async () => {
+    mocks.workflowStatus.mockRejectedValue(
+      new Error("Patient not found in dataset"),
+    );
+    const list = vi.fn().mockResolvedValue([]);
+    mocks.repository.mockReturnValue({ list });
+    expect(await getReviewQueue()).toEqual([]);
+    expect(await getReviewWorkspace("old-analysis--v1")).toBeNull();
+    expect(list.mock.calls.every(([kind]) => kind === "patient")).toBe(true);
+  });
+  it("does not hide workflow read failures while the scoped patient still exists", async () => {
+    mocks.workflowStatus.mockRejectedValue(
+      new Error("Workflow storage unavailable"),
+    );
+    mocks.repository.mockReturnValue({
+      list: vi.fn().mockResolvedValue(readerFixture().patients),
+    });
+    await expect(getReviewQueue()).rejects.toThrow(
+      "Workflow storage unavailable",
+    );
+  });
   it("propagates storage failure without disconnecting the shared pool or using fixtures", async () => {
     mocks.repository.mockReturnValue({
       list: vi.fn().mockRejectedValue(new Error("Storage unavailable")),

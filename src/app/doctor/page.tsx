@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { ContentContainer, PageHeader } from "@/components/layout/page";
 import {
   EmptyState,
@@ -121,7 +121,8 @@ export default async function Queue() {
 function OpenReview({ id }: { id: string }) {
   return (
     <Button asChild variant="outline">
-      <Link href={`/doctor/reviews/${encodeURIComponent(id)}`}>
+      {/* Opening a review is a workflow write; never trigger it from a prefetch. */}
+      <Link href={`/doctor/reviews/${encodeURIComponent(id)}`} prefetch={false}>
         Open review
       </Link>
     </Button>

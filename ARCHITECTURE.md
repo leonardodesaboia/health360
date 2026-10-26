@@ -117,6 +117,42 @@ field-request reader, so that origin remains explicitly unsupported.
 unsupported requests, unavailable storage, pending analysis and no-current-request
 states show bounded English feedback. Preliminary proposals never enter this form.
 
+## Physician decisions and finalization
+
+`src/server/clinical-review/decisions.ts` validates one decision per proposal,
+required modification/rejection reasons, revised wording, current versions and
+canonical context/source integrity. It resolves only the server-selected demo
+dataset and patient. The canonical workflow read acquires the patient lock before
+versioned records are read inside `inDatasetTransaction`.
+
+Save appends an immutable MedicalReview version and its own timeline event.
+The server assigns the demonstration reviewer and timestamps; client audit fields
+are rejected. Expected review versions reject competing drafts. Pending decisions
+remain incomplete. CLARIFY saves an incomplete review and legally transitions to
+CLARIFICATION_REQUIRED; a new analysis is required before review can continue.
+Explicit finalization rejects pending/clarification, stale, blocked and duplicate
+requests. It appends the completed review, audit event and legal completion
+transition, then invokes the existing `publishReviewedPlan` owner service in the
+same transaction. Any failure rolls back review, workflow, event and plan writes.
+This service does not construct plans or alter profiles, analyses, rules or the
+shared workflow graph.
+
+CLARIFY stores a typed `clarification: { question, targetField? }` on the decision
+(additive, optional contract field; `targetField` is an intake FieldId).
+`clarifications.ts` exports `listOpenClarificationRequests(db | tx, datasetId,
+patientId)`: requests are open only while the latest transition is the demo
+reviewer's move to CLARIFICATION_REQUIRED referencing an incomplete review.
+
+Opening a current, reviewable workspace (`openReview`) moves MEDICAL_REVIEW_PENDING
+to MEDICAL_REVIEW_IN_PROGRESS once, under the patient lock; stale, blocked, foreign
+or replaced cases are unchanged. Queue links disable prefetch so only navigation
+opens a review. A read-only decision history lists every saved review version.
+
+The form uses native labeled controls and useActionState for committed feedback.
+Blocked summaries are labeled as system/rule
+output, with provider attribution suppressed; usable explanations retain distinct
+AI provenance. Demonstration review is never real clinical validation or identity.
+
 ## Server boundaries and remaining work
 
 P0-05 implements the restricted server-only `src/server/clinical-rules` layer:
@@ -126,8 +162,8 @@ It wraps existing profile/examination contracts with explicit nullable screening
 facts; it has no database, provider or publication dependency. Findings require
 physician review and always deny publication authority. See the
 [scenario pack](docs/product/DEMO_SCENARIOS.md) for limits and source verification.
-The following boundaries now have server-only modules. Review finalization and
-clarification producers remain in progress; see [STATUS](docs/STATUS.md).
+The following boundaries now have server-only modules. Physician decisions,
+finalization and typed clarification requests are implemented; see [STATUS](docs/STATUS.md).
 Keep `src/server` modules marked with `import "server-only"`:
 
 - DB/repositories: synthetic data, transactions, immutable versions and reset isolation.

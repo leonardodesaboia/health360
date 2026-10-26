@@ -1,9 +1,11 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ContentContainer, PageHeader } from "@/components/layout/page";
 import { Button } from "@/components/ui/button";
 import { WorkspaceReader } from "@/features/clinical-review/workspace";
-import { getReviewWorkspace } from "@/server/clinical-review/reader";
+import { DecisionForm } from "@/features/clinical-review/decision-form";
+import { DecisionHistory } from "@/features/clinical-review/decision-history";
+import { openReviewWorkspace } from "@/server/clinical-review/reader";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +15,7 @@ export default async function Review({
   params: Promise<{ reviewId: string }>;
 }) {
   const { reviewId } = await params;
-  const workspace = await getReviewWorkspace(reviewId);
+  const workspace = await openReviewWorkspace(reviewId);
   if (!workspace) notFound();
   return (
     <ContentContainer width="workspace">
@@ -27,7 +29,10 @@ export default async function Review({
           </Button>
         }
       />
-      <WorkspaceReader workspace={workspace} />
+      <WorkspaceReader workspace={workspace}>
+        <DecisionForm workspace={workspace} />
+        <DecisionHistory workspace={workspace} />
+      </WorkspaceReader>
     </ContentContainer>
   );
 }
