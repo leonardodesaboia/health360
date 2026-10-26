@@ -35,6 +35,14 @@ browser acceptance suite (`tests/e2e/acceptance/journeys.spec.ts`).
 (deterministic, no API key). A live failure is shown honestly as **Analysis not
 completed** with **Retry analysis**; the system blocks, it never guesses.
 
+**Presenter shortcuts — pending (P0-14 part 2, not yet on main).** Prepared demo states
+selected through the same case selector will let a presenter jump to a stage instead
+of typing intake live: `alex-review` (`/doctor`), `jordan-review` (`/doctor`,
+possible-redundancy proposal), `alex-plan-v1` (`/patient/plan`, ready for
+reassessment) and `alex-analysis-failed` (`/patient/analysis`, retry). Use them only
+after that change merges; until then follow the full flows below. Say that a prepared
+state was produced by the synthetic workflow and demo reviewer, not a real clinician.
+
 ## 0:00 — Opening (30 seconds)
 
 > “**Better decisions, not more tests.** Health360 helps a physician see when a
