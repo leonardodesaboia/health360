@@ -118,8 +118,8 @@ export function DemoControlsClient({
                 className="size-4 transition-transform group-open:rotate-180"
               />
             </summary>
-            {/* Mounted only while open so the collapsed panel adds no hidden duplicate label or copy to the page. */}
-            {preparedOpen ? (
+            {/* Mounted while open or while a prepared state is active (to keep its pressed state); otherwise the collapsed panel adds no hidden duplicate label or copy. */}
+            {preparedOpen || current?.preparedStateId ? (
               <>
                 <p className="mt-3 text-xs text-muted-foreground">
                   DEMONSTRATIVE — NOT CLINICALLY VALIDATED. Synthetic
