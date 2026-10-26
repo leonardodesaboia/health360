@@ -191,7 +191,7 @@ At workflow adoption, all 18 entries were planned. Pre-created unimplemented dra
 ### P0-12 — Deterministic clarification loop
 
 - Stable OpenSpec change ID: `p0-12-clarification`.
-- Physician-origin follow-up: **implemented; PR pending**; [archive and verification](../../openspec/changes/archive/2026-10-26-physician-patient-clarification/) consumes the typed P0-10 reader for bounded and free-text patient answers. Verify passes (439 unit tests), 86 PostgreSQL integration tests, 90 desktop/mobile e2e tests on port 3250, formatting and strict specs pass.
+- Physician-origin follow-up: **done (PR open)**; [PR #30](https://github.com/leonardodesaboia/health360/pull/30); [archive and verification](../../openspec/changes/archive/2026-10-26-physician-patient-clarification/) consumes the typed P0-10 reader for bounded and free-text patient answers. Verify passes (439 unit tests), 86 PostgreSQL integration tests, 90 desktop/mobile e2e tests on port 3250, formatting and strict specs pass.
 - Status: **done**; [archive](../../openspec/changes/archive/2026-10-25-p0-12-clarification/); [PR #26](https://github.com/leonardodesaboia/health360/pull/26) (merged).
 - Original delivery evidence: [verification](../../openspec/changes/archive/2026-10-25-p0-12-clarification/tasks.md): verify passes (407 unit tests), 74 PostgreSQL integration tests, 74 desktop/mobile e2e tests on port 3250, formatting and strict specs pass. That delivery covered AI-origin requests; the physician-origin follow-up above consumes P0-10's typed reader.
 
