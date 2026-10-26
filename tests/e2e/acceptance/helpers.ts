@@ -133,11 +133,20 @@ export async function selectCase(
 }
 
 /** Real browser intake; no profile or analysis fixture is substituted for this journey. */
-export async function completeFirstIntake(page: Page) {
+export async function completeFirstIntake(
+  page: Page,
+  { age = "50" }: { age?: string | null } = {},
+) {
   await page.goto("/patient/intake");
-  await page
-    .getByLabel("Age in the synthetic scenario", { exact: true })
-    .fill("50");
+  const ageUnknown = page.getByLabel(
+    "I don't know — age in the synthetic scenario",
+    { exact: true },
+  );
+  if (age === null) await ageUnknown.check();
+  else
+    await page
+      .getByLabel("Age in the synthetic scenario", { exact: true })
+      .fill(age);
   await page
     .getByRole("button", { name: "Save and continue", exact: true })
     .click();
@@ -182,9 +191,11 @@ export async function completeFirstIntake(page: Page) {
   await page
     .getByRole("button", { name: "Edit basic information", exact: true })
     .click();
-  await expect(
-    page.getByLabel("Age in the synthetic scenario", { exact: true }),
-  ).toHaveValue("50");
+  if (age === null) await expect(ageUnknown).toBeChecked();
+  else
+    await expect(
+      page.getByLabel("Age in the synthetic scenario", { exact: true }),
+    ).toHaveValue(age);
   for (const heading of [
     "Clinical history",
     "Habits",
@@ -217,7 +228,7 @@ export async function assertNoUnreviewedPlan(page: Page) {
   ).toBeVisible();
   await expect(
     page.getByRole("heading", {
-      name: /^(Awaiting a reviewed plan|Plan unavailable: analysis not completed)$/,
+      name: /^(Awaiting a reviewed plan|Plan unavailable: analysis not completed|More information is needed)$/,
     }),
   ).toBeVisible();
   await expect(
@@ -227,4 +238,105 @@ export async function assertNoUnreviewedPlan(page: Page) {
     page.getByText("Review supplied prevention finding", { exact: true }),
   ).toHaveCount(0);
   await expect(page.getByText("UNTRUSTED_RESPONSE_MARKER")).toHaveCount(0);
+}
+
+/** Server actions run claim, mock provider and completion transactions; allow for load. */
+export const afterAction = { timeout: 30000 };
+
+/** Jordan: age 60, average risk, normal complete adequately prepared colonoscopy. */
+export async function completeRepeatIntake(
+  page: Page,
+  { examDate }: { examDate: string | null },
+) {
+  await page.goto("/patient/intake");
+  await page
+    .getByLabel("Age in the synthetic scenario", { exact: true })
+    .fill("60");
+  await page
+    .getByRole("button", { name: "Save and continue", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Clinical history", exact: true }),
+  ).toBeVisible();
+  for (const control of await page.getByRole("combobox").all())
+    await control.selectOption("no");
+  const medicationsUnknown = page.getByRole("checkbox", {
+    name: /I don't know.*current medications/,
+  });
+  if (await medicationsUnknown.isChecked()) await medicationsUnknown.uncheck();
+  await page
+    .getByLabel("Current medications (enter None if none)", { exact: true })
+    .fill("None");
+  await page
+    .getByRole("button", { name: "Save and continue", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Habits", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByLabel("Currently smoking", { exact: true })
+    .selectOption("no");
+  await page
+    .getByLabel("Regular physical activity", { exact: true })
+    .selectOption("yes");
+  await page
+    .getByRole("button", { name: "Save and continue", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Previous exams", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByLabel("Previous colorectal screening", { exact: true })
+    .selectOption("COLONOSCOPY");
+  const precision = page.getByLabel("Previous examination date", {
+    exact: true,
+  });
+  if (examDate === null) await precision.selectOption("unknown");
+  else {
+    await precision.selectOption("EXACT");
+    // Unknown is the default; clearing "I don't know" enables the date input.
+    await page
+      .getByLabel("I don't know — exact examination date", { exact: true })
+      .uncheck();
+    await page
+      .getByLabel("Exact examination date", { exact: true })
+      .fill(examDate);
+  }
+  for (const label of [
+    "Colonoscopy result was normal",
+    "Colonoscopy reached the cecum (complete examination)",
+    "Colonoscopy bowel preparation was adequate",
+  ])
+    await page.getByLabel(label, { exact: true }).selectOption("yes");
+  await page
+    .getByRole("button", { name: "Save and continue", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Review answers", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByLabel(
+      "I confirm these synthetic answers and want to save my profile.",
+      { exact: true },
+    )
+    .check();
+  await page
+    .getByRole("button", { name: "Confirm and save profile", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/patient\/analysis$/);
+}
+
+/** Opens the only queued review in this isolated dataset and expands its details. */
+export async function openPhysicianWorkspace(page: Page, patient: string) {
+  await page.goto("/doctor");
+  await expect(page.getByRole("main")).toContainText(patient);
+  await page.getByRole("link", { name: "Open review", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Proposals for review", exact: true }),
+  ).toBeVisible();
+  for (const summary of [
+    "View rationale and criteria",
+    "View evidence and sources",
+  ])
+    await page.getByText(summary, { exact: true }).first().click();
 }

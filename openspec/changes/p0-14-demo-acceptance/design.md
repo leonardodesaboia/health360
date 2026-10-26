@@ -1,6 +1,6 @@
 ## Scope
 
-Part 1 of P0-14 is explicitly authorized while P0-10 and P0-12 remain unfinished. It must not claim all 18 product acceptance points or full A–E completion. Preserve the application and test existing behavior rather than patch unrelated flow gaps.
+Part 1 of P0-14 is explicitly authorized while P0-10 remains unfinished. P0-12 clarification merged during part 1 (#26), so its acceptance journey is included. It must not claim all 18 product acceptance points or full A–E completion. Preserve the application and test existing behavior rather than patch unrelated flow gaps.
 
 ## Implementation plan
 
@@ -17,4 +17,4 @@ Run the new acceptance specs against the production build on PORT=3210 with mock
 
 ## Exclusions
 
-No app changes, live model calls, real patient records, deployment, clinical validation, merged PRs, or completion claims for deferred P0-10/P0-12 behavior.
+No app changes, live model calls, real patient records, deployment, clinical validation, merged PRs, or completion claims for deferred P0-10 behavior.

@@ -3,7 +3,10 @@ import {
   expect,
   selectCase,
   completeFirstIntake,
+  completeRepeatIntake,
+  openPhysicianWorkspace,
   assertNoUnreviewedPlan,
+  afterAction,
 } from "./helpers";
 
 test.setTimeout(180000);
@@ -24,11 +27,11 @@ test("Flow A part 1: real intake reaches the physician queue, persists and reset
     .click();
   await expect(
     page.getByText("Awaiting physician review", { exact: true }),
-  ).toBeVisible();
+  ).toBeVisible(afterAction);
   await page.reload();
   await expect(
     page.getByText("Awaiting physician review", { exact: true }),
-  ).toBeVisible();
+  ).toBeVisible(afterAction);
   const persisted = await demo.inspect(token);
   expect(persisted.profiles).toContainEqual({ version: 2, age: 50 });
   expect(persisted.analyses).toEqual([
@@ -50,6 +53,20 @@ test("Flow A part 1: real intake reaches the physician queue, persists and reset
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
+  await openPhysicianWorkspace(page, "Alex Example");
+  const main = page.getByRole("main");
+  await expect(main).toContainText(
+    "Preventive opportunity · AI-generated explanation",
+  );
+  await expect(main).toContainText(
+    "Preliminary proposals, awaiting physician review.",
+  );
+  await expect(main).toContainText("crc-screening-due · Rule v1");
+  await expect(main).toContainText("US Preventive Services Task Force");
+  await expect(
+    page.getByRole("link", { name: /^Open source: / }).first(),
+  ).toBeVisible();
+  await page.goto("/doctor");
 
   const other = await browser.newContext();
   try {
@@ -113,7 +130,7 @@ for (const [variant, reason] of [
       .click();
     await expect(
       page.getByText("Awaiting physician review", { exact: true }),
-    ).toBeVisible();
+    ).toBeVisible(afterAction);
     await page.reload();
     await expect(
       page.getByRole("button", { name: "Retry analysis", exact: true }),
@@ -180,18 +197,134 @@ test("Flow D start: fixture-reviewed plan v1 is preserved when real reassessment
 });
 
 // TODO(P0-10): replace with real decision controls, reasons, explicit finalization and patient-plan assertions.
-test.fixme("Flows A/B completion: physician decisions and finalization publish only reviewed content", async () => {
+test.fixme("needs P0-10: Flows A/B completion — physician decisions and finalization publish only reviewed content", async () => {
   throw new Error(
     "TODO(P0-10): implement actual physician decisions and finalization acceptance",
   );
 });
-// TODO(P0-12): supported question templates, I don't know, immutable profile version and reanalysis; stale review rejection.
-test.fixme("Flow C: clarification answer or unknown persists and re-enters guarded analysis", async () => {
-  throw new Error("TODO(P0-12): implement actual clarification acceptance");
-});
-// TODO(P0-10, P0-12): finish cycle two through actual review UI and verify plan v2 plus preserved v1.
-test.fixme("Flow D completion: updated information receives a new finalized review and plan v2", async () => {
-  throw new Error(
-    "TODO(P0-10, P0-12): implement the complete second review cycle",
+test("Flow B: Jordan's recent normal colonoscopy yields a traceable preliminary possible-redundancy proposal", async ({
+  page,
+  context,
+  demo,
+}) => {
+  await selectCase(page, "Jordan Example");
+  const token = await demo.track(context);
+  await completeRepeatIntake(page, { examDate: "2022-11-03" });
+  await page
+    .getByRole("button", { name: "Analyze current profile", exact: true })
+    .click();
+  await expect(
+    page.getByText("Awaiting physician review", { exact: true }),
+  ).toBeVisible(afterAction);
+  const persisted = await demo.inspect(token);
+  expect(persisted.analyses).toEqual([
+    { status: "PRELIMINARY", profileVersion: 2, proposalCount: 1 },
+  ]);
+  expect(persisted.reviews).toBe(0);
+  expect(persisted.plans).toEqual([]);
+  // Preliminary only: the patient never sees the proposal as advice before review.
+  await assertNoUnreviewedPlan(page);
+  await expect(page.getByRole("main")).not.toContainText(
+    /Possible redundant test|crc-routine-repeat/,
   );
+
+  await openPhysicianWorkspace(page, "Jordan Example");
+  const main = page.getByRole("main");
+  await expect(main).toContainText(
+    "Possible redundant test · AI-generated explanation",
+  );
+  await expect(main).toContainText("crc-routine-repeat · Rule v1");
+  await expect(main).toContainText("2022-11-03");
+  await expect(main).toContainText(
+    "A recent test alone does not establish redundancy",
+  );
+  await expect(main).toContainText(
+    "US Multi-Society Task Force on Colorectal Cancer",
+  );
+});
+
+for (const answer of ["date", "unknown"] as const) {
+  test(`Flow C: Jordan's unknown exam date answered with ${answer === "date" ? "the date" : "I don't know"} saves a new profile version and re-enters guarded analysis`, async ({
+    page,
+    context,
+    demo,
+  }) => {
+    await selectCase(page, "Jordan Example");
+    const token = await demo.track(context);
+    await completeRepeatIntake(page, { examDate: null });
+    await page
+      .getByRole("button", { name: "Analyze current profile", exact: true })
+      .click();
+    await expect(
+      page.getByText("Information to confirm", { exact: true }),
+    ).toBeVisible(afterAction);
+    await assertNoUnreviewedPlan(page);
+
+    await page.goto("/patient/analysis");
+    await page
+      .getByRole("link", { name: "Answer missing information", exact: true })
+      .click();
+    const question =
+      "On what exact date was your previous screening examination?";
+    const unknown = page.getByLabel(
+      `I don't know — ${question.charAt(0).toLowerCase()}${question.slice(1)}`,
+      { exact: true },
+    );
+    await expect(unknown).toBeChecked();
+    if (answer === "date") {
+      await unknown.uncheck();
+      await page.getByLabel(question, { exact: true }).fill("2022-11-03");
+    }
+    await page
+      .getByRole("button", {
+        name: "Save answers and analyze again",
+        exact: true,
+      })
+      .click();
+    await expect(page).toHaveURL(/\/patient\/analysis$/, afterAction);
+    await expect(
+      page.getByText(
+        answer === "date"
+          ? "Awaiting physician review"
+          : "Information to confirm",
+        { exact: true },
+      ),
+    ).toBeVisible(afterAction);
+
+    const persisted = await demo.inspect(token);
+    expect(persisted.profiles.map((profile) => profile.version)).toEqual(
+      expect.arrayContaining([1, 2, 3]),
+    );
+    expect(persisted.analyses).toEqual([
+      expect.objectContaining({
+        status: "BLOCKED",
+        profileVersion: 2,
+        proposalCount: 0,
+      }),
+      expect.objectContaining({
+        status: answer === "date" ? "PRELIMINARY" : "BLOCKED",
+        profileVersion: 3,
+        proposalCount: answer === "date" ? 1 : 0,
+      }),
+    ]);
+    expect(persisted.eventKinds).toEqual(
+      expect.arrayContaining([
+        "CLARIFICATION_REQUESTED",
+        "CLARIFICATION_ANSWERED",
+      ]),
+    );
+    expect(persisted.reviews).toBe(0);
+    expect(persisted.plans).toEqual([]);
+    await assertNoUnreviewedPlan(page);
+    if (answer === "date") {
+      await openPhysicianWorkspace(page, "Jordan Example");
+      await expect(page.getByRole("main")).toContainText(
+        "crc-routine-repeat · Rule v1",
+      );
+    }
+  });
+}
+// TODO(P0-10): finish cycle two through actual review UI and verify plan v2 plus preserved v1.
+test.fixme("needs P0-10: Flow D completion — updated information receives a new finalized review and plan v2", async () => {
+  throw new Error("TODO(P0-10): implement the complete second review cycle");
 });

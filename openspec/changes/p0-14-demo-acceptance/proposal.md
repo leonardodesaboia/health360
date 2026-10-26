@@ -6,7 +6,7 @@
 
 - Add an English presenter script with setup, synthetic cases, expected results, reset and recovery instructions.
 - Add Playwright acceptance coverage for Flow A through the physician queue, Flow E failure and retry, and the start of Flow D with preservation of the previous reviewed plan.
-- Track unavailable P0-10 and P0-12 stages with named `test.fixme` cases and TODOs. Keep the full P0-14 change open until all A–E stages are implemented and verified.
+- Cover P0-12 clarification (merged in #26) with a real browser journey. Track unavailable P0-10 stages with named `test.fixme` cases and TODOs. Keep the full P0-14 change open until all A–E stages are implemented and verified.
 
 ## Capabilities
 

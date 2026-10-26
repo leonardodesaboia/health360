@@ -8,13 +8,13 @@ The demonstration role switch is navigation, not authentication.
 
 ## What this rehearsal proves
 
-| Segment              | Part-1 coverage                                                                                                             | Limit                                                                                     |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| A — First evaluation | Browser case selection, real intake submission, persisted profile, mock analysis, patient plan gate, physician queue/reader | Stop before physician decisions and finalization (P0-10).                                 |
-| B — Do Not Test      | Existing demonstrative scenario and proposal traceability can be inspected                                                  | Full physician decision-to-plan acceptance remains deferred.                              |
-| C — Clarification    | Explain the missing-information state                                                                                       | Questions, answers and reanalysis acceptance await P0-12; do not present them as working. |
-| D — Reassessment     | Start an update from a **fixture-reviewed** plan and preserve plan v1                                                       | Fixture setup does not prove review UI; plan v2 acceptance remains deferred.              |
-| E — AI failure       | Inject a failure at the mock-provider boundary, show blocked analysis, retry through the browser, preserve failure history  | This is a controlled test fault, not a live provider outage.                              |
+| Segment              | Part-1 coverage                                                                                                             | Limit                                                                                      |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| A — First evaluation | Browser case selection, real intake submission, persisted profile, mock analysis, patient plan gate, physician queue/reader | Stop before physician decisions and finalization (P0-10).                                  |
+| B — Do Not Test      | Existing demonstrative scenario and proposal traceability can be inspected                                                  | Full physician decision-to-plan acceptance remains deferred.                               |
+| C — Clarification    | Unknown age → plain-English question with I don't know → new profile version → guarded reanalysis                           | Covered by acceptance for the age question; one question per missing field, not a chatbot. |
+| D — Reassessment     | Start an update from a **fixture-reviewed** plan and preserve plan v1                                                       | Fixture setup does not prove review UI; plan v2 acceptance remains deferred.               |
+| E — AI failure       | Inject a failure at the mock-provider boundary, show blocked analysis, retry through the browser, preserve failure history  | This is a controlled test fault, not a live provider outage.                               |
 
 P0-14 is **in progress**. This first part does not establish all 18 product
 acceptance points or complete A–E journeys. Deferred cases use `test.fixme` with
@@ -98,16 +98,27 @@ This is preliminary and does not tell the patient to cancel or avoid a test.
 Source definitions and demonstration limits are in
 [the scenario pack](DEMO_SCENARIOS.md). Full decision-to-plan coverage is deferred.
 
-## Flow C — reserved for clarification acceptance
+## Flow C — clarification of an unknown answer
 
 An unknown age or required examination fact must stay unknown and produce an
 explicit missing-information state. Never replace “I don't know” with “No,” a
 normal result or an invented date to make a demonstration proceed.
 
-**TODO(P0-12):** once the real question/answer flow lands, rehearse the restricted
-English question, **I don't know**, a new immutable profile version and guarded
-reanalysis. A remaining unknown must continue to block the unsupported finding.
-This is not a chatbot. The part-1 script does not claim this journey is complete.
+1. Select **Alex Example** and complete intake, checking **I don't know — age in
+   the synthetic scenario**. Activate **Analyze current profile**: the status reads
+   **Information to confirm** and `/patient/plan` shows **More information is
+   needed** (no plan).
+2. On `/patient/analysis`, follow **Answer missing information**. Each missing field
+   has one plain-English question; **I don't know** is preselected for unknowns.
+3. Clear **I don't know**, enter `50`, and activate **Save answers and analyze
+   again**. A new immutable profile version is saved and analysis re-runs: the status
+   reads **Awaiting physician review** and Alex appears in `/doctor`.
+4. Optional contrast: keep **I don't know** and save. The answer stays unknown, a
+   new profile version is still recorded, and the status returns to **Information to
+   confirm**. A remaining unknown keeps blocking the finding.
+
+This is not a chatbot. Earlier profile versions and the blocked analysis remain in
+history.
 
 ## Flow D — start an update while preserving the earlier plan
 
@@ -123,7 +134,7 @@ rehearsal; do not silently substitute its fixture setup for a live physician rev
 3. Open `/patient/plan` and show **Previous reviewed plan**. Reload: the old plan
    remains preserved. The history records **Reassessment requested**; no new plan
    or second review has been created by starting the update.
-4. **TODO(P0-10, P0-12):** complete the updated profile, new analysis, actual review
+4. **TODO(P0-10):** complete the updated profile, new analysis, actual review
    and plan v2, then compare both preserved plan versions. Part 1 stops before this.
 
 ## Flow E — controlled failure and safe retry
