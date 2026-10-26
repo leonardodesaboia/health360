@@ -222,7 +222,7 @@ At workflow adoption, all 18 entries were planned. Pre-created unimplemented dra
 ### P0-14 — Prepared demonstration and complete acceptance suite
 
 - Stable OpenSpec change ID: `p0-14-demo-acceptance`.
-- Status: **planned**; change not yet picked up.
+- Status: **in progress (part 1)**; [active change](../../openspec/changes/p0-14-demo-acceptance/). Part 1 covers the judge walkthrough and A–E browser acceptance; the 18-point acceptance audit and timed release rehearsal remain.
 - Implementation/archive evidence: none. Add relative change, archive and PR links here only when they exist.
 
 - Goal: assemble an explicitly synthetic reproducible HISIC demonstration across A–E.
