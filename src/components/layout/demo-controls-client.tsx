@@ -24,6 +24,7 @@ export function DemoControlsClient({
   const router = useRouter();
   const [current, setCurrent] = useState<CurrentCase | null>(null);
   const [state, setState] = useState<LoadState>("loading");
+  const [preparedOpen, setPreparedOpen] = useState(false);
   const busy = state === "loading" || state === "preparing";
 
   const refresh = useCallback(async () => {
@@ -106,7 +107,10 @@ export function DemoControlsClient({
           })}
         </form>
         {preparedStates.length ? (
-          <details className="group w-full">
+          <details
+            className="group w-full"
+            onToggle={(event) => setPreparedOpen(event.currentTarget.open)}
+          >
             <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-md border border-input bg-card px-4 py-2 font-medium">
               Prepared starting points
               <ChevronDown
@@ -114,31 +118,37 @@ export function DemoControlsClient({
                 className="size-4 transition-transform group-open:rotate-180"
               />
             </summary>
-            <p className="mt-3 text-xs text-muted-foreground">
-              DEMONSTRATIVE — NOT CLINICALLY VALIDATED. Synthetic presentation
-              states. Loading replaces this browser&apos;s selected case.
-            </p>
-            <form
-              action={(formData) => run(() => selectDemoCase(formData))}
-              aria-label="Choose prepared starting point"
-              className="mt-3 flex flex-col gap-2 md:flex-row md:flex-wrap"
-            >
-              {preparedStates.map(({ id, label }) => {
-                const selected = current?.preparedStateId === id;
-                return (
-                  <PendingButton
-                    key={id}
-                    name="caseId"
-                    value={id}
-                    aria-pressed={selected}
-                    disabled={busy}
-                    variant={selected ? "default" : "outline"}
-                  >
-                    {label}
-                  </PendingButton>
-                );
-              })}
-            </form>
+            {/* Mounted only while open so the collapsed panel adds no hidden duplicate label or copy to the page. */}
+            {preparedOpen ? (
+              <>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  DEMONSTRATIVE — NOT CLINICALLY VALIDATED. Synthetic
+                  presentation states. Loading replaces this browser&apos;s
+                  selected case.
+                </p>
+                <form
+                  action={(formData) => run(() => selectDemoCase(formData))}
+                  aria-label="Choose prepared starting point"
+                  className="mt-3 flex flex-col gap-2 md:flex-row md:flex-wrap"
+                >
+                  {preparedStates.map(({ id, label }) => {
+                    const selected = current?.preparedStateId === id;
+                    return (
+                      <PendingButton
+                        key={id}
+                        name="caseId"
+                        value={id}
+                        aria-pressed={selected}
+                        disabled={busy}
+                        variant={selected ? "default" : "outline"}
+                      >
+                        {label}
+                      </PendingButton>
+                    );
+                  })}
+                </form>
+              </>
+            ) : null}
           </details>
         ) : null}
         {current ? (
