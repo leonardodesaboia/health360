@@ -44,3 +44,20 @@ export async function readIntakePrefill(
     profileVersion: profile?.version ?? 0,
   };
 }
+
+/** Latest stored profile and its linked examinations for the selected demo patient. */
+export async function readLatestProfile(
+  db: Prisma.TransactionClient,
+  datasetId: string,
+  patientId: string,
+) {
+  const repo = datasetRepository(db, datasetId);
+  const profile = (await repo.list("profile"))
+    .filter((p) => p.patientId === patientId)
+    .sort((a, b) => b.version - a.version)[0];
+  if (!profile) return null;
+  const examinations = (await repo.list("examination")).filter((exam) =>
+    profile.examinationIds.includes(exam.id),
+  );
+  return { profile, examinations };
+}

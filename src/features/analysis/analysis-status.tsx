@@ -118,7 +118,7 @@ export function AnalysisStatus({
             </Button>
           ) : (
             <Button asChild variant="outline">
-              <Link href="/patient/intake">View my history</Link>
+              <Link href="/patient/intake">Review health intake</Link>
             </Button>
           )}
           <Button asChild variant="ghost">

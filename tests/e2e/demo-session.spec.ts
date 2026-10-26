@@ -10,6 +10,49 @@ async function selectCase(page: Page, name: string) {
   await expect(caseHeading(page, name)).toBeVisible({ timeout: 15000 });
 }
 
+test("demo selector keeps its description readable at phone and desktop widths", async ({
+  page,
+}, testInfo) => {
+  const width = testInfo.project.name === "mobile" ? 390 : 1440;
+  await page.setViewportSize({ width, height: 900 });
+  await page.goto("/patient");
+  const selector = page
+    .getByRole("region")
+    .filter({ has: page.getByRole("form", { name: "Choose demo case" }) });
+  async function checkLayout() {
+    const description = await selector.locator("p").boundingBox();
+    const buttons = await selector
+      .getByRole("form", { name: "Choose demo case" })
+      .boundingBox();
+    if (!description || !buttons)
+      throw new Error("Demo selector must be visible");
+    if (width === 390) {
+      expect(description.width).toBeGreaterThan(width * 0.8);
+      expect(buttons.y).toBeGreaterThanOrEqual(
+        description.y + description.height,
+      );
+    } else {
+      expect(buttons.x).toBeGreaterThanOrEqual(
+        description.x + description.width,
+      );
+    }
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+  }
+  await expect(
+    selector.getByRole("heading", { name: "Select a demo case", exact: true }),
+  ).toBeVisible();
+  await checkLayout();
+  await selectCase(page, "Jordan Example");
+  await checkLayout();
+  await selector.screenshot({
+    path: testInfo.outputPath(`demo-selector-${width}.png`),
+  });
+});
+
 test("shows the select-a-case entry state without a session", async ({
   page,
 }) => {

@@ -49,9 +49,9 @@ a user can finalize a review. No full A–E suite is claimed.
 
 ## Known gaps and risks
 
-- `/patient/profile` still reads the browser-local demonstrator under its local
-  patient key; it is not a reader for the selected session's persisted profile.
-  The physician reader uses the analyzed persisted profile.
+- With a selected case, `/patient/profile` renders that session's latest persisted
+  profile and linked examinations server-side (answers via the intake prefill reader).
+  Without a case it still shows the browser-local demonstrator profile.
 - Explicit physician finalization now publishes the reviewed plan in the same
   transaction; demo reviewer decisions are never clinical validation.
 - Case selection/reset now seeds complete typed synthetic intakeFacts for Alex's
