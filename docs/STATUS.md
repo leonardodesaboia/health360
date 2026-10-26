@@ -35,13 +35,13 @@ Shared infrastructure: [#12 workflow API](https://github.com/leonardodesaboia/he
 
 ## Flows A–E
 
-| Flow               | Connected stages on main                                                                                                   | Missing for complete acceptance                                                                     |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| A First evaluation | Select case → intake → stored profile → analysis → physician reader                                                        | Decisions/finalization → first published plan from fresh case; complete acceptance run              |
-| B Do Not Test      | Prior exam → deterministic check → traceable preliminary possible redundancy → reader                                      | Physician decision and reviewed patient outcome; recent alone never means unnecessary               |
-| C Clarification    | Required gap → `/patient/clarification` bounded questions with I don't know → profile vN+1 → reanalysis                    | Physician CLARIFY producer/typed reader (P0-10); review and plan after reanalysis                   |
-| D Reassessment     | Existing reviewed-plan guard, history/version links, request → prefilled intake → new profile/analysis; old plan preserved | Fresh case cannot create first reviewed plan; second finalized review/plan and two-cycle acceptance |
-| E AI failure       | Invalid/unsupported/provider-failed result → ANALYSIS_FAILED without proposals; retry and stale-attempt guards             | Complete prepared failure/retry rehearsal and separately controlled live-provider verification      |
+| Flow               | Connected stages on main                                                                                                                              | Missing for complete acceptance                                                                     |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| A First evaluation | Select case → intake → stored profile → analysis → physician reader                                                                                   | Decisions/finalization → first published plan from fresh case; complete acceptance run              |
+| B Do Not Test      | Prior exam → deterministic check → traceable preliminary possible redundancy → reader                                                                 | Physician decision and reviewed patient outcome; recent alone never means unnecessary               |
+| C Clarification    | Required gap → `/patient/clarification` bounded questions with I don't know → profile vN+1 → reanalysis                                               | Physician CLARIFY producer/typed reader (P0-10); review and plan after reanalysis                   |
+| D Reassessment     | Existing reviewed-plan guard, history/version links, request → prefilled intake → new profile/analysis; old plan preserved                            | Fresh case cannot create first reviewed plan; second finalized review/plan and two-cycle acceptance |
+| E AI failure       | Invalid/unsupported/provider-failed result → ANALYSIS_FAILED without proposals; retry and stale-attempt guards; prepared `alex-analysis-failed` start | Timed failure/retry rehearsal and separately controlled live-provider verification                  |
 
 Focused unit, database and browser tests exist for landed slices; recorded evidence
 is in the associated OpenSpec task artifacts. Fixture-seeded plan tests do not prove
@@ -57,6 +57,10 @@ a user can finalize a review. No full A–E suite is claimed.
 - Case selection/reset now seeds complete typed synthetic intakeFacts for Alex's
   screening-due and Jordan's possible-redundancy paths. Unknown-date and new-symptom
   variants still clarify or block; intake prefill does not reconstruct every exam/date answer.
+- Prepared starting points (`alex-review`, `jordan-review`, `alex-plan-v1`,
+  `alex-analysis-failed`) are built by the real intake, mock-analysis and demo-reviewer
+  producers, never by inserting status, review or plan rows. The demo reviewer approval
+  behind `alex-plan-v1` is fictional and is not clinical validation.
 - Clarification resolves only analysis-selected supported fields. Physician-origin
   CLARIFY requests are exposed by `listOpenClarificationRequests`, but the patient
   clarification loop does not consume them yet. Unknown
