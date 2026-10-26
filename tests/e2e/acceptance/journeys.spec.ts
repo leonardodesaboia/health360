@@ -56,9 +56,21 @@ test("Flow A part 1: real intake reaches the physician queue, persists and reset
   ).toBe(true);
   await openPhysicianWorkspace(page, "Alex Example");
   const main = page.getByRole("main");
-  await expect(main).toContainText(
-    "Preventive opportunity · AI-generated explanation",
-  );
+  const proposal = main.getByRole("article");
+  await expect(
+    proposal.getByText("Preventive opportunity · Awaiting physician review", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    proposal.getByText("Rule-generated", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    proposal.getByText("AI-generated", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    proposal.getByText("Explanation wording only", { exact: true }),
+  ).toBeVisible();
   await expect(main).toContainText(
     "Preliminary proposals, awaiting physician review.",
   );
@@ -289,9 +301,21 @@ test("Flow B: Jordan's recent normal colonoscopy yields a traceable preliminary 
 
   await openPhysicianWorkspace(page, "Jordan Example");
   const main = page.getByRole("main");
-  await expect(main).toContainText(
-    "Possible redundant test · AI-generated explanation",
-  );
+  const proposal = main.getByRole("article");
+  await expect(
+    proposal.getByText("Possible redundant test · Awaiting physician review", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    proposal.getByText("Rule-generated", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    proposal.getByText("AI-generated", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    proposal.getByText("Explanation wording only", { exact: true }),
+  ).toBeVisible();
   await expect(main).toContainText("crc-routine-repeat · Rule v1");
   await expect(main).toContainText("2022-11-03");
   await expect(main).toContainText(
