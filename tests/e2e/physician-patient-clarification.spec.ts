@@ -4,6 +4,9 @@ import { promisify } from "node:util";
 import { z } from "zod";
 import AxeBuilder from "@axe-core/playwright";
 const execute = promisify(execFile);
+// Axe must read resting colors, not a mid-transition frame; globals.css disables
+// transitions under prefers-reduced-motion, so the contrast rule stays unchanged.
+test.use({ reducedMotion: "reduce" });
 const run = async (...args: string[]) =>
   (
     await execute(

@@ -81,6 +81,9 @@ const test = base.extend<{
   ],
 });
 
+// Axe must read resting colors, not a mid-transition frame; globals.css disables
+// transitions under prefers-reduced-motion, so the contrast rule stays unchanged.
+test.use({ reducedMotion: "reduce" });
 async function expectNoSeriousAxe(page: Page) {
   const { violations } = await new AxeBuilder({ page }).analyze();
   expect(

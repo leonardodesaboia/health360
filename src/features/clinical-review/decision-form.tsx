@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { Notice } from "@/components/shared/primitives";
 import { Button } from "@/components/ui/button";
 import { fields } from "../health-intake/contracts";
 import type { MedicalReview } from "../patients/contracts";
@@ -24,7 +25,7 @@ const choices = [
 type Decision = MedicalReview["decisions"][number];
 const initialState: ReviewActionState = { status: "idle", message: "" };
 const controlClass =
-  "min-h-11 w-full rounded-md border border-input bg-card px-3 py-2 text-sm";
+  "min-h-11 w-full rounded-md border border-input bg-card px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground";
 
 export function DecisionForm({ workspace }: { workspace: ReviewWorkspace }) {
   const { analysis, review, stale, workflowStatus } = workspace;
@@ -60,6 +61,11 @@ export function DecisionForm({ workspace }: { workspace: ReviewWorkspace }) {
   const incomplete = decisions.some((d) =>
     ["PENDING", "CLARIFY"].includes(d.decision),
   );
+  const readOnly = locked && !pending;
+  const clarificationRequested =
+    workflowStatus === "CLARIFICATION_REQUIRED" ||
+    state.status === "clarification";
+  const reviewVersion = state.reviewVersion ?? review?.version;
   function update(index: number, value: Partial<(typeof decisions)[number]>) {
     setDecisions((current) =>
       current.map((d, i) => (i === index ? { ...d, ...value } : d)),
@@ -75,19 +81,29 @@ export function DecisionForm({ workspace }: { workspace: ReviewWorkspace }) {
         Demo reviewer — not a real clinician (demo-physician). These synthetic
         decisions do not provide clinical validation.
       </p>
-      <p className="mt-2 text-xs text-muted-foreground">
-        Analysis v{analysis.version} · Review v
-        {state.reviewVersion ?? review?.version ?? 0}
+      <p className="mt-2 text-xs text-muted-foreground tabular-nums">
+        Analysis v{analysis.version} ·{" "}
+        {reviewVersion ? `Review v${reviewVersion}` : "No saved review yet"}
       </p>
-      {locked && !pending && (
-        <p className="mt-4 text-sm">
-          {finalized
-            ? "This review is finalized and cannot be changed."
-            : workflowStatus === "CLARIFICATION_REQUIRED" ||
-                state.status === "clarification"
-              ? "Clarification requested. Updated information and a new analysis are required before review can continue."
-              : "Decisions are unavailable for this analysis. Reload the current case to check its versions and workflow."}
-        </p>
+      {readOnly && (
+        <div className="mt-4">
+          {finalized ? (
+            <Notice title="Review finalized">
+              This review is finalized and cannot be changed. The decisions
+              below are read-only.
+            </Notice>
+          ) : clarificationRequested ? (
+            <Notice title="Clarification requested" tone="warning">
+              Updated information and a new analysis are required before review
+              can continue.
+            </Notice>
+          ) : (
+            <Notice title="Decisions unavailable" tone="warning">
+              Decisions are unavailable for this analysis. Reload the current
+              case to check its versions and workflow.
+            </Notice>
+          )}
+        </div>
       )}
       <form
         action={action}
@@ -114,6 +130,9 @@ export function DecisionForm({ workspace }: { workspace: ReviewWorkspace }) {
           </legend>
           {decisions.map((d, index) => (
             <div key={d.proposalId} className="space-y-3 border-t pt-6">
+              <p className="text-xs text-muted-foreground tabular-nums">
+                Proposal {index + 1} of {decisions.length}
+              </p>
               <h3>{proposals[index].title}</h3>
               <label
                 className="block text-sm font-medium"
@@ -256,9 +275,11 @@ export function DecisionForm({ workspace }: { workspace: ReviewWorkspace }) {
           </div>
         </fieldset>
         <p id="review-help" className="text-sm text-muted-foreground">
-          Pending decisions block finalization. A clarification request keeps
-          the review incomplete and returns the case for updated information and
-          analysis.
+          {readOnly
+            ? "Decisions are read-only in this state."
+            : incomplete
+              ? "Finalize review becomes available when every proposal is approved, modified or rejected. A clarification request keeps the review incomplete and returns the case for updated information and analysis."
+              : "Every proposal has a decision. Finalize review records them and publishes the reviewed plan."}
         </p>
         <p
           id="review-feedback"

@@ -67,6 +67,15 @@ const test = base.extend<{ reviewCase: ReviewCase; repeatCase: ReviewCase }>({
     { timeout: 60000 },
   ],
 });
+// Saves commit a serialized Postgres transaction and re-render the workspace. On a
+// shared, I/O-loaded Docker host the commit fsync can stall for several seconds;
+// the UI correctly stays in "Saving review…" and then completes, so committed
+// results get more than the 5 s default assertion timeout.
+const committed = { timeout: 30_000 };
+test.describe.configure({ timeout: 120_000 });
+// Axe must read resting colors, not a mid-transition frame; globals.css disables
+// transitions under prefers-reduced-motion, so the contrast rule stays unchanged.
+test.use({ reducedMotion: "reduce" });
 async function openReview(page: Page, baseURL: string, reviewCase: ReviewCase) {
   await page.context().addCookies([
     {
@@ -91,7 +100,10 @@ async function save(region: Locator) {
   await region
     .getByRole("button", { name: "Save decisions", exact: true })
     .click();
-  await expect(region.getByRole("status")).toContainText("decisions saved");
+  await expect(region.getByRole("status")).toContainText(
+    "decisions saved",
+    committed,
+  );
 }
 async function finalize(region: Locator) {
   await region
@@ -99,6 +111,7 @@ async function finalize(region: Locator) {
     .click();
   await expect(region.getByRole("status")).toContainText(
     "review finalized and reviewed plan published",
+    committed,
   );
   await expect(
     region.getByLabel("Decision for proposal 1", { exact: true }),
@@ -288,6 +301,7 @@ test("clarification remains incomplete after refresh and cannot publish a plan",
     .click();
   await expect(region.getByRole("status")).toContainText(
     "Clarification requested",
+    committed,
   );
   await expect(decision).toHaveValue("CLARIFY");
   await expect(decision).toBeDisabled();
@@ -342,6 +356,7 @@ test("a competing tab receives safe failure feedback and retains its unsaved inp
       .click();
     await expect(second.getByRole("alert")).toContainText(
       "Reload to check current versions",
+      committed,
     );
     await expect(reason).toHaveValue("Competing synthetic draft");
     await expect(competing).toHaveValue("REJECT");

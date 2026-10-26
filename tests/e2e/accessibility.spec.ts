@@ -1,6 +1,10 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
+// Axe must read resting colors, not a mid-transition frame; globals.css disables
+// transitions under prefers-reduced-motion, so the contrast rule stays unchanged.
+test.use({ reducedMotion: "reduce" });
+
 test("main demo routes have no serious or critical axe violations", async ({
   page,
 }) => {
