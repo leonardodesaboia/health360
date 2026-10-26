@@ -110,8 +110,16 @@ the new profile version and a fresh analysis ID. The action calls the analysis
 owner's exported `resumeAnalysisForSession` to perform reanalysis; no LLM or rule
 logic is duplicated. Interrupted calls can resume the stored reservation without
 another profile. Unknowns remain null and can require clarification again; failures
-publish no plan. The physician queue reader currently exposes no typed CLARIFY
-field-request reader, so that origin remains explicitly unsupported.
+publish no plan. Physician-origin requests use
+`listOpenClarificationRequests(tx, datasetId, patientId)` under the same lock.
+Expected review ID/version joins the profile/analysis guards. Named supported
+fields reuse bounded intake controls; requests without a target field use text
+answers of up to 2,000 characters with an explicit unknown option. Unsupported
+named targets remain unavailable. Question context and PATIENT_REPORTED answers
+are versioned in a physician-clarification namespace in the intake snapshot and
+as separate sourced profile notes. Unknown answers stay null. Free text remains
+local and is excluded by the existing analysis minimizer; it is never inferred
+into deterministic clinical facts. Fresh analysis requires a new physician review.
 
 `/patient/analysis` links to `/patient/clarification`; direct access without a session,
 unsupported requests, unavailable storage, pending analysis and no-current-request

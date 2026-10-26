@@ -28,7 +28,7 @@ export default async function ClarificationPage() {
       <Surface>
         {data.status === "READY" ? (
           <ClarificationForm
-            key={`${data.form.analysisId}:${data.form.profileVersion}`}
+            key={`${data.form.analysisId}:${data.form.profileVersion}:${data.form.reviewId ?? "analysis"}:${data.form.reviewVersion ?? 0}`}
             {...data.form}
             submitAction={submitClarification}
           />

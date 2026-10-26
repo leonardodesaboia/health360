@@ -12,6 +12,7 @@ import {
   type IntakeAnswers,
 } from "@/features/health-intake/contracts";
 import type { ClarificationQuestion } from "./questions";
+import type { FreeClarificationQuestion } from "./physician-questions";
 import type {
   ClarificationRequest,
   ClarificationActionResult,
@@ -31,12 +32,18 @@ export function ClarificationForm({
   analysisId,
   answers,
   questions,
+  freeQuestions = [],
+  reviewId,
+  reviewVersion,
   submitAction,
 }: {
   profileVersion: number;
   analysisId: string;
   answers: IntakeAnswers;
   questions: ClarificationQuestion[];
+  freeQuestions?: FreeClarificationQuestion[];
+  reviewId?: string;
+  reviewVersion?: number;
   submitAction: (
     request: ClarificationRequest,
   ) => Promise<ClarificationActionResult>;
@@ -53,10 +60,13 @@ export function ClarificationForm({
   });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [freeAnswers, setFreeAnswers] = useState<Record<string, string | null>>(
+    () => Object.fromEntries(freeQuestions.map((q) => [q.id, null])),
+  );
   return (
     <form
       noValidate
-      className="space-y-6"
+      className="space-y-6 break-words"
       onSubmit={async (event) => {
         event.preventDefault();
         if (
@@ -69,10 +79,26 @@ export function ClarificationForm({
         setBusy(true);
         setError("");
         try {
+          if (
+            Object.values(freeAnswers).some(
+              (value) => value !== null && !value.trim(),
+            )
+          ) {
+            setError("Enter your answer or choose I don't know.");
+            const firstEmpty = freeQuestions.find(
+              (question) =>
+                freeAnswers[question.id] !== null &&
+                !freeAnswers[question.id]?.trim(),
+            );
+            if (firstEmpty) document.getElementById(firstEmpty.id)?.focus();
+            return;
+          }
           const values = getValues();
           const result = await submitAction({
             profileVersion,
             analysisId,
+            ...(reviewId ? { reviewId, reviewVersion } : {}),
+            freeAnswers,
             answers: Object.fromEntries(
               questions.map((q) => [q.id, values[q.id]]),
             ),
@@ -110,8 +136,60 @@ export function ClarificationForm({
             error={errors[question.id]}
           />
         ))}
+        {freeQuestions.map((question) => (
+          <div key={question.id}>
+            <label htmlFor={question.id} className="block text-sm font-medium">
+              {question.label}
+            </label>
+            <textarea
+              id={question.id}
+              rows={3}
+              maxLength={2000}
+              disabled={freeAnswers[question.id] === null}
+              value={freeAnswers[question.id] ?? ""}
+              onChange={(event) =>
+                setFreeAnswers((current) => ({
+                  ...current,
+                  [question.id]: event.target.value,
+                }))
+              }
+              aria-invalid={Boolean(
+                error &&
+                freeAnswers[question.id] !== null &&
+                !freeAnswers[question.id]?.trim(),
+              )}
+              aria-describedby={`${question.id}-help${error ? " clarification-feedback" : ""}`}
+              className="mt-2 min-h-28 w-full rounded-md border border-input bg-card px-3 py-2 text-base focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            />
+            <p
+              id={`${question.id}-help`}
+              className="mt-2 text-sm text-muted-foreground"
+            >
+              Answer this specific demo review question only. Your words stay
+              patient-reported and are not inferred into clinical facts.
+            </p>
+            <label className="mt-2 flex min-h-11 items-center gap-3 text-sm">
+              <input
+                type="checkbox"
+                checked={freeAnswers[question.id] === null}
+                onChange={(event) =>
+                  setFreeAnswers((current) => ({
+                    ...current,
+                    [question.id]: event.target.checked ? null : "",
+                  }))
+                }
+                className="size-5 shrink-0 accent-primary"
+              />
+              I don&apos;t know — {question.label}
+            </label>
+          </div>
+        ))}
         {error && (
-          <p role="alert" className="text-sm text-destructive">
+          <p
+            id="clarification-feedback"
+            role="alert"
+            className="text-sm text-destructive"
+          >
             {error}
           </p>
         )}

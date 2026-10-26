@@ -79,9 +79,14 @@ CLARIFICATION_REQUIRED, and timeouts keep the saved profile with explicit failur
 An interrupted call can be resumed from Continue saved analysis, without another
 profile version. An old form cannot overwrite a newer profile or analysis.
 
-Physician-origin clarification will use a typed supported-field reader when one
-exists. The current queue/workspace reader exposes no such request contract; free
-text review reasons are never interpreted as patient questions.
+Physician-origin clarification uses the typed open-request reader from the current
+incomplete review. The patient sees the physician's question, with a bounded input
+when a known intake field is named or a text answer when no field is named. Both
+offer I don't know. Questions and patient-reported answers remain linked to the
+review version; a superseded review form cannot write. Free text remains a local
+patient-reported note and is not inferred into clinical facts. Reanalysis starts a
+new review while the earlier incomplete review remains preserved. Free-text review
+reasons are never interpreted as patient questions.
 
 ## Administrative lifecycle
 
