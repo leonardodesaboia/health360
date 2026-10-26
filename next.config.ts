@@ -4,5 +4,35 @@ const config: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   agentRules: false,
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Referrer-Policy", value: "no-referrer" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+          {
+            // Avoid changing Next.js inline-script rendering during demo hardening.
+            key: "Content-Security-Policy",
+            value:
+              "base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'",
+          },
+          ...(process.env.NODE_ENV === "production"
+            ? [
+                {
+                  key: "Strict-Transport-Security",
+                  value: "max-age=31536000",
+                },
+              ]
+            : []),
+        ],
+      },
+    ];
+  },
 };
 export default config;
