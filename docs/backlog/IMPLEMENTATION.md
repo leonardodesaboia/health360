@@ -163,7 +163,7 @@ At workflow adoption, all 18 entries were planned. Pre-created unimplemented dra
 ### P0-10 — Physician decisions and finalization
 
 - Stable OpenSpec change ID: `p0-10-physician-decisions`.
-- Status: **done (PR open)**; [archive](../../openspec/changes/archive/2026-10-25-p0-10-physician-decisions/).
+- Status: **done (PR open)**; [archive](../../openspec/changes/archive/2026-10-25-p0-10-physician-decisions/); [PR #28](https://github.com/leonardodesaboia/health360/pull/28).
 - Implementation evidence: [verification](../../openspec/changes/archive/2026-10-25-p0-10-physician-decisions/tasks.md): verify passes (430 unit tests), 83 PostgreSQL integration tests, 84 desktop/mobile e2e tests on port 3220, formatting and strict specs pass. Exports the typed `listOpenClarificationRequests` reader for P0-12.
 
 - Goal: persist approve/modify/reject/pending/clarify decisions with audit metadata.
