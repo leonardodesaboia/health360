@@ -169,6 +169,15 @@ export const medicalReviewSchema = z.object({
       reason: z.string(),
       revisedText: z.string().nullable(),
       recordedAt: timestamp,
+      // Typed physician clarification request (CLARIFY only); targetField is an intake FieldId.
+      clarification: z
+        .object({
+          question: z.string().min(1).max(500),
+          targetField: z.string().min(1).max(80).optional(),
+        })
+        .strict()
+        .nullable()
+        .optional(),
     }),
   ),
 });

@@ -8,8 +8,8 @@ Synthetic data only. **DEMONSTRATIVE — NOT CLINICALLY VALIDATED**.
 ## Backlog delivery
 
 Implemented describes landed code, not a complete MVP or an archived change.
-Some merged slices retain active OpenSpec checklists. P0-10 remains in progress
-outside main with no provider PR listed at this snapshot. P0-14 part 1 is in
+Some merged slices retain active OpenSpec checklists. P0-10 decisions, typed
+CLARIFY requests, finalization and decision history are implemented and archived. P0-14 part 1 is in
 progress; its change and suite are not on main.
 
 | Item                         | State on main                                                 | PRs and remaining boundary                                                                                                                                                                   |
@@ -23,7 +23,7 @@ progress; its change and suite are not on main.
 | P0-07 Analysis               | Implemented                                                   | [#20](https://github.com/leonardodesaboia/health360/pull/20); claim/evaluate/validate/persist, retry and freshness guards                                                                    |
 | P0-08 Do Not Test            | Implemented through preliminary proposal                      | [#23](https://github.com/leonardodesaboia/health360/pull/23); publication needs P0-10                                                                                                        |
 | P0-09 Physician reader       | Reader implemented; review integration in progress            | [#21](https://github.com/leonardodesaboia/health360/pull/21) now merged; decision/finalization producer missing                                                                              |
-| P0-10 Decisions/finalization | In progress; not implemented on main                          | No listed PR; saves, CLARIFY, finalization and decision history outstanding                                                                                                                  |
+| P0-10 Decisions/finalization | Implemented; finalization publishes atomically                | Decisions, typed CLARIFY reader `listOpenClarificationRequests`, opening, finalization, decision history                                                                                     |
 | P0-11 Reviewed plan          | Guarded publisher/reader implemented; integration in progress | [#11](https://github.com/leonardodesaboia/health360/pull/11); P0-10 must call publication atomically                                                                                         |
 | P0-12 Clarification          | Patient loop implemented; physician-origin requests pending   | [#24](https://github.com/leonardodesaboia/health360/pull/24), [#26](https://github.com/leonardodesaboia/health360/pull/26): bounded questions, profile vN+1, reanalysis; CLARIFY needs P0-10 |
 | P0-13 History/reassessment   | History/restart implemented; full second cycle in progress    | [#14](https://github.com/leonardodesaboia/health360/pull/14), [#25](https://github.com/leonardodesaboia/health360/pull/25) now merged; second finalized plan needs remaining producers       |
@@ -52,13 +52,14 @@ a user can finalize a review. No full A–E suite is claimed.
 - `/patient/profile` still reads the browser-local demonstrator under its local
   patient key; it is not a reader for the selected session's persisted profile.
   The physician reader uses the analyzed persisted profile.
-- P0-10 blocks fresh patient-to-plan journeys. The publisher exists but has no
-  production finalization caller on main. The physician workspace reads.
+- Explicit physician finalization now publishes the reviewed plan in the same
+  transaction; demo reviewer decisions are never clinical validation.
 - Case selection seeds the legacy profile/exam snapshot without typed intakeFacts.
   Intake prefill does not reconstruct every exam/date answer. Complete the synthetic
   facts explicitly before analysis; narrative negative history is not a substitute.
 - Clarification resolves only analysis-selected supported fields. Physician-origin
-  CLARIFY requests remain unavailable until P0-10 exposes a typed reader. Unknown
+  CLARIFY requests are exposed by `listOpenClarificationRequests`, but the patient
+  clarification loop does not consume them yet. Unknown
   answers stay null and can return to CLARIFICATION_REQUIRED; they never bypass gates.
 - Preserve analysis reference comparisons and version checks across its two
   transactions. Provider work belongs outside transactions. See [ADR0005](adr/0005-integration-contracts.md).

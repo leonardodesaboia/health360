@@ -1,9 +1,12 @@
 import { readerFixture } from "../../../tests/fixtures/clinical-review";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { prepareAnalysis } from "../../server/analysis/prepare";
+import { scenarioVariant } from "../../server/clinical-rules/scenarios";
 import { demoPatient, demoExamination } from "../patients/fixtures";
 import { intakeFactsSchema } from "../patients/contracts";
 import {
   buildQueue,
+  analysisPresentation,
   findWorkspace,
   workspaceId,
   safeEvidenceUrl,
@@ -12,6 +15,37 @@ import {
 } from "./reader";
 
 describe("physician reader", () => {
+  it("attributes real rule-blocked records to system/rules rather than an uncalled model", async () => {
+    const explain = vi.fn(async () => {
+      throw new Error("A blocked rule must not call the model");
+    });
+    const { analysis } = await prepareAnalysis(
+      scenarioVariant("first-screening", "unknown-age"),
+      {
+        id: "blocked-provenance-fixture",
+        version: 1,
+        createdAt: "2026-10-25T12:00:00Z",
+        provider: "mock",
+        model: "configured-but-not-called",
+        promptId: "analysis-v1",
+        promptVersion: 1,
+      },
+      explain,
+    );
+    expect(analysis.status).toBe("BLOCKED");
+    expect(explain).not.toHaveBeenCalled();
+    expect(analysisPresentation(analysis)).toEqual({
+      summaryHeading: "Blocked analysis summary",
+      summaryProvenance: "System-generated status and rule-generated context",
+      showProvider: false,
+    });
+    expect(analysisPresentation(readerFixture().analyses[0])).toMatchObject({
+      summaryHeading: "AI-structured summary",
+      summaryProvenance: "AI-generated",
+      showProvider: true,
+    });
+  });
+
   it("distinguishes declared yes, no and unknown screening facts", () => {
     const data = readerFixture();
     const facts = intakeFactsSchema.parse(

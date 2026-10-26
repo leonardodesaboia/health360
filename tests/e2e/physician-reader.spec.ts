@@ -1,7 +1,8 @@
 import { execFileSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { resolve } from "node:path";
-import { test as base, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
+import { test as base, expect, type Page } from "@playwright/test";
 import { z } from "zod";
 
 const seededSchema = z.object({
@@ -80,6 +81,15 @@ const test = base.extend<{
   ],
 });
 
+async function expectNoSeriousAxe(page: Page) {
+  const { violations } = await new AxeBuilder({ page }).analyze();
+  expect(
+    violations.filter(({ impact }) =>
+      ["serious", "critical"].includes(impact ?? ""),
+    ),
+  ).toEqual([]);
+}
+
 test("physician reads stored time, exact versions, unknown facts and evidence with a keyboard", async ({
   page,
   baseURL,
@@ -104,6 +114,20 @@ test("physician reads stored time, exact versions, unknown facts and evidence wi
   await expect(
     reader
       .locator(`time[datetime="${reviewCase.analysisTime}"]`)
+      .filter({ visible: true }),
+  ).toBeVisible();
+  await expectNoSeriousAxe(page);
+  await reader
+    .getByRole("link", { name: "Open review", exact: true })
+    .filter({ visible: true })
+    .click();
+  await expect(
+    reader.getByRole("heading", { name: "Patient context", exact: true }),
+  ).toBeVisible();
+  await page.goto("/doctor");
+  await expect(
+    reader
+      .getByText("Physician review in progress", { exact: true })
       .filter({ visible: true }),
   ).toBeVisible();
   await reader
@@ -148,6 +172,7 @@ test("physician reads stored time, exact versions, unknown facts and evidence wi
       exact: true,
     }),
   ).toBeVisible();
+  await expectNoSeriousAxe(page);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -226,6 +251,19 @@ test("blocked analysis has no fallback proposals", async ({
     },
   ]);
   await page.goto(`/doctor/reviews/${encodeURIComponent(blocked.workspaceId)}`);
+  await expect(
+    page.getByRole("heading", {
+      name: "Blocked analysis summary",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/^System-generated status and rule-generated context/),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "AI-structured summary", exact: true }),
+  ).toHaveCount(0);
+  await expect(page.getByText(/mock \/ reader-integration/)).toHaveCount(0);
   await expect(
     page.getByText("Analysis blocked", { exact: true }),
   ).toBeVisible();

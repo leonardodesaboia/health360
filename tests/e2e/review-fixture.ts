@@ -41,8 +41,8 @@ const now = "2026-10-23T12:34:56Z";
 try {
   if (mode === "cleanup") {
     await db.dataset.deleteMany({ where: { id: datasetId } });
-  } else if (mode === "seed-real") {
-    await seedRealAnalysis();
+  } else if (mode === "seed-real" || mode === "seed-blocked") {
+    await seedRealAnalysis(mode === "seed-blocked");
   } else if (mode === "stale-profile") {
     await inDatasetTransaction(db, datasetId, async (repository, tx) => {
       const { patient } = demoCaseRecords(caseId);
@@ -85,7 +85,6 @@ try {
       ],
       provenance: "AI_GENERATED",
     };
-    const blocked = mode === "seed-blocked";
     const analysis = aiAnalysisSchema.parse({
       id: analysisId,
       version: 1,
@@ -103,8 +102,8 @@ try {
       missingInformation: ["Clinical confirmation"],
       uncertainties: ["Demonstrative and not clinically validated"],
       reviewQuestions: [],
-      proposals: blocked ? [] : [proposal],
-      status: blocked ? "BLOCKED" : "PRELIMINARY",
+      proposals: [proposal],
+      status: "PRELIMINARY",
     });
     await inDatasetTransaction(db, datasetId, async (repository, tx) => {
       const refs = { profileVersion: profile.version, analysisId: analysis.id };
@@ -140,7 +139,7 @@ try {
       await transitionWorkflow(tx, datasetId, {
         patientId: patient.id,
         expectedFrom: "ANALYSIS_PENDING",
-        to: blocked ? "ANALYSIS_FAILED" : "MEDICAL_REVIEW_PENDING",
+        to: "MEDICAL_REVIEW_PENDING",
         actor: "system",
         refs,
       });
@@ -160,9 +159,8 @@ try {
 }
 
 /** Exercise the landed P0-07 producer; only the external model is deterministic. */
-async function seedRealAnalysis() {
-  if (caseId !== "first-screening")
-    throw new Error("This reader integration uses the first-screening case");
+async function seedRealAnalysis(blocked = false) {
+  const repeat = caseId === "repeat-screening";
   await replaceDemoDataset(db, datasetId, caseId);
   const { patient, profile } = demoCaseRecords(caseId);
   const profileVersion = profile.version + 1;
@@ -177,6 +175,7 @@ async function seedRealAnalysis() {
       ...profile,
       id: randomUUID(),
       version: profileVersion,
+      age: blocked ? null : profile.age,
       updatedAt: now,
       intakeFacts: {
         provenance: "PATIENT_REPORTED",
@@ -190,10 +189,10 @@ async function seedRealAnalysis() {
         serratedPolyposis: false,
         familyCrc: false,
         familySyndrome: false,
-        priorScreening: "NEVER_SCREENED",
-        colonoscopyNormal: null,
-        colonoscopyComplete: null,
-        colonoscopyAdequatePrep: null,
+        priorScreening: repeat ? "COLONOSCOPY" : "NEVER_SCREENED",
+        colonoscopyNormal: repeat ? true : null,
+        colonoscopyComplete: repeat ? true : null,
+        colonoscopyAdequatePrep: repeat ? true : null,
       },
     });
     await repository.append("intake", {
@@ -211,6 +210,7 @@ async function seedRealAnalysis() {
       refs: { profileVersion },
     });
   });
+  let providerCalled = false;
   const result = await analyzeSession(
     db,
     { datasetId, patientId: patient.id, caseId },
@@ -223,8 +223,9 @@ async function seedRealAnalysis() {
         promptId: "reader-integration",
       },
       now: () => new Date(now),
-      explain: (input) =>
-        analyze(
+      explain: (input) => {
+        providerCalled = true;
+        return analyze(
           input,
           new MockProvider({
             ok: true,
@@ -248,27 +249,33 @@ async function seedRealAnalysis() {
             },
           }),
           1000,
-        ),
+        );
+      },
     },
   );
   if (
     result.status !== "RECORDED" ||
-    result.workflowStatus !== "MEDICAL_REVIEW_PENDING"
+    result.workflowStatus !==
+      (blocked ? "CLARIFICATION_REQUIRED" : "MEDICAL_REVIEW_PENDING")
   )
     throw new Error(
-      `The real analysis producer did not create a reviewable analysis: ${result.status}`,
+      "The real producer did not record the expected workflow result",
     );
   const records = await datasetRepository(db, datasetId).list("analysis");
   const analysis = records.find((record) => record.id === result.analysisId);
   if (
     !analysis ||
-    analysis.status !== "PRELIMINARY" ||
-    !analysis.proposals.length ||
-    analysis.profileVersion !== profileVersion
+    analysis.profileVersion !== profileVersion ||
+    analysis.status !== (blocked ? "BLOCKED" : "PRELIMINARY") ||
+    (blocked
+      ? analysis.proposals.length !== 0
+      : analysis.proposals.length === 0)
   )
     throw new Error(
-      "Real producer records must include the current profile and proposals",
+      "Real producer records must match the analyzed profile and result",
     );
+  if (blocked && providerCalled)
+    throw new Error("Rule-blocked input must not invoke the model");
   process.stdout.write(
     JSON.stringify({
       datasetId,

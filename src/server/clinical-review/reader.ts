@@ -8,6 +8,7 @@ import { getDatabase } from "../db/client";
 import { inDatasetTransaction } from "../db/repository";
 import { getDemoSession } from "../demo/session";
 import { getWorkflowStatus } from "../workflow/state";
+import { openReview } from "./decisions";
 
 async function readDataset() {
   const session = await getDemoSession();
@@ -15,11 +16,20 @@ async function readDataset() {
   const db = getDatabase();
   return inDatasetTransaction(db, session.datasetId, async (repository, tx) => {
     // The shared state reader takes the patient lock before any versioned record reads.
-    const workflowStatus = await getWorkflowStatus(
-      tx,
-      session.datasetId,
-      session.patientId,
-    );
+    let workflowStatus;
+    try {
+      workflowStatus = await getWorkflowStatus(
+        tx,
+        session.datasetId,
+        session.patientId,
+      );
+    } catch (error) {
+      // A demo case replacement can remove the cookie's patient; expose nothing then.
+      const patients = await repository.list("patient").catch(() => null);
+      if (patients?.some((patient) => patient.id === session.patientId) ?? true)
+        throw error;
+      return null;
+    }
     const [patients, profiles, examinations, analyses, contexts, reviews] =
       await Promise.all([
         repository.list("patient"),
@@ -53,4 +63,12 @@ export async function getReviewWorkspace(id: string) {
   return result
     ? findWorkspace(result.data, result.session.patientId, id)
     : null;
+}
+
+/** Opens the review (PENDING → IN_PROGRESS when current), then reads the workspace. */
+export async function openReviewWorkspace(id: string) {
+  const session = await getDemoSession();
+  if (!session) return null;
+  await openReview(getDatabase(), session, id);
+  return getReviewWorkspace(id);
 }
