@@ -4,6 +4,28 @@ import { Activity, ArrowLeftRight, ShieldCheck } from "lucide-react";
 import { DemoControls } from "./demo-controls";
 import { Navigation } from "./navigation";
 
+export function DemoBanner() {
+  return (
+    <div className="border-b bg-secondary px-4 py-2 text-center text-xs leading-relaxed text-secondary-foreground">
+      <strong>Demonstration environment</strong> · Synthetic data ·
+      DEMONSTRATIVE — NOT CLINICALLY VALIDATED · Do not use for real care
+    </div>
+  );
+}
+
+export function BrandLink({ href }: { href: string }) {
+  return (
+    <Link
+      href={href}
+      aria-label="Health360 — home"
+      className="flex items-center gap-2 text-xl font-semibold tracking-tight"
+    >
+      <Activity aria-hidden="true" className="size-7 text-primary" />
+      health<span className="-ml-2 font-normal text-primary">360</span>
+    </Link>
+  );
+}
+
 function AppShell({
   children,
   role,
@@ -19,20 +41,10 @@ function AppShell({
       >
         Skip to content
       </a>
-      <div className="border-b bg-secondary px-4 py-2 text-center text-xs leading-relaxed text-secondary-foreground">
-        <strong>Demonstration environment</strong> · Synthetic data ·
-        DEMONSTRATIVE — NOT CLINICALLY VALIDATED · Do not use for real care
-      </div>
+      <DemoBanner />
       <header className="border-b bg-sidebar text-sidebar-foreground">
         <div className="mx-auto flex max-w-workspace flex-wrap items-center justify-between gap-4 px-4 py-4 md:px-8">
-          <Link
-            href={role === "patient" ? "/patient" : "/doctor"}
-            aria-label="Health360 — home"
-            className="flex items-center gap-2 text-xl font-semibold tracking-tight"
-          >
-            <Activity aria-hidden="true" className="size-7 text-primary" />
-            health<span className="-ml-2 font-normal text-primary">360</span>
-          </Link>
+          <BrandLink href={role === "patient" ? "/patient" : "/doctor"} />
           <p className="hidden text-xs text-muted-foreground lg:block">
             {role === "patient"
               ? "Your preventive follow-up"

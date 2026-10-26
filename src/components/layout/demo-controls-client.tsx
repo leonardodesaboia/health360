@@ -53,7 +53,7 @@ export function DemoControlsClient({
       className="border-b bg-muted text-sm"
     >
       <div className="mx-auto flex max-w-workspace flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3 md:px-8">
-        <div className="min-w-0 flex-1" aria-live="polite">
+        <div className="w-full min-w-0 md:w-auto md:flex-1" aria-live="polite">
           <h2 id="demo-case-title" className="text-sm font-medium">
             {state === "loading"
               ? "Loading demo case…"

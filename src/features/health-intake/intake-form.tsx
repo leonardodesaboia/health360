@@ -67,7 +67,7 @@ export function IntakeForm({
       setStatus(
         draft
           ? "Saved draft restored."
-          : "Start with the synthetic scenario only.",
+          : "Answer with the synthetic scenario. Choose I don't know when unsure.",
       );
       setError("");
       setReady(true);
@@ -175,7 +175,9 @@ export function IntakeForm({
       setCompleted(true);
       setError("");
       setStatus(
-        `Profile version ${result.profile.version} saved in this browser.`,
+        `Profile version ${result.profile.version} saved ${
+          scope === localPatientId ? "in this browser" : "to this demo case"
+        }.`,
       );
     } catch (cause) {
       setError(
