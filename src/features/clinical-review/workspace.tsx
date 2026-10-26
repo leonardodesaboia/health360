@@ -213,9 +213,55 @@ export function WorkspaceReader({
             {proposals.map((proposal) => (
               <article className="mt-6 border-t pt-6" key={proposal.id}>
                 <p className="text-xs text-muted-foreground">
-                  {categories[proposal.category]} · AI-generated explanation
+                  {categories[proposal.category]} ·{" "}
+                  {completed
+                    ? "Original preliminary proposal"
+                    : "Awaiting physician review"}
                 </p>
                 <h3 className="mt-2">{proposal.title}</h3>
+                <dl className="mt-3 space-y-1 text-xs">
+                  <div className="flex gap-3">
+                    <dt className="w-28 shrink-0 text-muted-foreground">
+                      Rule-generated
+                    </dt>
+                    <dd className="min-w-0 break-words tabular-nums">
+                      {proposal.ruleIds.length
+                        ? proposal.ruleIds
+                            .map((id) => {
+                              const rule = contextDetails?.rules.find(
+                                (item) => item.id === id,
+                              );
+                              return rule
+                                ? `${rule.id} v${rule.version}`
+                                : `${id} (context v${context.version})`;
+                            })
+                            .join(", ")
+                        : "No rule reference supplied"}
+                    </dd>
+                  </div>
+                  <div className="flex gap-3">
+                    <dt className="w-28 shrink-0 text-muted-foreground">
+                      Evidence
+                    </dt>
+                    <dd className="tabular-nums">
+                      {proposal.evidenceIds.length
+                        ? `${proposal.evidenceIds.length} ${proposal.evidenceIds.length === 1 ? "source" : "sources"}`
+                        : "Placeholder — no source supplied"}
+                    </dd>
+                  </div>
+                  <div className="flex gap-3">
+                    <dt className="w-28 shrink-0 text-muted-foreground">
+                      AI-generated
+                    </dt>
+                    <dd>Explanation wording only</dd>
+                  </div>
+                  <div className="flex gap-3">
+                    <dt className="w-28 shrink-0 text-muted-foreground">
+                      Validation
+                    </dt>
+                    <dd>DEMONSTRATIVE — NOT CLINICALLY VALIDATED</dd>
+                  </div>
+                </dl>
                 <details className="mt-4 text-sm">
                   <summary className="min-h-11 cursor-pointer content-center font-medium">
                     View rationale and criteria
