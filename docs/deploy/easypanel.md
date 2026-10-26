@@ -88,7 +88,8 @@ In **Domains**, add the hostname with target port `3000` and path `/`. Point its
 DNS A record to the VPS (AAAA only if IPv6 works). Allow ports 80/443 through the
 firewall, enable HTTPS/certificate issuance in Easypanel, and verify the certificate
 and HTTP-to-HTTPS redirect. Check `https://<demo-host>/api/health`, `/patient`, and
-`/doctor`. Use HTTPS with `DEMO_COOKIE_SECURE=true`. Keep Postgres private.
+`/doctor`. Use HTTPS with `DEMO_COOKIE_SECURE=true`. Production always sets secure
+session cookies, even when this flag is absent or false. Keep Postgres private.
 
 ## 6. Demo reset
 

@@ -1,0 +1,42 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const { getSession } = vi.hoisted(() => ({ getSession: vi.fn() }));
+vi.mock("../../../server/demo/session", () => ({ getDemoSession: getSession }));
+import { GET } from "./route";
+
+describe("demo presenter state", () => {
+  beforeEach(() => vi.resetAllMocks());
+
+  it("returns no data without a session and disables caching", async () => {
+    getSession.mockResolvedValue(null);
+    const response = await GET();
+    expect(response.status).toBe(200);
+    expect(await response.json()).toBeNull();
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+  });
+
+  it("returns only the synthetic presenter fields, never scope or clinical records", async () => {
+    getSession.mockResolvedValue({
+      caseId: "first-screening",
+      datasetId: "private-dataset",
+      patientId: "private-patient",
+      patient: { displayName: "Alex Example", id: "private-patient" },
+      profile: { personalHistory: ["private-history"] },
+      examinations: ["private-exam"],
+    });
+    const response = await GET();
+    expect(await response.json()).toEqual({
+      caseId: "first-screening",
+      displayName: "Alex Example",
+      summary: "Synthetic, age 50 · No previous colorectal screening reported",
+    });
+  });
+
+  it("returns a generic uncached 503 when session storage fails", async () => {
+    getSession.mockRejectedValue(new Error("postgresql://secret@private/db"));
+    const response = await GET();
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ status: "unavailable" });
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+  });
+});

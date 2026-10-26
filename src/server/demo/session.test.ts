@@ -33,6 +33,23 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe("cookie-bound demo session", () => {
+  it.each([undefined, "false", "true"])(
+    "requires a secure cookie in production even with DEMO_COOKIE_SECURE=%s",
+    async (configured) => {
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("DEMO_COOKIE_SECURE", configured);
+      await selectDemoCaseForSession("first-screening");
+      expect(mocks.set).toHaveBeenCalledWith(
+        demoSessionCookie,
+        expect.any(String),
+        expect.objectContaining({
+          httpOnly: true,
+          sameSite: "lax",
+          secure: true,
+        }),
+      );
+    },
+  );
   it("returns null without a valid cookie and never touches storage", async () => {
     expect(await getDemoSession()).toBeNull();
     mocks.get.mockReturnValue({ value: "invalid" });
