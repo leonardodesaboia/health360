@@ -5,6 +5,7 @@ import {
   completeFirstIntake,
   completeRepeatIntake,
   openPhysicianWorkspace,
+  decideAndFinalize,
   assertNoUnreviewedPlan,
   afterAction,
 } from "./helpers";
@@ -196,10 +197,68 @@ test("Flow D start: fixture-reviewed plan v1 is preserved when real reassessment
   ).toBeVisible();
 });
 
-// TODO(P0-10): replace with real decision controls, reasons, explicit finalization and patient-plan assertions.
-test.fixme("needs P0-10: Flows A/B completion — physician decisions and finalization publish only reviewed content", async () => {
-  throw new Error(
-    "TODO(P0-10): implement actual physician decisions and finalization acceptance",
+test("Flow A completion: explicit approval and finalization publish only the reviewed plan", async ({
+  page,
+  context,
+  demo,
+}) => {
+  await selectCase(page, "Alex Example");
+  const token = await demo.track(context);
+  await completeFirstIntake(page);
+  await page
+    .getByRole("button", { name: "Analyze current profile", exact: true })
+    .click();
+  await expect(
+    page.getByText("Awaiting physician review", { exact: true }),
+  ).toBeVisible(afterAction);
+  await assertNoUnreviewedPlan(page);
+  await decideAndFinalize(page, "Alex Example", { kind: "APPROVE" });
+
+  const persisted = await demo.inspect(token);
+  expect(persisted.plans).toHaveLength(1);
+  expect(persisted.plans[0].version).toBe(1);
+  await page.goto("/patient/plan");
+  const plan = page.getByRole("main");
+  await expect(
+    plan.getByText("Reviewed demonstration plan", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    plan.getByRole("heading", { name: "Selected actions", exact: true }),
+  ).toBeVisible();
+  await expect(plan).not.toContainText(/crc-screening-due|AI-generated/);
+  await page.goto("/patient/history");
+  await expect(
+    page.getByRole("link", { name: "View plan version 1", exact: true }),
+  ).toBeVisible();
+});
+
+test("Flow B completion: a modified redundancy proposal publishes only the physician's revised wording", async ({
+  page,
+  context,
+  demo,
+}) => {
+  await selectCase(page, "Jordan Example");
+  const token = await demo.track(context);
+  await completeRepeatIntake(page, { examDate: "2022-11-03" });
+  await page
+    .getByRole("button", { name: "Analyze current profile", exact: true })
+    .click();
+  await expect(
+    page.getByText("Awaiting physician review", { exact: true }),
+  ).toBeVisible(afterAction);
+  const revised =
+    "Discuss with your physician whether a repeat colonoscopy is needed now.";
+  await decideAndFinalize(page, "Jordan Example", {
+    kind: "MODIFY",
+    reason: "Demonstrative revision; plain-language wording for the patient.",
+    revised,
+  });
+  expect((await demo.inspect(token)).plans).toHaveLength(1);
+  await page.goto("/patient/plan");
+  const plan = page.getByRole("main");
+  await expect(plan.getByText(revised, { exact: true })).toBeVisible();
+  await expect(plan).not.toContainText(
+    /Review supplied possible redundancy|crc-routine-repeat/,
   );
 });
 test("Flow B: Jordan's recent normal colonoscopy yields a traceable preliminary possible-redundancy proposal", async ({
@@ -324,7 +383,48 @@ for (const answer of ["date", "unknown"] as const) {
     }
   });
 }
-// TODO(P0-10): finish cycle two through actual review UI and verify plan v2 plus preserved v1.
-test.fixme("needs P0-10: Flow D completion — updated information receives a new finalized review and plan v2", async () => {
-  throw new Error("TODO(P0-10): implement the complete second review cycle");
+test("Flow D completion: updated information receives a new finalized review and plan v2 while v1 is preserved", async ({
+  page,
+  context,
+  demo,
+}) => {
+  await selectCase(page, "Alex Example");
+  const token = await demo.track(context);
+  await completeFirstIntake(page);
+  await page
+    .getByRole("button", { name: "Analyze current profile", exact: true })
+    .click();
+  await expect(
+    page.getByText("Awaiting physician review", { exact: true }),
+  ).toBeVisible(afterAction);
+  await decideAndFinalize(page, "Alex Example", { kind: "APPROVE" });
+  const cycleOne = await demo.inspect(token);
+  expect(cycleOne.plans).toHaveLength(1);
+
+  await page.goto("/patient/history");
+  await page
+    .getByRole("button", { name: "Update my information", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/patient\/intake$/, afterAction);
+  await completeFirstIntake(page);
+  await page
+    .getByRole("button", { name: "Analyze current profile", exact: true })
+    .click();
+  await expect(
+    page.getByText("Awaiting physician review", { exact: true }),
+  ).toBeVisible(afterAction);
+  await decideAndFinalize(page, "Alex Example", { kind: "APPROVE" });
+
+  const cycleTwo = await demo.inspect(token);
+  expect(cycleTwo.plans.map((plan) => plan.version).sort()).toEqual([1, 2]);
+  expect(cycleTwo.plans).toEqual(expect.arrayContaining(cycleOne.plans));
+  expect(cycleTwo.eventKinds).toContain("REASSESSMENT_REQUESTED");
+  await page.goto("/patient/history");
+  for (const version of [1, 2])
+    await expect(
+      page.getByRole("link", {
+        name: `View plan version ${version}`,
+        exact: true,
+      }),
+    ).toBeVisible();
 });

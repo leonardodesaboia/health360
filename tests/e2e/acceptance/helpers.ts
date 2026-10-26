@@ -118,6 +118,9 @@ export const test = base.extend<{ demo: DemoFixture }>({
 });
 export { expect };
 
+/** Server actions run claim, mock provider and completion transactions; allow for load. */
+export const afterAction = { timeout: 30000 };
+
 export async function selectCase(
   page: Page,
   name: "Alex Example" | "Jordan Example",
@@ -218,7 +221,7 @@ export async function completeFirstIntake(
   await page
     .getByRole("button", { name: "Confirm and save profile", exact: true })
     .click();
-  await expect(page).toHaveURL(/\/patient\/analysis$/);
+  await expect(page).toHaveURL(/\/patient\/analysis$/, afterAction);
 }
 
 export async function assertNoUnreviewedPlan(page: Page) {
@@ -239,9 +242,6 @@ export async function assertNoUnreviewedPlan(page: Page) {
   ).toHaveCount(0);
   await expect(page.getByText("UNTRUSTED_RESPONSE_MARKER")).toHaveCount(0);
 }
-
-/** Server actions run claim, mock provider and completion transactions; allow for load. */
-export const afterAction = { timeout: 30000 };
 
 /** Jordan: age 60, average risk, normal complete adequately prepared colonoscopy. */
 export async function completeRepeatIntake(
@@ -323,7 +323,7 @@ export async function completeRepeatIntake(
   await page
     .getByRole("button", { name: "Confirm and save profile", exact: true })
     .click();
-  await expect(page).toHaveURL(/\/patient\/analysis$/);
+  await expect(page).toHaveURL(/\/patient\/analysis$/, afterAction);
 }
 
 /** Opens the only queued review in this isolated dataset and expands its details. */
@@ -333,10 +333,52 @@ export async function openPhysicianWorkspace(page: Page, patient: string) {
   await page.getByRole("link", { name: "Open review", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Proposals for review", exact: true }),
-  ).toBeVisible();
+  ).toBeVisible(afterAction);
   for (const summary of [
     "View rationale and criteria",
     "View evidence and sources",
   ])
     await page.getByText(summary, { exact: true }).first().click();
+}
+
+/** Real P0-10 controls: one decision for proposal 1, optional modification, explicit finalization. */
+export async function decideAndFinalize(
+  page: Page,
+  patient: string,
+  decision:
+    { kind: "APPROVE" } | { kind: "MODIFY"; reason: string; revised: string },
+) {
+  await page.goto("/doctor");
+  await expect(page.getByRole("main")).toContainText(patient);
+  await page
+    .getByRole("link", { name: "Open review", exact: true })
+    .first()
+    .click();
+  const region = page.getByRole("region", {
+    name: "Physician decisions",
+    exact: true,
+  });
+  await expect(region).toBeVisible(afterAction);
+  const select = region.getByLabel("Decision for proposal 1", {
+    exact: true,
+  });
+  await expect(select).toHaveValue("PENDING");
+  await expect(
+    region.getByRole("button", { name: "Finalize review", exact: true }),
+  ).toBeDisabled();
+  await select.selectOption(decision.kind);
+  if (decision.kind === "MODIFY") {
+    await region.getByLabel(/^Reason for proposal 1/).fill(decision.reason);
+    await region
+      .getByLabel(/^Revised text for proposal 1/)
+      .fill(decision.revised);
+  }
+  await region
+    .getByRole("button", { name: "Finalize review", exact: true })
+    .click();
+  await expect(region.getByRole("status")).toContainText(
+    "review finalized and reviewed plan published",
+    afterAction,
+  );
+  await expect(select).toBeDisabled();
 }
