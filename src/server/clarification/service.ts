@@ -5,10 +5,13 @@ import type { Prisma, PrismaClient } from "../../generated/prisma/client";
 import { buildCompletedIntake } from "../../features/health-intake/profile";
 import {
   applyAnswers,
+  applyRequestedAnswers,
   selectQuestions,
 } from "../../features/clarification/questions";
 import { datasetRepository, inDatasetTransaction } from "../db/repository";
 import { readIntakePrefill } from "../intake/read";
+import { listOpenClarificationRequests } from "../clinical-review/clarifications";
+import { selectPhysicianQuestions } from "../../features/clarification/physician-questions";
 import {
   getWorkflowState,
   StaleStateError,
@@ -40,23 +43,53 @@ async function currentClarification(
     state.lastTransition.refs.profileVersion !== profile.version
   )
     throw new StaleStateError();
-  // Until a typed physician-request reader exists, never interpret free-text review reasons.
+  const prefill = await readIntakePrefill(tx, datasetId, patientId);
+  const physicianRequests = await listOpenClarificationRequests(
+    tx,
+    datasetId,
+    patientId,
+  );
+  if (physicianRequests.length) {
+    if (
+      physicianRequests.some(
+        (request) =>
+          request.analysisId !== analysis.id ||
+          request.analysisVersion !== analysis.version,
+      )
+    )
+      throw new StaleStateError();
+    const selected = selectPhysicianQuestions(physicianRequests);
+    return {
+      unavailable: false as const,
+      origin: "PHYSICIAN" as const,
+      profile,
+      analysis,
+      answers: prefill.answers,
+      ...selected,
+      reviewId: physicianRequests[0].reviewId,
+      reviewVersion: physicianRequests[0].reviewVersion,
+    };
+  }
   if (
     analysis.failureReason !== "missing_information" ||
     analysis.status !== "BLOCKED"
   )
     return { unavailable: true as const };
-  const prefill = await readIntakePrefill(tx, datasetId, patientId);
   const selected = selectQuestions(
     analysis.missingInformation,
     prefill.answers,
   );
   return {
     unavailable: false as const,
+    origin: "ANALYSIS" as const,
     profile,
     analysis,
     answers: prefill.answers,
     ...selected,
+    freeQuestions: [],
+    bindings: [],
+    reviewId: undefined,
+    reviewVersion: undefined,
   };
 }
 
@@ -69,7 +102,10 @@ export async function readClarification(
     const current = await currentClarification(tx, datasetId, patientId);
     if (!current) return null;
     if (current.unavailable) return { available: false as const };
-    if (current.unsupported.length || !current.questions.length)
+    if (
+      current.unsupported.length ||
+      (!current.questions.length && !current.freeQuestions.length)
+    )
       return { available: false as const };
     return {
       available: true as const,
@@ -77,6 +113,9 @@ export async function readClarification(
       analysisId: current.analysis.id,
       answers: current.answers,
       questions: current.questions,
+      freeQuestions: current.freeQuestions,
+      reviewId: current.reviewId,
+      reviewVersion: current.reviewVersion,
     };
   });
 }
@@ -98,11 +137,31 @@ export async function saveClarificationAnswers(
       request.analysisId !== current.analysis.id
     )
       throw new StaleStateError();
-    const answers = applyAnswers(
-      current.answers,
-      current.analysis.missingInformation,
-      request.answers,
-    );
+    if (
+      request.reviewId !== current.reviewId ||
+      request.reviewVersion !== current.reviewVersion
+    )
+      throw new StaleStateError();
+    if (current.unsupported.length)
+      throw new Error("Unsupported clarification request");
+    const freeAnswers = request.freeAnswers ?? {};
+    if (
+      Object.keys(freeAnswers).length !== current.freeQuestions.length ||
+      current.freeQuestions.some((q) => !Object.hasOwn(freeAnswers, q.id))
+    )
+      throw new Error("Answer only the requested questions");
+    const answers =
+      current.origin === "PHYSICIAN"
+        ? applyRequestedAnswers(
+            current.answers,
+            current.questions,
+            request.answers,
+          )
+        : applyAnswers(
+            current.answers,
+            current.analysis.missingInformation,
+            request.answers,
+          );
     const completed = buildCompletedIntake(
       patientId,
       answers,
@@ -110,6 +169,34 @@ export async function saveClarificationAnswers(
       randomUUID(),
       new Date().toISOString(),
     );
+    // Keep physician question context separate from patient-reported answers.
+    // These sourced notes stay local; the analysis minimizer excludes profile free text.
+    const previousIntake = (await repo.list("intake")).find(
+      (i) =>
+        i.patientId === patientId &&
+        i.profileVersion === current.profile.version,
+    );
+    const notes = Object.fromEntries(
+      Object.entries(previousIntake?.answers ?? {}).filter(([key]) =>
+        key.startsWith("physician-clarification/"),
+      ),
+    );
+    if (current.origin === "PHYSICIAN")
+      for (const binding of current.bindings) {
+        const key = `physician-clarification/${encodeURIComponent(current.reviewId)}/${current.reviewVersion}/${encodeURIComponent(binding.proposalId)}`;
+        notes[`${key}/question`] = {
+          value: `Demo reviewer follow-up question: ${binding.question}`,
+          provenance: "SYSTEM_STRUCTURED",
+        };
+        notes[`${key}/answer`] = {
+          value: binding.freeText
+            ? freeAnswers[binding.answerId]
+            : answers[binding.answerId as keyof typeof answers],
+          provenance: "PATIENT_REPORTED",
+        };
+      }
+    Object.assign(completed.intake.answers, notes);
+    completed.profile.personalHistory.push(...Object.values(notes));
     const reservationId = randomUUID();
     await transitionWorkflow(tx, datasetId, {
       patientId,

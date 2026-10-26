@@ -112,6 +112,14 @@ export function applyAnswers(
   const { questions, unsupported } = selectQuestions(missing, current);
   if (unsupported.length || !questions.length)
     throw new Error("Unsupported clarification request");
+  return applyRequestedAnswers(current, questions, input);
+}
+
+export function applyRequestedAnswers(
+  current: IntakeAnswers,
+  questions: ClarificationQuestion[],
+  input: unknown,
+): IntakeAnswers {
   const patch = z
     .record(z.string(), z.string().max(120).nullable())
     .parse(input);
@@ -121,6 +129,26 @@ export function applyAnswers(
     Object.keys(patch).some((id) => !questions.some((q) => q.id === id))
   )
     throw new Error("Answer only the requested fields");
+  // A physician may target a conditional field that the full intake currently hides.
+  // Validate the explicitly requested input even when normal intake visibility skips it.
+  for (const question of questions) {
+    const value = patch[question.id];
+    if (value === null) continue;
+    const valid = question.options
+      ? question.options.some(([option]) => option === value)
+      : question.kind === "choice"
+        ? ["yes", "no"].includes(value)
+        : question.kind === "age"
+          ? /^\d{1,3}$/.test(value) && Number(value) <= 120
+          : question.kind === "date"
+            ? z.iso.date().safeParse(value).success &&
+              value <= new Date().toISOString().slice(0, 10)
+            : question.id === "examApproximateDate"
+              ? /^\d{4}(-(?:0[1-9]|1[0-2]))?$/.test(value) &&
+                value <= new Date().toISOString().slice(0, value.length)
+              : value.trim().length > 0;
+    if (!valid) throw new Error("Invalid answer for the requested field");
+  }
   const next = { ...current, ...patch };
   if ("examDate" in patch) {
     if (patch.examDate !== null) {
