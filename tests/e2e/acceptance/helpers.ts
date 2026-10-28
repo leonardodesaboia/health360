@@ -126,6 +126,9 @@ export async function selectCase(
   name: "Alex Example" | "Jordan Example",
 ) {
   await page.goto("/patient");
+  await expect(page.locator("#demo-case-title")).toHaveText(
+    /^(Select a demo case|Demo case:)/,
+  );
   const controls = page
     .locator("details")
     .filter({ has: page.locator("summary", { hasText: "Presenter controls" }) })
