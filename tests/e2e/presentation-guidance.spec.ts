@@ -122,3 +122,140 @@ test("session read errors remain visible outside closed presenter controls", asy
     page.getByRole("button", { name: "Alex Example", exact: true }),
   ).toBeHidden();
 });
+
+test("presenter QA: desktop case, prepared and reset controls share one row", async ({
+  page,
+}, info) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.route("**/api/demo-session", (route) =>
+    route.fulfill({
+      json: {
+        session: {
+          caseId: "first-screening",
+          displayName: "Alex Example",
+          summary: "Synthetic case",
+        },
+        preparedStatesAvailable: true,
+      },
+    }),
+  );
+  await page.goto("/showcase");
+  await expect(page.locator("#demo-case-title")).toHaveText(
+    "Demo case: Alex Example",
+  );
+  await page.getByText("Presenter controls", { exact: true }).click();
+  const caseButton = await page
+    .getByRole("button", { name: "Alex Example", exact: true })
+    .boundingBox();
+  const prepared = await page
+    .getByText("Prepared starting points", { exact: true })
+    .boundingBox();
+  const reset = await page
+    .getByRole("button", { name: "Reset demo", exact: true })
+    .boundingBox();
+  expect(caseButton).not.toBeNull();
+  expect(prepared?.y).toBe(caseButton?.y);
+  expect(reset?.y).toBe(caseButton?.y);
+  await page.screenshot({
+    path: info.outputPath("presenter-controls.png"),
+    fullPage: true,
+  });
+});
+
+test("presenter QA: a prepared reset explains the mock-provider requirement", async ({
+  page,
+}) => {
+  await page.route("**/api/demo-session", (route) =>
+    route.fulfill({
+      json: {
+        session: {
+          caseId: "first-screening",
+          preparedStateId: "alex-review",
+          displayName: "Alex Example",
+          summary: "Synthetic prepared case",
+        },
+        preparedStatesAvailable: false,
+      },
+    }),
+  );
+  await page.goto("/showcase");
+  await expect(page.locator("#demo-case-title")).toHaveText(
+    "Demo case: Alex Example",
+  );
+  await page.getByText("Presenter controls", { exact: true }).click();
+  let submissions = 0;
+  page.on("request", (request) => {
+    if (request.method() === "POST") submissions++;
+  });
+  await page.getByRole("button", { name: "Reset demo", exact: true }).click();
+  await expect(
+    page.getByRole("alert").filter({
+      hasText: "This prepared starting point requires the mock provider",
+    }),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole("alert")
+      .filter({ hasText: "Select Alex Example or Jordan Example" }),
+  ).toBeVisible();
+  expect(submissions).toBe(0);
+  await page.getByText("Presenter controls", { exact: true }).click();
+  await expect(
+    page.getByRole("alert").filter({
+      hasText: "This prepared starting point requires the mock provider",
+    }),
+  ).toBeVisible();
+});
+
+test("presenter QA: developer showcase remains URL-only", async ({ page }) => {
+  await page.goto("/doctor");
+  await expect(
+    page.getByRole("link", { name: "Components", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "Component library", exact: true }),
+  ).toHaveCount(0);
+  await page.goto("/showcase");
+  await expect(
+    page.getByRole("heading", { name: "Component library", level: 1 }),
+  ).toBeVisible();
+});
+
+test("presenter QA: reset refreshes stale provider capability after failure", async ({
+  page,
+}) => {
+  let reads = 0;
+  await page.route("**/api/demo-session", (route) =>
+    route.fulfill({
+      json: {
+        session: {
+          caseId: "first-screening",
+          preparedStateId: "alex-review",
+          displayName: "Alex Example",
+          summary: "Synthetic prepared case",
+        },
+        preparedStatesAvailable: ++reads === 1,
+      },
+    }),
+  );
+  await page.route("**/showcase", (route) =>
+    route.request().method() === "POST"
+      ? route.fulfill({ status: 503, body: "unavailable" })
+      : route.continue(),
+  );
+  await page.goto("/showcase");
+  await expect(page.locator("#demo-case-title")).toHaveText(
+    "Demo case: Alex Example",
+  );
+  await page.getByText("Presenter controls", { exact: true }).click();
+  await page.getByRole("button", { name: "Reset demo", exact: true }).click();
+  await expect(
+    page.getByRole("alert").filter({
+      hasText: "This prepared starting point requires the mock provider",
+    }),
+  ).toBeVisible();
+  expect(reads).toBe(2);
+  await expect(page.locator("#demo-case-title")).toHaveText(
+    "Demo case: Alex Example",
+  );
+});

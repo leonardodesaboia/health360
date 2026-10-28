@@ -5,7 +5,6 @@ import {
   ClipboardList,
   Home,
   History,
-  Layers,
   ListChecks,
   type LucideIcon,
 } from "lucide-react";
@@ -20,10 +19,7 @@ export function Navigation({ role }: { role: "patient" | "doctor" }) {
           { href: "/patient/plan", label: "My plan", icon: ListChecks },
           { href: "/patient/history", label: "History", icon: History },
         ]
-      : [
-          { href: "/doctor", label: "Reviews", icon: ClipboardList },
-          { href: "/showcase", label: "Components", icon: Layers },
-        ];
+      : [{ href: "/doctor", label: "Reviews", icon: ClipboardList }];
   return (
     <nav
       aria-label={

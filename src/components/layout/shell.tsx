@@ -78,12 +78,6 @@ function AppShell({
           <ShieldCheck aria-hidden="true" className="size-4" />
           Technical prototype. Clinical decisions require physician review.
         </p>
-        <Link
-          href="/showcase"
-          className="inline-flex min-h-11 items-center underline underline-offset-4"
-        >
-          Component library
-        </Link>
       </footer>
     </>
   );

@@ -80,3 +80,12 @@ disclosure, closed after case selection and navigation, expanded with no selecte
 session. Case identity and selected starting-point label remain visible outside it;
 errors remain visible when closed. Reset restores this browser's selected starting
 point; it is not undo. Prepared loading replaces only this browser's selected case.
+
+At desktop widths, the expanded presenter disclosure keeps case selection,
+Prepared starting points and Reset demo on one control row. Mobile controls stack
+and wrap. The component library remains available by `/showcase` URL only.
+A prepared starting point requires the mock provider for reset. If provider
+capability changed after a restart, a failed reset re-reads that capability and
+explains the mock requirement plus the plain-case selection recovery. Other reset
+failures report an unconfirmed outcome and ask the presenter to reload; they do
+not claim a storage outage or a successful reset.

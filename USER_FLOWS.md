@@ -14,7 +14,8 @@ blocked state. It never displays preliminary proposals. Previous reviewed conten
 remains identified as previous during a new cycle.
 `/doctor` lists the latest persisted analysis for the selected demo session patient. Without a session or analysis it shows an empty state. Opening an entry navigates to `/doctor/reviews/<analysis-id>--v<version>`. The reader shows the exact analyzed profile/context, proposal criteria, evidence versions, uncertainty and stale-version warnings. Unknown or foreign IDs disclose no records. Opening a current review moves it from awaiting review to review in progress; it never completes a review or publishes a plan.
 
-`/showcase` is the shared-component verification route, linked in the shell/footer.
+`/showcase` is the shared-component verification route, reachable directly by URL.
+It is intentionally absent from presenter-facing navigation and the footer.
 
 The demo role link changes between `/patient` and `/doctor`. It is neither login
 nor authorization. Reassessment mutations go through the server workflow service;
