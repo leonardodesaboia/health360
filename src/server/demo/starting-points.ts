@@ -42,6 +42,11 @@ export const demoSelectionIdSchema = z.enum([
   ...preparedDemoStates.map((state) => state.id),
 ]);
 
+/** Prepared states embed deterministic mock analyses, so they exist only in mock mode. */
+export function preparedStatesAvailable() {
+  return (process.env.LLM_PROVIDER ?? "mock") === "mock";
+}
+
 export function preparedDemoState(id: PreparedDemoStateId) {
   const state = preparedDemoStates.find((item) => item.id === id);
   if (!state) throw new Error("Unsupported prepared demonstration state");

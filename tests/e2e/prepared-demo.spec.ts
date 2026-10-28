@@ -98,6 +98,12 @@ for (const state of [
         await expect(page.getByRole("main")).toContainText(
           "Possible redundant test",
         );
+      // The deterministic analysis lists no missing information, so no empty warning appears.
+      await expect(
+        page.getByText(
+          "Missing information does not mean a condition is absent.",
+        ),
+      ).toHaveCount(0);
     }
     expect(
       await page.evaluate(

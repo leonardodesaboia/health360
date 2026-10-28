@@ -14,10 +14,14 @@ import { datasetRepository } from "../db/repository";
 import { replaceDemoDataset } from "./store";
 import { demoCaseRecords } from "./records";
 import { preparedIntakeAnswers } from "./prepared-answers";
-import { preparedDemoState, type PreparedDemoStateId } from "./starting-points";
+import {
+  preparedDemoState,
+  preparedStatesAvailable,
+  type PreparedDemoStateId,
+} from "./starting-points";
 
 export function requirePreparedMockProvider() {
-  if ((process.env.LLM_PROVIDER ?? "mock") !== "mock")
+  if (!preparedStatesAvailable())
     throw new Error("Prepared demonstration states require LLM_PROVIDER=mock.");
 }
 
