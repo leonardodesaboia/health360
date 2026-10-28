@@ -126,6 +126,12 @@ export async function selectCase(
   name: "Alex Example" | "Jordan Example",
 ) {
   await page.goto("/patient");
+  const controls = page
+    .locator("details")
+    .filter({ has: page.locator("summary", { hasText: "Presenter controls" }) })
+    .first();
+  if ((await controls.getAttribute("open")) === null)
+    await page.getByText("Presenter controls", { exact: true }).click();
   await page
     .getByRole("form", { name: "Choose demo case" })
     .getByRole("button", { name, exact: true })
