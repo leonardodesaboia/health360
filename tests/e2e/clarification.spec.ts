@@ -110,7 +110,7 @@ for (const scenario of ["known", "unknown", "interrupted"] as const) {
       await expect(
         page.getByText(
           scenario === "unknown"
-            ? "Information to confirm"
+            ? "More information needed"
             : "Awaiting physician review",
           { exact: true },
         ),
