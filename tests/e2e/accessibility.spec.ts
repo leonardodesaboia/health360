@@ -27,3 +27,29 @@ test("main demo routes have no serious or critical axe violations", async ({
     ).toEqual([]);
   }
 });
+
+test("selected case controls and evaluation guidance remain accessible when expanded", async ({
+  page,
+}) => {
+  await page.goto("/patient");
+  await page.getByRole("button", { name: "Alex Example", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Demo case: Alex Example", exact: true }),
+  ).toBeVisible();
+  await page.getByText("Presenter controls", { exact: true }).focus();
+  await page.keyboard.press("Enter");
+  await expect(
+    page.getByRole("button", { name: "Reset demo", exact: true }),
+  ).toBeVisible();
+  const { violations } = await new AxeBuilder({ page }).analyze();
+  expect(
+    violations.filter(({ impact }) =>
+      ["serious", "critical"].includes(impact ?? ""),
+    ),
+  ).toEqual([]);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+});

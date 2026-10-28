@@ -58,10 +58,15 @@ test("physician header describes demonstration reviews without validation claims
   await page.goto("/doctor");
   const header = page.getByRole("banner");
   await expect(
-    header.getByText(
-      "Physician workspace · Demonstration reviews, not clinical validation",
-      { exact: true },
-    ),
+    header.getByText("Physician view · Demo reviewer", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    header.getByText("Demo navigation only; no sign-in or authorization.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/DEMONSTRATIVE — NOT CLINICALLY VALIDATED/).first(),
   ).toBeVisible();
   await expect(header).not.toContainText("Interface reference");
 });
