@@ -114,9 +114,11 @@ for (const kind of ["bounded", "free-text"] as const)
           () => document.documentElement.scrollWidth <= innerWidth,
         ),
       ).toBe(true);
-      // The shared case selector hydrates independently; wait for its loading
-      // opacity to settle before measuring whole-page contrast.
-      await expect(page.locator("#demo-case-title")).toHaveText(/^Demo case:/);
+      // The shell reads its session independently. Confirm the visible identity,
+      // then inspect the case controls after opening the presenter disclosure.
+      await expect(page.locator("#demo-case-title")).toHaveText(
+        "Demo case: Alex Example",
+      );
       await page.getByText("Presenter controls", { exact: true }).click();
       const selectedCase = page.getByRole("button", {
         name: "Alex Example",
