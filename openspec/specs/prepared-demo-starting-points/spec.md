@@ -34,3 +34,17 @@ The demo selector SHALL offer synthetic demonstrative prepared states alongside 
 
 - **WHEN** a prepared state is selected with mock configuration, an unknown ID or an explicitly non-mock provider
 - **THEN** mock mode runs offline, while unknown IDs and non-mock configurations are rejected before creating prepared records, without using unknown clinical answers as negatives
+
+### Requirement: Presenter sees prepared-point availability
+
+The system SHALL report whether prepared starting points are available for the configured provider through the uncached presenter state. Outside mock mode it SHALL explain that they require the mock provider instead of offering selections that are rejected.
+
+#### Scenario: Live provider configured
+
+- **WHEN** the server runs with a non-mock `LLM_PROVIDER` and the presenter opens Prepared starting points
+- **THEN** no prepared selection is offered, the panel says the mock provider is required, and the server-side rejection of non-mock preparation is unchanged
+
+#### Scenario: Mock provider configured
+
+- **WHEN** the server runs with the mock provider
+- **THEN** the presenter state reports prepared starting points as available and the four allowlisted selections are offered

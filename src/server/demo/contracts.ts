@@ -46,7 +46,7 @@ export const demoCaseLabels: Record<
   },
   "repeat-screening": {
     displayName: "Jordan Example",
-    summary: "Synthetic, age 60 · Reports a normal colonoscopy on Nov 3, 2022",
+    summary: "Synthetic, age 60 · Reports a previous normal colonoscopy",
   },
 };
 
