@@ -223,7 +223,7 @@ At workflow adoption, all 18 entries were planned. Pre-created unimplemented dra
 
 - Stable OpenSpec change ID: `p0-14-demo-acceptance`.
 - Status: **in progress (closeout)**; [active change](../../openspec/changes/p0-14-demo-acceptance/). Part 1, the judge walkthrough and A–E browser acceptance, merged in [#33](https://github.com/leonardodesaboia/health360/pull/33) and [#35](https://github.com/leonardodesaboia/health360/pull/35). Part 2, prepared presentation starting points, merged in [#36](https://github.com/leonardodesaboia/health360/pull/36) ([archive](../../openspec/changes/archive/2026-10-26-p0-14-prepared-starting-points/)).
-- Implementation evidence: [18-point acceptance audit](../../openspec/changes/p0-14-demo-acceptance/tasks.md): all 18 points mapped to evidence; point 5 relies on the live OpenAI run reported by health360-22 at `fe63370` ([STATUS](../STATUS.md#live-provider-verification)). Remaining before archive: the presenter's timed rehearsal on the release build using the [outline](../product/DEMO_SCRIPT.md#timed-rehearsal-outline).
+- Implementation evidence: [18-point acceptance audit](../../openspec/changes/p0-14-demo-acceptance/tasks.md): all 18 points mapped to evidence; point 5 (real API) is verified by the live OpenAI run of health360-22 at `fe63370` ([STATUS](../STATUS.md#live-provider-verification)). Remaining before archive: the presenter's timed rehearsal on the release build using the [outline](../product/DEMO_SCRIPT.md#timed-rehearsal-outline).
 
 - Goal: assemble an explicitly synthetic reproducible HISIC demonstration across A–E.
 - Depends on: P0-01 through P0-13.

@@ -53,7 +53,7 @@ maps each product acceptance point to its evidence.
 
 Reported by worker health360-22 on October 26, 2026, at `fe63370` (before #31–#36),
 with no code changes, using synthetic data and the live OpenAI model `gpt-6-astra`.
-This run was not repeated by the closeout PR.
+Recorded as verified for acceptance point 5; the closeout PR did not repeat it.
 
 - Live smoke (`LLM_LIVE_SMOKE=1`): PASS.
 - Headless Chromium UI flows: A PASS (12.7 s), B PASS (13.7 s), C missing information
