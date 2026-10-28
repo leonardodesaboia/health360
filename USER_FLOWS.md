@@ -20,8 +20,8 @@ The demo role link changes between `/patient` and `/doctor`. It is neither login
 nor authorization. Reassessment mutations go through the server workflow service;
 navigation alone does not complete an analysis, review or publication.
 The plan page reads persisted records and never publishes on a
-page visit. The pending P0-10 review finalization service must invoke guarded plan publication
-inside the same serialized dataset transaction; no production caller exists yet.
+page visit. Review finalization invokes guarded plan publication inside the same
+serialized dataset transaction after completeness and evidence checks.
 No route reveals unreviewed proposals as patient guidance.
 
 ## Physician decisions
@@ -174,3 +174,34 @@ Patients do not see preliminary proposal content there. The server action never
 writes a plan or completes physician review. Shared timeline kinds distinguish
 ANALYSIS_CREATED, ANALYSIS_FAILED and CLARIFICATION_REQUESTED; the latter two still
 reference the immutable AIAnalysis version.
+
+## Evaluation presentation
+
+The four informational stages are Intake → Analysis → Physician review → Plan.
+`src/features/workflow/presentation.ts` derives them from recorded current-cycle
+status, never from navigation, elapsed time, pending requests or local decisions.
+Confirmed intake makes analysis ready; analysis remains incomplete while pending,
+failed or awaiting clarification. Review is current only after reviewable analysis,
+and complete only after recorded finalization. Plan completes only with
+PLAN_AVAILABLE plus a current plan returned by the existing guarded reader.
+Without that read, guidance says Review finalized / Check plan status.
+
+Clarification shows Information needed → Analysis again → Physician review.
+Reassessment resets the current cycle; a previous plan remains previous even after
+intake advances. Existing guarded route readers retain actual versions and dates.
+The shared model carries only a version-free preservation message. Failed reads
+remain errors, never proof that no plan exists.
+
+Home, plan and history guidance points directly to intake, analysis, clarification
+or plan status as appropriate. Task routes retain one existing form; waiting
+analysis/review offers Refresh status through router.refresh, without starting a
+new analysis. Saved-analysis continuation is offered only where the existing
+clarification reader exposes recovery. Patient guidance never contains proposals,
+rationale or unreviewed AI text.
+
+Patient view and Physician view · Demo reviewer remain visible beside the full
+DEMONSTRATIVE — NOT CLINICALLY VALIDATED banner. The role switch says Demo navigation
+only; no sign-in or authorization. Presenter controls contain case switching,
+prepared starting points and reset, closed after selection and navigation. With no
+session, selection is expanded. Case identity, starting-point label and any errors
+remain visible outside the closed disclosure. No local preference is persisted.

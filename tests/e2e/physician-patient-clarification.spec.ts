@@ -97,6 +97,8 @@ for (const kind of ["bounded", "free-text"] as const)
       ).toBe(true);
       // The shared case selector hydrates independently; wait for its loading
       // opacity to settle before measuring whole-page contrast.
+      await expect(page.locator("#demo-case-title")).toHaveText(/^Demo case:/);
+      await page.getByText("Presenter controls", { exact: true }).click();
       const selectedCase = page.getByRole("button", {
         name: "Alex Example",
         exact: true,

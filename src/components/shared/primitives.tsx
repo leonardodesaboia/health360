@@ -87,7 +87,7 @@ export function LoadingState() {
         aria-hidden="true"
         className="size-5 motion-safe:animate-spin"
       />
-      Loading information…
+      Loading this evaluation…
     </p>
   );
 }
@@ -95,8 +95,11 @@ export function ErrorState({ retry }: { retry: ReactNode }) {
   return (
     <div role="alert" className="space-y-4 rounded-lg border p-6">
       <CircleAlert aria-hidden="true" className="text-destructive" />
-      <h2>This page could not be loaded</h2>
-      <p className="text-muted-foreground">Try again to continue.</p>
+      <h2>We couldn&apos;t load this evaluation.</h2>
+      <p className="text-muted-foreground">
+        Try loading it again. Do not reset the demo to check a temporary loading
+        problem.
+      </p>
       {retry}
     </div>
   );

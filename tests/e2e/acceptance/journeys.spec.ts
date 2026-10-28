@@ -87,6 +87,7 @@ test("Flow A part 1: real intake reaches the physician queue, persists and reset
     await selectCase(otherPage, "Jordan Example");
     const otherToken = await demo.track(other);
     const before = await demo.inspect(otherToken);
+    await page.getByText("Presenter controls", { exact: true }).click();
     await page.getByRole("button", { name: "Reset demo", exact: true }).click();
     expect((await demo.inspect(token)).analyses).toEqual([]);
     expect(await demo.inspect(otherToken)).toEqual(before);
@@ -339,7 +340,7 @@ for (const answer of ["date", "unknown"] as const) {
       .getByRole("button", { name: "Analyze current profile", exact: true })
       .click();
     await expect(
-      page.getByText("Information to confirm", { exact: true }),
+      page.getByText("More information needed", { exact: true }),
     ).toBeVisible(afterAction);
     await assertNoUnreviewedPlan(page);
 
@@ -369,7 +370,7 @@ for (const answer of ["date", "unknown"] as const) {
       page.getByText(
         answer === "date"
           ? "Awaiting physician review"
-          : "Information to confirm",
+          : "More information needed",
         { exact: true },
       ),
     ).toBeVisible(afterAction);

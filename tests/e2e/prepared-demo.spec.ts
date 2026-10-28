@@ -15,6 +15,15 @@ const preparedButton = (page: Page, id: string) =>
   });
 
 async function loadPrepared(page: Page, id: string) {
+  await expect(page.locator("#demo-case-title")).toHaveText(
+    /^(Select a demo case|Demo case:)/,
+  );
+  const controls = page
+    .locator("details")
+    .filter({ has: page.locator("summary", { hasText: "Presenter controls" }) })
+    .first();
+  if ((await controls.getAttribute("open")) === null)
+    await page.getByText("Presenter controls", { exact: true }).click();
   await page.getByText("Prepared starting points", { exact: true }).click();
   await preparedButton(page, id).click();
 }
@@ -118,7 +127,11 @@ test("prepared reset rebuilds the selected starting point and keyboard controls 
 }) => {
   test.setTimeout(60000);
   await page.goto("/patient");
+  await expect(page.locator("#demo-case-title")).toHaveText(
+    "Select a demo case",
+  );
   const menu = page.getByText("Prepared starting points", { exact: true });
+  await expect(menu).toBeVisible();
   await menu.focus();
   await expect(menu).toBeFocused();
   await page.keyboard.press("Enter");
@@ -136,6 +149,7 @@ test("prepared reset rebuilds the selected starting point and keyboard controls 
     "awaiting physician review",
     { timeout: 30000 },
   );
+  await page.getByText("Presenter controls", { exact: true }).click();
   await page.getByRole("button", { name: "Reset demo", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Retry analysis", exact: true }),
@@ -144,4 +158,24 @@ test("prepared reset rebuilds the selected starting point and keyboard controls 
     "aria-pressed",
     "true",
   );
+});
+
+test("prepared controls preserve the mock-provider capability gate", async ({
+  page,
+}) => {
+  await page.route("**/api/demo-session", (route) =>
+    route.fulfill({ json: { session: null, preparedStatesAvailable: false } }),
+  );
+  await page.goto("/patient");
+  await expect(
+    page.getByRole("heading", { name: "Select a demo case", level: 2 }),
+  ).toBeVisible();
+  await page.getByText("Prepared starting points", { exact: true }).click();
+  await expect(
+    page.getByText(
+      "Prepared starting points are available only with the mock provider. Restart the server with LLM_PROVIDER=mock to use them.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expect(preparedButton(page, "alex-review")).toHaveCount(0);
 });

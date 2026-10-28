@@ -45,10 +45,10 @@ function AppShell({
       <header className="border-b bg-sidebar text-sidebar-foreground">
         <div className="mx-auto flex max-w-workspace flex-wrap items-center justify-between gap-4 px-4 py-4 md:px-8">
           <BrandLink href={role === "patient" ? "/patient" : "/doctor"} />
-          <p className="hidden text-xs text-muted-foreground lg:block">
+          <p className="text-sm font-medium">
             {role === "patient"
-              ? "Your preventive follow-up"
-              : "Physician workspace · Demonstration reviews, not clinical validation"}
+              ? "Patient view"
+              : "Physician view · Demo reviewer"}
           </p>
           <Link
             href={role === "patient" ? "/doctor" : "/patient"}
@@ -63,6 +63,9 @@ function AppShell({
           </Link>
         </div>
         <div className="mx-auto max-w-workspace px-4 pb-3 md:px-8">
+          <p className="mb-3 text-xs text-muted-foreground">
+            Demo navigation only; no sign-in or authorization.
+          </p>
           <Navigation role={role} />
         </div>
       </header>

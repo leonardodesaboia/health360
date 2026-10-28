@@ -69,7 +69,7 @@ test("a patient completes reassessment intake and runs a new analysis while plan
     await expect(page).toHaveURL(/\/patient\/analysis$/);
     await page.getByRole("button", { name: "Analyze current profile" }).click();
     await expect(
-      page.getByText("Information to confirm", { exact: true }),
+      page.getByText("More information needed", { exact: true }),
     ).toBeVisible();
     await page.goto("/patient/plan");
     await expect(

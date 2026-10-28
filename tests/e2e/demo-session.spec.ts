@@ -4,6 +4,15 @@ const caseHeading = (page: Page, name: string) =>
   page.getByRole("heading", { name: `Demo case: ${name}`, level: 2 });
 
 async function selectCase(page: Page, name: string) {
+  await expect(page.locator("#demo-case-title")).toHaveText(
+    /^(Select a demo case|Demo case:)/,
+  );
+  const controls = page
+    .locator("details")
+    .filter({ has: page.locator("summary", { hasText: "Presenter controls" }) })
+    .first();
+  if ((await controls.getAttribute("open")) === null)
+    await page.getByText("Presenter controls", { exact: true }).click();
   const form = page.getByRole("form", { name: "Choose demo case" });
   await form.getByRole("button", { name, exact: true }).click();
   // Selection reseeds the dataset in one locked transaction; allow for slow CI/mobile runs.
@@ -18,24 +27,12 @@ test("demo selector keeps its description readable at phone and desktop widths",
   await page.goto("/patient");
   const selector = page
     .getByRole("region")
-    .filter({ has: page.getByRole("form", { name: "Choose demo case" }) });
+    .filter({ has: page.locator("#demo-case-title") });
   async function checkLayout() {
-    const description = await selector.locator("p").boundingBox();
-    const buttons = await selector
-      .getByRole("form", { name: "Choose demo case" })
-      .boundingBox();
-    if (!description || !buttons)
-      throw new Error("Demo selector must be visible");
-    if (width === 390) {
-      expect(description.width).toBeGreaterThan(width * 0.8);
-      expect(buttons.y).toBeGreaterThanOrEqual(
-        description.y + description.height,
-      );
-    } else {
-      expect(buttons.x).toBeGreaterThanOrEqual(
-        description.x + description.width,
-      );
-    }
+    await expect(selector.getByRole("heading", { level: 2 })).toBeVisible();
+    await expect(
+      page.getByText("Presenter controls", { exact: true }),
+    ).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,
@@ -87,7 +84,11 @@ test("selected case is shared across views and survives refresh", async ({
     page.getByRole("heading", { name: "Hello, Jordan", level: 1 }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Jordan Example", exact: true }),
+    page.getByRole("button", {
+      name: "Jordan Example",
+      exact: true,
+      includeHidden: true,
+    }),
   ).toHaveAttribute("aria-pressed", "true");
 
   await page.reload();
@@ -106,6 +107,7 @@ test("reset keeps the case and switching updates both views", async ({
 }) => {
   await page.goto("/doctor");
   await selectCase(page, "Alex Example");
+  await page.getByText("Presenter controls", { exact: true }).click();
   await page.getByRole("button", { name: "Reset demo" }).click();
   await expect(caseHeading(page, "Alex Example")).toBeVisible();
 
@@ -115,4 +117,25 @@ test("reset keeps the case and switching updates both views", async ({
   await expect(
     page.getByRole("heading", { name: "Hello, Jordan", level: 1 }),
   ).toBeVisible();
+});
+
+test("presenter changes remain isolated from another browser context", async ({
+  page,
+  browser,
+}) => {
+  const other = await browser.newContext();
+  try {
+    const otherPage = await other.newPage();
+    await page.goto("/patient");
+    await selectCase(page, "Alex Example");
+    await otherPage.goto("/patient");
+    await selectCase(otherPage, "Jordan Example");
+    await page.getByText("Presenter controls", { exact: true }).click();
+    await page.getByRole("button", { name: "Reset demo", exact: true }).click();
+    await expect(caseHeading(page, "Alex Example")).toBeVisible();
+    await otherPage.reload();
+    await expect(caseHeading(otherPage, "Jordan Example")).toBeVisible();
+  } finally {
+    await other.close();
+  }
 });

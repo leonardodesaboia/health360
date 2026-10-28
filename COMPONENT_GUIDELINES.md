@@ -50,3 +50,33 @@ answers across navigation once persistence is implemented.
 Every new interactive primitive needs keyboard operation, visible focus, touch size,
 disabled explanation and error/loading treatment. Update the showcase and add
 behavioral tests for meaningful interaction. Avoid snapshot tests that mirror JSX.
+
+## Evaluation guidance
+
+`workflowPresentation(snapshot, page)` projects the current administrative cycle into
+Intake, Analysis, Physician review and Plan. Supply only the recorded status,
+guarded plan availability and existing saved-analysis recovery availability; never
+include proposals or preliminary AI text. A missing/unavailable plan read cannot
+complete the Plan stage. Route read failures remain route errors.
+
+`JourneyProgress({ model, id })` is informational, with an ordered list and text
+states. At mobile widths it uses a native disclosure, open on Home and closed on
+other routes. The branch stays visible. Only an active stage has `aria-current="step"`.
+The caller supplies a unique heading ID. Complete means recorded administrative
+work, never clinical validation.
+
+`NextStepPanel({ model, id, taskAction? })` owns “What happens next,” the explanation,
+responsible actor and one primary action. Its description ID is `${id}-description`.
+Links use Button/Link; refresh uses `WorkflowRefreshButton`, which calls
+`router.refresh()` and never writes workflow state. Task slots use the existing
+form/action with the exact model label. If an intake or clarification form already
+owns the action, use the model directly in that form, connect its heading and
+description with ARIA, and omit the extra panel rather than duplicating submits.
+History retains its existing guarded update form as its one primary task.
+
+The shell keeps the full demonstrative banner and role visible at every width.
+Role switching is demo navigation only. Presenter controls are a separate native
+disclosure, closed after case selection and navigation, expanded with no selected
+session. Case identity and selected starting-point label remain visible outside it;
+errors remain visible when closed. Reset restores this browser's selected starting
+point; it is not undo. Prepared loading replaces only this browser's selected case.

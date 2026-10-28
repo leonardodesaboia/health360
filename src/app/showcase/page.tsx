@@ -1,3 +1,8 @@
+import {
+  JourneyProgress,
+  NextStepPanel,
+} from "@/components/shared/workflow-guidance";
+import { workflowPresentation } from "@/features/workflow/presentation";
 import { DoctorShell } from "@/components/layout/shell";
 import { ContentContainer, PageHeader } from "@/components/layout/page";
 import { Button } from "@/components/ui/button";
@@ -44,6 +49,28 @@ export default function Showcase() {
             <FormExample />
           </div>
         </Surface>
+        <NextStepPanel
+          id="showcase-next-step"
+          model={workflowPresentation(
+            {
+              status: "MEDICAL_REVIEW_PENDING",
+              planState: "none",
+              canContinueSavedAnalysis: false,
+            },
+            "analysis",
+          )}
+        />
+        <JourneyProgress
+          id="showcase-progress"
+          model={workflowPresentation(
+            {
+              status: "MEDICAL_REVIEW_PENDING",
+              planState: "none",
+              canContinueSavedAnalysis: false,
+            },
+            "analysis",
+          )}
+        />
         <Surface>
           <h2>Administrative states</h2>
           <div className="mt-6 flex flex-wrap gap-3">
