@@ -30,6 +30,7 @@ export function DemoControlsClient({
   const [current, setCurrent] = useState<CurrentCase | null>(null);
   const [state, setState] = useState<LoadState>("loading");
   const [preparedAvailable, setPreparedAvailable] = useState(true);
+  const [preparedOpen, setPreparedOpen] = useState(false);
   const busy = state === "loading" || state === "preparing";
   const refresh = useCallback(async () => {
     try {
@@ -124,7 +125,10 @@ export function DemoControlsClient({
               })}
             </form>
             {preparedStates.length ? (
-              <details className="group">
+              <details
+                className="group"
+                onToggle={(event) => setPreparedOpen(event.currentTarget.open)}
+              >
                 <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-md border border-input bg-card px-4 py-2 font-medium">
                   Prepared starting points
                   <ChevronDown
@@ -132,43 +136,45 @@ export function DemoControlsClient({
                     className="size-4 transition-transform group-open:rotate-180"
                   />
                 </summary>
-                {!preparedAvailable ? (
-                  <p className="mt-3 text-xs text-muted-foreground">
-                    Prepared starting points are available only with the mock
-                    provider. Restart the server with LLM_PROVIDER=mock to use
-                    them.
-                  </p>
-                ) : (
-                  <>
+                {preparedOpen || current?.preparedStateId ? (
+                  !preparedAvailable ? (
                     <p className="mt-3 text-xs text-muted-foreground">
-                      DEMONSTRATIVE — NOT CLINICALLY VALIDATED. Synthetic
-                      presentation states. Loading replaces this browser&apos;s
-                      selected case.
+                      Prepared starting points are available only with the mock
+                      provider. Restart the server with LLM_PROVIDER=mock to use
+                      them.
                     </p>
-                    <form
-                      action={(data) => run(() => selectDemoCase(data))}
-                      aria-label="Choose prepared starting point"
-                      className="mt-3 flex flex-col gap-2 md:flex-row md:flex-wrap"
-                    >
-                      {preparedStates.map(({ id, label }) => (
-                        <PendingButton
-                          key={id}
-                          name="caseId"
-                          value={id}
-                          aria-pressed={current?.preparedStateId === id}
-                          disabled={busy}
-                          variant={
-                            current?.preparedStateId === id
-                              ? "default"
-                              : "outline"
-                          }
-                        >
-                          {label}
-                        </PendingButton>
-                      ))}
-                    </form>
-                  </>
-                )}
+                  ) : (
+                    <>
+                      <p className="mt-3 text-xs text-muted-foreground">
+                        DEMONSTRATIVE — NOT CLINICALLY VALIDATED. Synthetic
+                        presentation states. Loading replaces this
+                        browser&apos;s selected case.
+                      </p>
+                      <form
+                        action={(data) => run(() => selectDemoCase(data))}
+                        aria-label="Choose prepared starting point"
+                        className="mt-3 flex flex-col gap-2 md:flex-row md:flex-wrap"
+                      >
+                        {preparedStates.map(({ id, label }) => (
+                          <PendingButton
+                            key={id}
+                            name="caseId"
+                            value={id}
+                            aria-pressed={current?.preparedStateId === id}
+                            disabled={busy}
+                            variant={
+                              current?.preparedStateId === id
+                                ? "default"
+                                : "outline"
+                            }
+                          >
+                            {label}
+                          </PendingButton>
+                        ))}
+                      </form>
+                    </>
+                  )
+                ) : null}
               </details>
             ) : null}
             {current ? (
