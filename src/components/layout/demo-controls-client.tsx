@@ -11,6 +11,10 @@ type CurrentCase = {
   displayName: string;
   summary: string;
 };
+type PresenterState = {
+  session: CurrentCase | null;
+  preparedStatesAvailable: boolean;
+};
 type LoadState = "loading" | "preparing" | "ready" | "error";
 
 /** Reads the session client-side so shell routes stay static (and keep real 404 statuses). */
@@ -25,14 +29,16 @@ export function DemoControlsClient({
   const [current, setCurrent] = useState<CurrentCase | null>(null);
   const [state, setState] = useState<LoadState>("loading");
   const [preparedOpen, setPreparedOpen] = useState(false);
+  const [preparedAvailable, setPreparedAvailable] = useState(true);
   const busy = state === "loading" || state === "preparing";
 
   const refresh = useCallback(async () => {
     try {
       const response = await fetch("/api/demo-session", { cache: "no-store" });
       if (!response.ok) throw new Error("Demo session unavailable");
-      const selected = (await response.json()) as CurrentCase | null;
-      setCurrent(selected);
+      const presenter = (await response.json()) as PresenterState;
+      setCurrent(presenter.session);
+      setPreparedAvailable(presenter.preparedStatesAvailable);
       setState("ready");
     } catch {
       setState("error");
@@ -119,7 +125,13 @@ export function DemoControlsClient({
               />
             </summary>
             {/* Mounted while open or while a prepared state is active (to keep its pressed state); otherwise the collapsed panel adds no hidden duplicate label or copy. */}
-            {preparedOpen || current?.preparedStateId ? (
+            {(preparedOpen || current?.preparedStateId) &&
+            !preparedAvailable ? (
+              <p className="mt-3 text-xs text-muted-foreground">
+                Prepared starting points are available only with the mock
+                provider. Restart the server with LLM_PROVIDER=mock to use them.
+              </p>
+            ) : preparedOpen || current?.preparedStateId ? (
               <>
                 <p className="mt-3 text-xs text-muted-foreground">
                   DEMONSTRATIVE — NOT CLINICALLY VALIDATED. Synthetic

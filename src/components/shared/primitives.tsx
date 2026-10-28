@@ -102,6 +102,7 @@ export function ErrorState({ retry }: { retry: ReactNode }) {
   );
 }
 export function InformationGap({ items }: { items: string[] }) {
+  if (!items.length) return null;
   return (
     <Notice tone="warning" title="Information to confirm">
       <ul className="list-inside list-disc space-y-1">

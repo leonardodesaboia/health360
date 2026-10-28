@@ -38,7 +38,10 @@ completed** with **Retry analysis**; the system blocks, it never guesses.
 **Presenter shortcuts (prepared starting points).** Instead of typing intake live, open
 **Prepared starting points** in the demo controls and choose one. Loading replaces only
 that window's selected case and opens its starting screen; **Reset demo** rebuilds the
-same starting point. Covered by `tests/e2e/prepared-demo.spec.ts`.
+same starting point. Covered by `tests/e2e/prepared-demo.spec.ts`. Prepared starting
+points exist **only with `LLM_PROVIDER=mock`**; with a live model the panel says so
+and offers no buttons. To use a shortcut during a live presentation, restart in mock
+first (about 10 seconds; selected cases survive the restart) and say so.
 
 | Button                                     | State ID               | Opens               | Use it for                                                       |
 | ------------------------------------------ | ---------------------- | ------------------- | ---------------------------------------------------------------- |
@@ -84,8 +87,9 @@ in 2022 — but at first does not remember the date.
    > “Unknown stays unknown. The system asks instead of assuming.”
 3. Click **Answer missing information**. The question “On what exact date was your
    previous screening examination?” has **I don't know** preselected. Clear it, enter
-   **11/03/2022**, click **Save answers and analyze again** → **Awaiting physician
-   review**.
+   **November 3, 2022** in the order the date field shows (`mm/dd/yyyy` on an en-US
+   browser; a `dd/mm/yyyy` field needs **03/11/2022**), click **Save answers and
+   analyze again** → **Awaiting physician review**.
    > “The answer creates a new profile version; earlier versions are kept.”
 4. `/doctor` → **Open review**: **Possible redundant test**. Open the criteria:
    `crc-routine-repeat · Rule v1`, the 2022 examination data, and the limitation
@@ -127,6 +131,8 @@ actual time per block.
 | Jordan: Do Not Test (Flows C and B) | 3:00   | Live intake, clarification, modify       | `jordan-review` (skip the clarification step)  |
 | Jordan: reassessment (Flow D)       | 1:00   | History → update → review → plan v2      | `alex-plan-v1`, then **Update my information** |
 | Safety and close (Flow E)           | 0:30   | Spoken                                   | `alex-analysis-failed` → **Retry analysis**    |
+
+Shortcuts in the last column require `LLM_PROVIDER=mock` (see Presenter shortcuts).
 
 Checkpoints: Jordan starts by **1:30**; reassessment starts by **4:30**. If you are more
 than 30 seconds behind at a checkpoint, switch that block to its shortcut.
