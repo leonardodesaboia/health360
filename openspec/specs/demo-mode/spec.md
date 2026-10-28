@@ -15,8 +15,8 @@ real care, with US English interface copy.
 
 #### Scenario: Open any reference route
 
-- **WHEN** a user opens /patient, /patient/intake, /patient/plan, /doctor, /doctor/reviews/demo-review-01 or /showcase
-- **THEN** the shell SHALL display Demonstration environment and synthetic/non-validated context
+- **WHEN** a user opens /, /patient, /patient/intake, /patient/plan, /doctor, the current case review workspace or /showcase
+- **THEN** the page SHALL display Demonstration environment and synthetic/non-validated context
 - **AND** the reference screen SHALL NOT claim a validated medical recommendation
 
 ### Requirement: Role switching is navigation only
@@ -35,20 +35,3 @@ creating authentication or authorization.
 - **WHEN** the user follows View as patient from the doctor environment
 - **THEN** the link SHALL navigate to /patient
 - **AND** no credential, persisted role or clinical authority SHALL be issued
-
-### Requirement: Synthetic references do not simulate completed clinical work
-
-The foundation SHALL use fixed synthetic fixtures, read-only intake, disabled review
-decisions and an unavailable plan instead of performing MVP module logic.
-
-#### Scenario: Read the prepared case
-
-- **WHEN** the reference queue/workspace opens Marina Example
-- **THEN** the case SHALL remain explicitly fictitious with unknown values preserved
-- **AND** no model call, saved decision or generated plan SHALL occur
-
-#### Scenario: Unavailable physician decision
-
-- **WHEN** the synthetic review workspace is displayed
-- **THEN** approval/modification/rejection controls SHALL remain disabled with a nearby explanation
-- **AND** the patient plan SHALL remain unavailable

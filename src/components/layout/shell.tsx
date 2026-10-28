@@ -48,7 +48,7 @@ function AppShell({
           <p className="hidden text-xs text-muted-foreground lg:block">
             {role === "patient"
               ? "Your preventive follow-up"
-              : "Physician workspace · Interface reference"}
+              : "Physician workspace · Demonstration reviews, not clinical validation"}
           </p>
           <Link
             href={role === "patient" ? "/doctor" : "/patient"}

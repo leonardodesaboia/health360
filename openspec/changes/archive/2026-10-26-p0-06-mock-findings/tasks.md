@@ -11,6 +11,8 @@
 
 Archive and link the follow-up PR after all implementation checks pass.
 
+Closeout (2026-10-26): the follow-up merged as [PR #15](https://github.com/leonardodesaboia/health360/pull/15). `src/server/ai/provider/mock.ts` on origin/main 4445499 still emits only allowed findings with a unique SYSTEM_STRUCTURED rationale record and blocks missing or ambiguous support, covered by `src/server/ai/provider/mock.test.ts`. Acceptance Flows A and B rely on it for their single preliminary proposal. Archived without further code changes.
+
 ## Review evidence
 
 Inline clinical-safety, TypeScript, security and spec-conformance review: only allowed findings and SYSTEM_STRUCTURED matched records are emitted; exact rule/category/evidence IDs are copied; missing, ambiguous, stale and oversized support blocks without partial data. Unknown information, demonstrative labels and mandatory physician review remain intact. Explicit failure injection remains unchanged. No separate reviewer was claimed; native AO review follows the follow-up PR.

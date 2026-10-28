@@ -35,13 +35,22 @@ browser acceptance suite (`tests/e2e/acceptance/journeys.spec.ts`).
 (deterministic, no API key). A live failure is shown honestly as **Analysis not
 completed** with **Retry analysis**; the system blocks, it never guesses.
 
-**Presenter shortcuts — pending (P0-14 part 2, not yet on main).** Prepared demo states
-selected through the same case selector will let a presenter jump to a stage instead
-of typing intake live: `alex-review` (`/doctor`), `jordan-review` (`/doctor`,
-possible-redundancy proposal), `alex-plan-v1` (`/patient/plan`, ready for
-reassessment) and `alex-analysis-failed` (`/patient/analysis`, retry). Use them only
-after that change merges; until then follow the full flows below. Say that a prepared
-state was produced by the synthetic workflow and demo reviewer, not a real clinician.
+**Presenter shortcuts (prepared starting points).** Instead of typing intake live, open
+**Prepared starting points** in the demo controls and choose one. Loading replaces only
+that window's selected case and opens its starting screen; **Reset demo** rebuilds the
+same starting point. Covered by `tests/e2e/prepared-demo.spec.ts`.
+
+| Button                                     | State ID               | Opens               | Use it for                                                       |
+| ------------------------------------------ | ---------------------- | ------------------- | ---------------------------------------------------------------- |
+| **Alex — physician review**                | `alex-review`          | `/doctor`           | Alex step 2: queue row awaiting review, decisions pending        |
+| **Jordan — possible redundancy review**    | `jordan-review`        | `/doctor`           | Jordan step 4: **Possible redundant test** awaiting review       |
+| **Alex — reviewed plan v1**                | `alex-plan-v1`         | `/patient/plan`     | Reassessment: plan v1 shown, **Update my information** available |
+| **Alex — analysis failed, ready to retry** | `alex-analysis-failed` | `/patient/analysis` | Safety close: **Retry analysis** after a blocked analysis        |
+
+Say that a prepared state was produced by the synthetic workflow (real intake, mock
+analysis) and the demo reviewer, not a real clinician. `jordan-review` skips the
+unknown-date clarification; show that step live only when time allows. `alex-plan-v1`
+contains a fictional demo-reviewer approval, never clinical validation.
 
 ## 0:00 — Opening (30 seconds)
 
@@ -104,6 +113,30 @@ in 2022 — but at first does not remember the date.
 
 The failure path is rehearsed by acceptance Flow E with a controlled test fault; do not
 present it as a live outage.
+
+## Timed rehearsal outline
+
+Target: **6:00 total**, hard stop at 7:00. Rehearse once on the release build
+(`pnpm build && pnpm start`) with the provider you will present, and write down the
+actual time per block.
+
+| Block                               | Target | Live path                                | Shortcut if behind schedule                    |
+| ----------------------------------- | ------ | ---------------------------------------- | ---------------------------------------------- |
+| Opening                             | 0:30   | Spoken                                   | —                                              |
+| Alex: screening due (Flow A)        | 1:00   | Pre-demo prepared intake → review → plan | `alex-review`                                  |
+| Jordan: Do Not Test (Flows C and B) | 3:00   | Live intake, clarification, modify       | `jordan-review` (skip the clarification step)  |
+| Jordan: reassessment (Flow D)       | 1:00   | History → update → review → plan v2      | `alex-plan-v1`, then **Update my information** |
+| Safety and close (Flow E)           | 0:30   | Spoken                                   | `alex-analysis-failed` → **Retry analysis**    |
+
+Checkpoints: Jordan starts by **1:30**; reassessment starts by **4:30**. If you are more
+than 30 seconds behind at a checkpoint, switch that block to its shortcut.
+
+**If live OpenAI is slow:** successful live calls took 11–17 seconds in the recorded
+live run (`docs/STATUS.md`), so each analysis click costs a pause. If one call exceeds
+about 20 seconds during rehearsal, or fails, restart the server with
+`LLM_PROVIDER=mock` (deterministic, no API key) and present with the mock, saying so.
+Never present a mock result as a live model result. A blocked analysis during the
+demo is shown honestly with **Retry analysis**.
 
 ## Recovery during the demo
 

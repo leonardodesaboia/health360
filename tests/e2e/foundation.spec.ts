@@ -51,6 +51,20 @@ test("patient and doctor navigation and review boundary", async ({ page }) => {
   await page.getByRole("link", { name: "Go to demonstration case" }).click();
   await expect(page).toHaveURL(/\/patient$/);
 });
+test("physician header describes demonstration reviews without validation claims", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/doctor");
+  const header = page.getByRole("banner");
+  await expect(
+    header.getByText(
+      "Physician workspace · Demonstration reviews, not clinical validation",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expect(header).not.toContainText("Interface reference");
+});
 test("skip link receives keyboard focus and reaches main", async ({ page }) => {
   await page.goto("/patient");
   await page.keyboard.press("Tab");

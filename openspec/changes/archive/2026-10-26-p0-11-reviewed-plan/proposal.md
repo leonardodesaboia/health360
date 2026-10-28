@@ -1,6 +1,6 @@
 ## Why
 
-P0-11 in [the ordered index](../../../docs/backlog/IMPLEMENTATION.md#p0-11) requires a dataset-scoped patient plan derived solely from finalized physician decisions for the November 3 HISIC demonstration.
+P0-11 in [the ordered index](../../../../docs/backlog/IMPLEMENTATION.md#p0-11) requires a dataset-scoped patient plan derived solely from finalized physician decisions for the November 3 HISIC demonstration.
 
 ## What Changes
 

@@ -1,6 +1,6 @@
 ## Why
 
-P0-07 correctly requires every deterministic finding, but the default P0-06 mock always emits an empty proposal list. This blocks the synthetic demo. This follow-up belongs to [P0-06](../../../docs/backlog/IMPLEMENTATION.md#p0-06).
+P0-07 correctly requires every deterministic finding, but the default P0-06 mock always emits an empty proposal list. This blocks the synthetic demo. This follow-up belongs to [P0-06](../../../../docs/backlog/IMPLEMENTATION.md#p0-06).
 
 ## What Changes
 
