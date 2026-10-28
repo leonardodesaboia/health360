@@ -340,7 +340,7 @@ for (const answer of ["date", "unknown"] as const) {
       .getByRole("button", { name: "Analyze current profile", exact: true })
       .click();
     await expect(
-      page.getByText("Information to confirm", { exact: true }),
+      page.getByText("More information needed", { exact: true }),
     ).toBeVisible(afterAction);
     await assertNoUnreviewedPlan(page);
 
@@ -370,7 +370,7 @@ for (const answer of ["date", "unknown"] as const) {
       page.getByText(
         answer === "date"
           ? "Awaiting physician review"
-          : "Information to confirm",
+          : "More information needed",
         { exact: true },
       ),
     ).toBeVisible(afterAction);
