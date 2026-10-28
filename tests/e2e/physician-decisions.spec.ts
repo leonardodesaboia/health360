@@ -128,6 +128,10 @@ test("pending drafts survive refresh and only explicit approval finalization pub
     exact: true,
   });
   await expect(decision).toHaveValue("PENDING");
+  await expect(region).toContainText("1 of 1 proposals still need a decision.");
+  await expect(
+    region.getByRole("link", { name: "View patient plan", exact: true }),
+  ).toHaveCount(0);
   await expect(
     region.getByRole("button", { name: "Finalize review", exact: true }),
   ).toBeDisabled();
@@ -144,6 +148,23 @@ test("pending drafts survive refresh and only explicit approval finalization pub
     "demo reviewer — not a real clinician",
   );
   await decision.selectOption("APPROVE");
+  const queueTab = await page.context().newPage();
+  await queueTab.goto("/doctor");
+  await expect(
+    queueTab
+      .getByRole("link", { name: "Continue review", exact: true })
+      .filter({ visible: true }),
+  ).toBeVisible();
+  await expect(
+    queueTab.getByRole("link", { name: "View finalized review", exact: true }),
+  ).toHaveCount(0);
+  await queueTab.close();
+  await expect(region).toContainText(
+    "Decisions entered. Finalization checks are still required.",
+  );
+  await expect(
+    region.getByRole("link", { name: "View patient plan", exact: true }),
+  ).toHaveCount(0);
   await expect(
     region.getByRole("button", { name: "Finalize review", exact: true }),
   ).toBeEnabled();
@@ -162,7 +183,45 @@ test("pending drafts survive refresh and only explicit approval finalization pub
     path: testInfo.outputPath("physician-decisions.png"),
     fullPage: true,
   });
-  await finalize(region);
+  let releaseRequest = () => {};
+  let noteRequest = () => {};
+  const requestStarted = new Promise<void>((resolve) => {
+    noteRequest = resolve;
+  });
+  const requestGate = new Promise<void>((resolve) => {
+    releaseRequest = resolve;
+  });
+  await page.route("**/doctor/reviews/**", async (route) => {
+    if (route.request().method() === "POST") {
+      noteRequest();
+      await requestGate;
+    }
+    await route.continue();
+  });
+  const finalization = finalize(region);
+  try {
+    await requestStarted;
+    await expect(region.getByRole("status")).toHaveText("Finalizing review…");
+    await expect(
+      region.getByRole("button", { name: "Finalize review", exact: true }),
+    ).toBeDisabled();
+    await expect(
+      region.getByRole("link", { name: "View patient plan", exact: true }),
+    ).toHaveCount(0);
+  } finally {
+    releaseRequest();
+    await finalization;
+    await page.unroute("**/doctor/reviews/**");
+  }
+  await expect(
+    region.getByText(
+      "Review finalized. Reviewed demonstration plan published.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expect(
+    region.getByRole("link", { name: "View patient plan", exact: true }),
+  ).toHaveAttribute("href", "/patient/plan");
   await expect(decision).toHaveValue("APPROVE");
   await page.reload();
   await expect(region).toContainText("Review v2");
@@ -170,6 +229,12 @@ test("pending drafts survive refresh and only explicit approval finalization pub
     region.getByRole("button", { name: "Finalize review", exact: true }),
   ).toBeDisabled();
   await expect(decision).toBeDisabled();
+  await page.goto("/doctor");
+  await expect(
+    page
+      .getByRole("link", { name: "View finalized review", exact: true })
+      .filter({ visible: true }),
+  ).toBeVisible();
   await page.goto("/patient/plan");
   const plan = page.getByRole("main");
   await expect(
@@ -186,6 +251,11 @@ test("modification requires reason and revised text and publishes only the revis
   repeatCase,
 }) => {
   const region = await openReview(page, baseURL!, repeatCase);
+  await page.getByText("View rationale and criteria", { exact: true }).click();
+  await expect(
+    page.getByText("Colonoscopy result was normal: Yes", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText(/^A recent test alone/)).toBeVisible();
   await expect(
     page.getByRole("main").getByText(/^Possible redundant test/),
   ).toBeVisible();
@@ -297,7 +367,7 @@ test("clarification remains incomplete after refresh and cannot publish a plan",
     .getByLabel("Related intake question (optional)", { exact: true })
     .selectOption("priorScreening");
   await region
-    .getByRole("button", { name: "Save decisions", exact: true })
+    .getByRole("button", { name: "Send clarification request", exact: true })
     .click();
   await expect(region.getByRole("status")).toContainText(
     "Clarification requested",
@@ -367,4 +437,37 @@ test("a competing tab receives safe failure feedback and retains its unsaved inp
   } finally {
     await otherPage.close();
   }
+});
+
+test("an interrupted finalization response asks for recorded status without claiming publication", async ({
+  page,
+  baseURL,
+  reviewCase,
+}) => {
+  const region = await openReview(page, baseURL!, reviewCase);
+  const decision = region.getByLabel("Decision for proposal 1", {
+    exact: true,
+  });
+  await decision.selectOption("APPROVE");
+  await page.route("**/doctor/reviews/**", async (route) => {
+    if (route.request().method() === "POST") await route.abort("failed");
+    else await route.continue();
+  });
+  await region
+    .getByRole("button", { name: "Finalize review", exact: true })
+    .click();
+  await expect(region.getByRole("alert")).toHaveText(
+    "We could not confirm the result. Reload this review to check its recorded status.",
+    committed,
+  );
+  await expect(decision).toHaveValue("APPROVE");
+  await expect(
+    region.getByRole("link", { name: "View patient plan", exact: true }),
+  ).toHaveCount(0);
+  await page.unroute("**/doctor/reviews/**");
+  await page.reload();
+  await expect(decision).toHaveValue("PENDING");
+  await expect(
+    region.getByRole("button", { name: "Finalize review", exact: true }),
+  ).toBeDisabled();
 });

@@ -6,13 +6,19 @@ import {
   StatusIndicator,
 } from "@/components/shared/primitives";
 import { Button } from "@/components/ui/button";
-import { workspaceId } from "@/features/clinical-review/reader";
+import {
+  workspaceId,
+  type ReviewWorkspace,
+} from "@/features/clinical-review/reader";
+import { queueAction } from "@/features/clinical-review/guidance";
 import { getReviewQueue } from "@/server/clinical-review/reader";
+import { getDemoSession } from "@/server/demo/session";
 
 export const dynamic = "force-dynamic";
 
 export default async function Queue() {
   const rows = await getReviewQueue();
+  const session = rows.length ? null : await getDemoSession();
   return (
     <ContentContainer width="workspace">
       <PageHeader
@@ -20,6 +26,10 @@ export default async function Queue() {
         title="Review queue"
         description="Current analyses for your selected synthetic demonstration case."
       />
+      <p className="text-sm text-muted-foreground">
+        Review each proposal, save decisions if needed, then finalize to publish
+        the reviewed demonstration plan.
+      </p>
       {rows.length ? (
         <>
           <div className="hidden overflow-hidden rounded-lg border bg-card md:block">
@@ -61,13 +71,15 @@ export default async function Queue() {
                     </td>
                     <td className="p-6">
                       <StatusIndicator status={row.workflowStatus} />
-                      {row.stale && <p className="mt-2">Stale analysis</p>}
+                      {row.stale && (
+                        <p className="mt-2">Newer information exists.</p>
+                      )}
                       {row.analysis.status === "BLOCKED" && (
                         <p className="mt-2">Analysis blocked</p>
                       )}
                     </td>
                     <td className="p-6">
-                      <OpenReview id={workspaceId(row.analysis)} />
+                      <OpenReview workspace={row} />
                     </td>
                   </tr>
                 ))}
@@ -88,12 +100,17 @@ export default async function Queue() {
                   </time>
                 </p>
                 <StatusIndicator status={row.workflowStatus} />
-                {row.stale && <p className="text-sm">Stale analysis</p>}
+                <p className="text-xs text-muted-foreground">
+                  Synthetic · Profile v{row.analysis.profileVersion}
+                </p>
+                {row.stale && (
+                  <p className="text-sm">Newer information exists.</p>
+                )}
                 {row.analysis.status === "BLOCKED" && (
                   <p className="text-sm">Analysis blocked</p>
                 )}
                 <div>
-                  <OpenReview id={workspaceId(row.analysis)} />
+                  <OpenReview workspace={row} />
                 </div>
               </li>
             ))}
@@ -101,11 +118,21 @@ export default async function Queue() {
         </>
       ) : (
         <EmptyState
-          title="No analyses to review"
-          description="Select a demonstration case and complete its analysis to populate this queue."
+          title={session ? "No analysis is ready yet" : "Select a demo case"}
+          description={
+            session
+              ? "Complete the confirmed intake and analysis for this synthetic case before review can begin."
+              : "Choose Alex Example or Jordan Example in Presenter controls to begin this synthetic demonstration."
+          }
           action={
-            <Button asChild variant="outline">
-              <Link href="/patient">Go to demonstration case</Link>
+            <Button asChild>
+              <Link
+                href={
+                  session ? "/patient/analysis" : "/patient#demo-case-title"
+                }
+              >
+                {session ? "View patient status" : "Choose a demo case"}
+              </Link>
             </Button>
           }
         />
@@ -118,12 +145,23 @@ export default async function Queue() {
   );
 }
 
-function OpenReview({ id }: { id: string }) {
+function OpenReview({ workspace }: { workspace: ReviewWorkspace }) {
+  const label = queueAction(workspace);
   return (
-    <Button asChild variant="outline">
+    <Button
+      asChild
+      variant={
+        label === "Start review" || label === "Continue review"
+          ? "default"
+          : "outline"
+      }
+    >
       {/* Opening a review is a workflow write; never trigger it from a prefetch. */}
-      <Link href={`/doctor/reviews/${encodeURIComponent(id)}`} prefetch={false}>
-        Open review
+      <Link
+        href={`/doctor/reviews/${encodeURIComponent(workspaceId(workspace.analysis))}`}
+        prefetch={false}
+      >
+        {label}
       </Link>
     </Button>
   );
