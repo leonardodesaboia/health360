@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { ContentContainer, PageHeader } from "@/components/layout/page";
+import { EmptyState, Notice } from "@/components/shared/primitives";
 import {
-  Notice,
-  StatusIndicator,
-  Surface,
-} from "@/components/shared/primitives";
+  JourneyProgress,
+  NextStepPanel,
+} from "@/components/shared/workflow-guidance";
 import { Button } from "@/components/ui/button";
+import { workflowPresentation } from "@/features/workflow/presentation";
 import type { WorkflowStatus } from "@/features/workflow/workflow";
 import { AnalyzeButton } from "./analyze-button";
 
@@ -18,13 +19,12 @@ export function AnalysisStatus({
   analyzeAction: () => Promise<void>;
   error?: boolean;
 }) {
-  const canAnalyze =
-    status === "INTAKE_COMPLETED" ||
-    status === "ANALYSIS_FAILED" ||
-    status === "REASSESSMENT_PENDING";
-  const isReview =
-    status === "MEDICAL_REVIEW_PENDING" ||
-    status === "MEDICAL_REVIEW_IN_PROGRESS";
+  const model = status
+    ? workflowPresentation(
+        { status, planState: "none", canContinueSavedAnalysis: false },
+        "analysis",
+      )
+    : null;
   return (
     <ContentContainer>
       <PageHeader
@@ -36,96 +36,56 @@ export function AnalysisStatus({
         Analysis is preliminary. A physician must review proposals before a plan
         becomes available.
       </Notice>
-      <Surface>
-        <h2 className="mb-4">Your next step</h2>
-        {status && <StatusIndicator status={status} />}
-        <div
-          role="status"
-          className="mt-4 space-y-3 text-sm text-muted-foreground"
-        >
-          {error ? (
-            <p>
-              The analysis could not be completed. Refresh this page and try
-              again.
-            </p>
-          ) : null}
-          {!status && !error ? (
-            <p>Select a synthetic demonstration case to begin.</p>
-          ) : null}
-          {canAnalyze ? (
-            <p>
-              {status === "ANALYSIS_FAILED"
-                ? "The analysis could not be completed. No new proposals are available. You can retry with the current information."
-                : "Your current information is ready for a preliminary analysis."}
-            </p>
-          ) : null}
-          {status === "ANALYSIS_PENDING" ? (
-            <p>
-              The analysis is in preparation. Refresh this page to check its
-              status.
-            </p>
-          ) : null}
-          {status === "CLARIFICATION_REQUIRED" ? (
-            <p>
-              More information is needed before the analysis can continue.
-              Unknown answers remain unknown.
-            </p>
-          ) : null}
-          {isReview ? (
-            <p>
-              The preliminary analysis is awaiting physician review. Your
-              reviewed plan will be available after the review is finalized.
-            </p>
-          ) : null}
-          {status === "NOT_STARTED" || status === "INTAKE_IN_PROGRESS" ? (
-            <p>Complete your health history before requesting analysis.</p>
-          ) : null}
-          {status === "MEDICAL_REVIEW_COMPLETED" ||
-          status === "PLAN_AVAILABLE" ? (
-            <p>View your plan status for the next step in your evaluation.</p>
-          ) : null}
-        </div>
-        <div className="mt-6 flex flex-wrap gap-3">
-          {status === "CLARIFICATION_REQUIRED" ? (
+      {error && !model && (
+        <Notice title="We could not confirm the analysis result" tone="warning">
+          Check the latest recorded status before trying again. No completion is
+          assumed.
+        </Notice>
+      )}
+      {!model ? (
+        <EmptyState
+          title="Select a demonstration case"
+          description="Choose Alex Example or Jordan Example in Presenter controls to begin this synthetic demonstration."
+          action={
             <Button asChild>
+              <Link href="/patient#demo-case-title">Choose a demo case</Link>
+            </Button>
+          }
+        />
+      ) : (
+        <>
+          {model.primary.kind === "task" ? (
+            <form action={analyzeAction}>
+              <AnalyzeButton model={model} error={error} />
+            </form>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">{model.label}</p>
+              {error && (
+                <Notice
+                  title="We could not confirm the analysis result"
+                  tone="warning"
+                >
+                  Check the latest recorded status before trying again. No
+                  completion is assumed.
+                </Notice>
+              )}
+              <NextStepPanel model={model} id="analysis-next-step" />
+            </>
+          )}
+          <JourneyProgress model={model} id="analysis-evaluation-progress" />
+          {status === "ANALYSIS_PENDING" && (
+            <Button asChild variant="outline">
               <Link href="/patient/clarification">
-                Answer missing information
+                Check saved-analysis recovery
               </Link>
             </Button>
-          ) : null}
-          {canAnalyze ? (
-            <form action={analyzeAction}>
-              <AnalyzeButton retry={status === "ANALYSIS_FAILED"} />
-            </form>
-          ) : null}
-          {status === "ANALYSIS_PENDING" ? (
-            <>
-              <Button asChild variant="outline">
-                <Link href="/patient/analysis">Refresh status</Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link href="/patient/clarification">
-                  Continue saved analysis
-                </Link>
-              </Button>
-            </>
-          ) : null}
-          {isReview ||
-          status === "MEDICAL_REVIEW_COMPLETED" ||
-          status === "PLAN_AVAILABLE" ? (
-            <Button asChild variant="outline">
-              <Link href="/patient/plan">View plan status</Link>
-            </Button>
-          ) : (
-            <Button asChild variant="outline">
-              <Link href="/patient/intake">Review health intake</Link>
-            </Button>
           )}
-          <Button asChild variant="ghost">
-            <Link href="/patient">Back to home</Link>
-          </Button>
-        </div>
-      </Surface>
+        </>
+      )}
+      <Button asChild variant="ghost">
+        <Link href="/patient">Back to home</Link>
+      </Button>
     </ContentContainer>
   );
 }

@@ -23,6 +23,31 @@ export function PlanContent({
         <p className="mt-2">
           Demo reviewer decisions are not clinical validation.
         </p>
+        <dl className="mt-4 grid gap-2 text-sm">
+          <div>
+            <dt className="inline font-medium">Plan version: </dt>
+            <dd className="inline tabular-nums">{plan.version}</dd>
+          </div>
+          <div>
+            <dt className="inline font-medium">Published: </dt>
+            <dd className="inline tabular-nums">
+              <time dateTime={plan.publishedAt}>
+                {new Intl.DateTimeFormat("en-US", {
+                  dateStyle: "medium",
+                  timeZone: "UTC",
+                }).format(new Date(plan.publishedAt))}
+              </time>{" "}
+              UTC
+            </dd>
+          </div>
+          <div>
+            <dt className="inline font-medium">Source: </dt>
+            <dd className="inline">
+              Physician-reviewed · Review version {plan.reviewVersion} · Profile
+              version {plan.profileVersion}
+            </dd>
+          </div>
+        </dl>
       </Notice>
       <Surface>
         <h2>Selected actions</h2>
@@ -66,34 +91,10 @@ export function PlanContent({
       <Surface>
         <h2>Next steps</h2>
         <p className="mt-4 text-sm">
-          Use the reviewed actions and information requests above to track this
-          demonstration follow-up. New information requires another analysis and
-          physician review before a new plan is available.
+          Action tracking is not available in this demonstration. New
+          information requires another analysis and physician review before a
+          new plan is available.
         </p>
-        <dl className="mt-4 grid gap-2 text-sm text-muted-foreground">
-          <div>
-            <dt className="inline font-medium">Plan version: </dt>
-            <dd className="inline tabular-nums">{plan.version}</dd>
-          </div>
-          <div>
-            <dt className="inline font-medium">Published: </dt>
-            <dd className="inline tabular-nums">
-              <time dateTime={plan.publishedAt}>
-                {new Intl.DateTimeFormat("en-US", {
-                  dateStyle: "medium",
-                  timeZone: "UTC",
-                }).format(new Date(plan.publishedAt))}
-              </time>
-            </dd>
-          </div>
-          <div>
-            <dt className="inline font-medium">Source: </dt>
-            <dd className="inline">
-              Physician-reviewed · Review version {plan.reviewVersion} · Profile
-              version {plan.profileVersion}
-            </dd>
-          </div>
-        </dl>
       </Surface>
     </>
   );

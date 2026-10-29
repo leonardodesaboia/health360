@@ -6,6 +6,7 @@ import { useFormStatus } from "react-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { workflowPresentation } from "@/features/workflow/presentation";
 import { IntakeField } from "@/features/health-intake/intake-field";
 import {
   intakeSchema,
@@ -21,9 +22,16 @@ import type {
 export function ContinueAnalysisButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending}>
-      {pending ? "Preparing analysis..." : "Continue saved analysis"}
-    </Button>
+    <div aria-busy={pending}>
+      <Button type="submit" disabled={pending}>
+        {pending ? "Analyzing current information…" : "Continue saved analysis"}
+      </Button>
+      {pending && (
+        <p role="status" className="mt-3 text-sm text-muted-foreground">
+          Analysis requested. Waiting for the server response.
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -63,9 +71,20 @@ export function ClarificationForm({
   const [freeAnswers, setFreeAnswers] = useState<Record<string, string | null>>(
     () => Object.fromEntries(freeQuestions.map((q) => [q.id, null])),
   );
+  const model = workflowPresentation(
+    {
+      status: "CLARIFICATION_REQUIRED",
+      planState: "none",
+      canContinueSavedAnalysis: false,
+    },
+    "clarification",
+  );
   return (
     <form
       noValidate
+      aria-labelledby="clarification-next-step"
+      aria-describedby="clarification-next-step-description"
+      aria-busy={busy}
       className="space-y-6 break-words"
       onSubmit={async (event) => {
         event.preventDefault();
@@ -121,6 +140,17 @@ export function ClarificationForm({
         }
       }}
     >
+      <div className="space-y-2">
+        <h2 id="clarification-next-step">What happens next</h2>
+        <h3>{model.heading}</h3>
+        <p
+          id="clarification-next-step-description"
+          className="text-sm text-muted-foreground"
+        >
+          {model.explanation}
+        </p>
+        <p className="text-sm font-medium">Next: {model.actor}</p>
+      </div>
       <p className="text-sm text-muted-foreground">
         These questions cover missing patient-reported information only. Choose
         I don&apos;t know whenever you cannot confirm an answer. Saved answers
@@ -129,12 +159,19 @@ export function ClarificationForm({
       <fieldset disabled={busy} className="space-y-6">
         <legend className="sr-only">Missing information</legend>
         {questions.map((question) => (
-          <IntakeField
-            key={question.id}
-            definition={question}
-            control={control}
-            error={errors[question.id]}
-          />
+          <div key={question.id}>
+            <IntakeField
+              definition={question}
+              control={control}
+              error={errors[question.id]}
+            />
+            {question.kind === "date" && (
+              <p className="mt-2 text-sm text-muted-foreground">
+                Enter the date in the order the field shows. Your browser sets
+                that order; in US format it is month/day/year.
+              </p>
+            )}
+          </div>
         ))}
         {freeQuestions.map((question) => (
           <div key={question.id}>
@@ -196,8 +233,8 @@ export function ClarificationForm({
         <div className="flex flex-wrap gap-3">
           <Button type="submit">
             {busy
-              ? "Saving answers and preparing analysis..."
-              : "Save answers and analyze again"}
+              ? "Saving answers and requesting analysis…"
+              : model.primary.label}
           </Button>
           <Button
             type="button"
@@ -213,8 +250,7 @@ export function ClarificationForm({
       </fieldset>
       {busy && (
         <p role="status" className="text-sm text-muted-foreground">
-          Your earlier profile and plan remain preserved while these answers are
-          processed.
+          Saving answers and requesting analysis…
         </p>
       )}
     </form>

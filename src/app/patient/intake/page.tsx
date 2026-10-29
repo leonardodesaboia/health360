@@ -15,7 +15,7 @@ export default async function Intake() {
   return (
     <ContentContainer width="form">
       <PageHeader
-        eyebrow="Health history"
+        eyebrow="Intake · Save your information before analysis"
         title="Guided health intake"
         description="Enter the synthetic scenario step by step. You can save a draft and return in this browser."
       />

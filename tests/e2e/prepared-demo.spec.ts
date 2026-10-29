@@ -83,7 +83,7 @@ for (const state of [
         .getByRole("button", { name: "Retry analysis", exact: true })
         .click();
       await expect(page.getByRole("main")).toContainText(
-        "The preliminary analysis is awaiting physician review.",
+        "Your preliminary analysis is ready for review. A demo reviewer must decide on every proposal and finalize the review before a plan can appear. No completion time is promised.",
         { timeout: 30000 },
       );
     } else {
@@ -146,7 +146,7 @@ test("prepared reset rebuilds the selected starting point and keyboard controls 
     .getByRole("button", { name: "Retry analysis", exact: true })
     .click();
   await expect(page.getByRole("main")).toContainText(
-    "awaiting physician review",
+    "Your preliminary analysis is ready for review. A demo reviewer must decide on every proposal and finalize the review before a plan can appear. No completion time is promised.",
     { timeout: 30000 },
   );
   await page.getByText("Presenter controls", { exact: true }).click();

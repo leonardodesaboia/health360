@@ -11,7 +11,10 @@ test("direct patient plan URL does not expose preliminary proposals without a se
     page.getByRole("heading", { name: "Preventive follow-up" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Select a demonstration case" }),
+    page.getByRole("main").getByRole("heading", {
+      name: "Select a demonstration case",
+      exact: true,
+    }),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Selected actions" }),
@@ -26,12 +29,12 @@ test("direct patient plan URL does not expose preliminary proposals without a se
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  await page.getByRole("link", { name: "Track evaluation" }).focus();
+  await page.getByRole("link", { name: "Choose a demo case" }).focus();
   await expect(
-    page.getByRole("link", { name: "Track evaluation" }),
+    page.getByRole("link", { name: "Choose a demo case" }),
   ).toBeFocused();
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/\/patient$/);
+  await expect(page).toHaveURL(/\/patient#demo-case-title$/);
 });
 
 for (const state of ["reviewed", "pending"] as const) {
@@ -93,7 +96,10 @@ for (const state of ["reviewed", "pending"] as const) {
         ).toBeVisible();
       } else {
         await expect(
-          page.getByRole("heading", { name: "Awaiting a reviewed plan" }),
+          page.getByRole("heading", {
+            name: "Review has started",
+            exact: true,
+          }),
         ).toBeVisible();
         await expect(
           page.getByText("Reviewed action wording", { exact: true }),

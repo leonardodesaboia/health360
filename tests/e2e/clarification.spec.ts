@@ -24,7 +24,7 @@ test("clarification without a selected session exposes no questions", async ({
   await page.goto("/patient/clarification");
   await expect(
     page.getByRole("heading", {
-      name: "Confirm missing information",
+      name: "Information needed before review can continue",
       level: 1,
     }),
   ).toBeVisible();
@@ -32,7 +32,9 @@ test("clarification without a selected session exposes no questions", async ({
     page.getByRole("button", { name: "Save answers and analyze again" }),
   ).toHaveCount(0);
   await expect(
-    page.getByRole("main").getByRole("heading", { name: "Select a demo case" }),
+    page
+      .getByRole("main")
+      .getByRole("heading", { name: "Select a demonstration case" }),
   ).toBeVisible();
 });
 
@@ -63,10 +65,40 @@ for (const scenario of ["known", "unknown", "interrupted"] as const) {
       ]);
       let stalePage;
       if (scenario === "interrupted") {
-        await page.goto("/patient/clarification");
+        await page.goto("/patient/analysis");
+        const next = page.getByRole("region", {
+          name: "What happens next",
+          exact: true,
+        });
+        await expect(next).toContainText(
+          "An analysis request is pending. Check for the latest recorded status. No plan is published by this step.",
+        );
         await expect(
-          page.getByRole("heading", { name: "Your information is saved" }),
+          next.getByText("Next: System", { exact: true }),
         ).toBeVisible();
+        await expect(
+          page.getByRole("button", { name: "Refresh status", exact: true }),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("button", {
+            name: "Continue saved analysis",
+            exact: true,
+          }),
+        ).toHaveCount(0);
+        await page
+          .getByRole("link", {
+            name: "Check saved-analysis recovery",
+            exact: true,
+          })
+          .click();
+        await expect(
+          page.getByRole("heading", { name: "What happens next" }),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("region", { name: "What happens next", exact: true }),
+        ).toContainText(
+          "Your answers are saved. Continue the saved analysis without submitting them again.",
+        );
         await page
           .getByRole("button", { name: "Continue saved analysis" })
           .click();

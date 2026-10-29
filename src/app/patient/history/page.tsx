@@ -1,15 +1,13 @@
 import Link from "next/link";
 import { ContentContainer, PageHeader } from "@/components/layout/page";
-import {
-  EmptyState,
-  Notice,
-  StatusIndicator,
-  Surface,
-} from "@/components/shared/primitives";
+import { EmptyState, Notice, Surface } from "@/components/shared/primitives";
 import { Button } from "@/components/ui/button";
+import { NextStepPanel } from "@/components/shared/workflow-guidance";
+import { workflowPresentation } from "@/features/workflow/presentation";
 import { ReassessmentButton } from "@/features/health-timeline/reassessment-button";
 import { loadPatientHistory } from "@/server/health-timeline/load";
 import { startReassessment } from "@/server/health-timeline/actions";
+import { FocusHashTarget } from "./focus-hash-target";
 
 export default async function History({
   searchParams,
@@ -25,6 +23,16 @@ export default async function History({
     data?.status === "REASSESSMENT_PENDING" ||
     data?.status === "INTAKE_IN_PROGRESS";
   const unavailable = (await searchParams).update === "unavailable";
+  const model = data
+    ? workflowPresentation(
+        {
+          status: data.status,
+          planState: latest ? (canUpdate ? "current" : "previous") : "none",
+          canContinueSavedAnalysis: false,
+        },
+        "history",
+      )
+    : null;
   return (
     <ContentContainer>
       <PageHeader
@@ -34,7 +42,9 @@ export default async function History({
       />
       {data ? (
         <>
-          <StatusIndicator status={data.status} />
+          {!canUpdate && model && (
+            <NextStepPanel model={model} id="history-next-step" />
+          )}
           {unavailable && (
             <Notice title="This update could not be started" tone="warning">
               Your evaluation may have changed or storage may be unavailable.
@@ -42,36 +52,38 @@ export default async function History({
               preserved.
             </Notice>
           )}
-          <Surface>
-            <h2>Update your information</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              An update starts another evaluation. Your earlier reviewed plan
-              stays in history while new information goes through analysis and
-              physician review.
-            </p>
-            {canUpdate && latest ? (
-              <form action={startReassessment} className="mt-4">
-                <input type="hidden" name="planId" value={latest.id} />
-                <input
-                  type="hidden"
-                  name="profileVersion"
-                  value={data.latestProfileVersion}
-                />
-                <ReassessmentButton />
-              </form>
-            ) : canResume ? (
-              <Button asChild className="mt-4">
-                <Link href="/patient/intake">
-                  Continue updating information
-                </Link>
-              </Button>
-            ) : (
-              <p className="mt-4 text-sm text-muted-foreground">
-                Complete the current evaluation and physician review before
-                starting another update.
+          <div
+            id="update-information"
+            role="region"
+            tabIndex={-1}
+            aria-labelledby="update-information-heading"
+          >
+            <FocusHashTarget id="update-information" />
+            <Surface>
+              <h2 id="update-information-heading">Update your information</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                An update starts another evaluation. Your earlier reviewed plan
+                stays in history while new information goes through analysis and
+                physician review.
               </p>
-            )}
-          </Surface>
+              {canUpdate && latest ? (
+                <form action={startReassessment} className="mt-4">
+                  <input type="hidden" name="planId" value={latest.id} />
+                  <input
+                    type="hidden"
+                    name="profileVersion"
+                    value={data.latestProfileVersion}
+                  />
+                  <ReassessmentButton />
+                </form>
+              ) : !canResume ? (
+                <p className="mt-4 text-sm text-muted-foreground">
+                  Complete the current evaluation and physician review before
+                  starting another update.
+                </p>
+              ) : null}
+            </Surface>
+          </div>
           <section aria-labelledby="plan-history-title">
             <h2 id="plan-history-title">Reviewed plan versions</h2>
             {data.plans.length ? (
@@ -137,10 +149,10 @@ export default async function History({
       ) : (
         <EmptyState
           title="Select a demonstration case"
-          description="Choose a synthetic case from Home to view its recorded history."
+          description="Choose Alex Example or Jordan Example in Presenter controls to begin this synthetic demonstration."
           action={
-            <Button asChild variant="outline">
-              <Link href="/patient">Go to Home</Link>
+            <Button asChild>
+              <Link href="/patient#demo-case-title">Choose a demo case</Link>
             </Button>
           }
         />

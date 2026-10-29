@@ -34,6 +34,8 @@ export function IntakeForm({
   const [confirmed, setConfirmed] = useState(false);
   const [confirmationError, setConfirmationError] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const revision = useRef(0),
     profileVersion = useRef(0);
   const submissionId = useRef<string | null>(null);
@@ -58,6 +60,7 @@ export function IntakeForm({
         repo.latest(scope),
       ]);
       reset(draft?.answers ?? prefill ?? initialAnswers);
+      setHasDraft(Boolean(draft));
       revision.current = draft?.revision ?? 0;
       profileVersion.current = latest?.profile.version ?? 0;
       submissionId.current = null;
@@ -66,7 +69,7 @@ export function IntakeForm({
       setStep(draft?.step ?? 0);
       setStatus(
         draft
-          ? "Saved draft restored."
+          ? "Your draft is saved in this browser. Confirm your answers to save a profile for this demo case."
           : "Answer with the synthetic scenario. Choose I don't know when unsure.",
       );
       setError("");
@@ -98,6 +101,7 @@ export function IntakeForm({
         revision.current,
       );
       revision.current = saved.revision;
+      setHasDraft(true);
       setStatus("Draft saved in this browser only.");
       setError("");
       if (!intakeStarted.current) {
@@ -148,6 +152,7 @@ export function IntakeForm({
       return;
     }
     setBusy(true);
+    setConfirming(true);
     try {
       const repo = createDraftRepository(window.localStorage);
       submissionId.current ??= crypto.randomUUID();
@@ -186,6 +191,7 @@ export function IntakeForm({
           : "Intake could not be confirmed. Your previous profile remains unchanged. Retry or reload the saved draft.",
       );
     } finally {
+      setConfirming(false);
       setBusy(false);
     }
   }
@@ -244,6 +250,9 @@ export function IntakeForm({
       ) : (
         <form
           noValidate
+          aria-labelledby="intake-next-step"
+          aria-describedby="intake-next-step-description"
+          aria-busy={busy}
           onChange={() => {
             setStatus("Unsaved changes. Save this draft before leaving.");
             setConfirmed(false);
@@ -257,6 +266,20 @@ export function IntakeForm({
           }}
           className="space-y-6"
         >
+          <div className="space-y-2">
+            <h2 id="intake-next-step" className="sr-only">
+              What happens next
+            </h2>
+            <p
+              id="intake-next-step-description"
+              className="text-sm text-muted-foreground"
+            >
+              {hasDraft
+                ? "Your draft is saved in this browser. Confirm your answers to save a profile for this demo case."
+                : "Answer questions about this synthetic case. You can choose ‘I don't know’ when unsure."}
+            </p>
+            <p className="text-sm font-medium">Next: You</p>
+          </div>
           <fieldset disabled={busy} className="space-y-6">
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
@@ -264,7 +287,7 @@ export function IntakeForm({
               </p>
               <div
                 role="progressbar"
-                aria-label="Intake progress"
+                aria-label="Intake questions"
                 aria-valuemin={1}
                 aria-valuemax={steps.length}
                 aria-valuenow={step + 1}
@@ -367,7 +390,11 @@ export function IntakeForm({
               </Button>
             </div>
             <p role="status" className="text-sm text-muted-foreground">
-              {busy ? "Saving..." : status}
+              {busy
+                ? confirming
+                  ? "Saving your confirmed information…"
+                  : "Saving draft in this browser…"
+                : status}
             </p>
           </fieldset>
         </form>

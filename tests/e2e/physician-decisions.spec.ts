@@ -390,10 +390,13 @@ test("clarification remains incomplete after refresh and cannot publish a plan",
   const plan = page.getByRole("main");
   await expect(
     plan.getByRole("heading", {
-      name: "More information is needed",
+      name: "Answer the requested questions",
       exact: true,
     }),
   ).toBeVisible();
+  await expect(plan).toContainText(
+    "More information is needed before a new analysis and physician review can continue.",
+  );
   await expect(
     plan.getByText("Demonstrative review item", { exact: true }),
   ).toHaveCount(0);
