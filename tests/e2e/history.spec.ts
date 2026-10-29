@@ -13,7 +13,10 @@ test("history navigation explains the missing session without revealing any reco
     page.getByRole("heading", { name: "Your follow-up history" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Select a demonstration case" }),
+    page.getByRole("main").getByRole("heading", {
+      name: "Select a demonstration case",
+      exact: true,
+    }),
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Update my information" }),
@@ -26,10 +29,12 @@ test("history navigation explains the missing session without revealing any reco
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  await page.getByRole("link", { name: "Go to Home" }).focus();
-  await expect(page.getByRole("link", { name: "Go to Home" })).toBeFocused();
+  await page.getByRole("link", { name: "Choose a demo case" }).focus();
+  await expect(
+    page.getByRole("link", { name: "Choose a demo case" }),
+  ).toBeFocused();
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/\/patient$/);
+  await expect(page).toHaveURL(/\/patient#demo-case-title$/);
 });
 
 test("a persisted reassessment preserves the old plan and publishes a separately reviewed version", async ({
@@ -84,7 +89,7 @@ test("a persisted reassessment preserves the old plan and publishes a separately
       page.getByText("Reassessment requested", { exact: true }),
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "Continue updating information" }),
+      page.getByRole("link", { name: "Continue health intake" }),
     ).toBeVisible();
     await run("complete", fixture.token);
     await page.reload();

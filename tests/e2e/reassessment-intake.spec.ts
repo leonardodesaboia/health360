@@ -8,7 +8,11 @@ test("a patient completes reassessment intake and runs a new analysis while plan
   page,
   context,
   baseURL,
-}) => {
+}, testInfo) => {
+  await page.setViewportSize({
+    width: testInfo.project.name === "desktop" ? 1440 : 390,
+    height: 900,
+  });
   test.setTimeout(180_000);
   if (!baseURL) throw new Error("Application URL required");
   const run = async (...args: string[]) =>
@@ -72,12 +76,34 @@ test("a patient completes reassessment intake and runs a new analysis while plan
       page.getByText("More information needed", { exact: true }),
     ).toBeVisible();
     await page.goto("/patient/plan");
+    const next = page.getByRole("region", {
+      name: "What happens next",
+      exact: true,
+    });
+    await expect(
+      next.getByRole("link", {
+        name: "Answer missing information",
+        exact: true,
+      }),
+    ).toHaveAttribute("href", "/patient/clarification");
+    await expect(page.getByRole("main")).toContainText(
+      "New evaluation in progress. Plan version 1 below is from an earlier review.",
+    );
     await expect(
       page.getByText("Previous reviewed plan", { exact: true }),
     ).toBeVisible();
     await expect(
       page.getByText("Reviewed action wording", { exact: true }),
     ).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await page.screenshot({
+      path: testInfo.outputPath("previous-plan-current-evaluation.png"),
+      fullPage: true,
+    });
     await run("assert-intake", fixture.token);
   } finally {
     await run("remove", fixture.token);
