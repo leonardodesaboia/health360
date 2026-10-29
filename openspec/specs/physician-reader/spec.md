@@ -66,3 +66,17 @@ The populated physician queue and workspace SHALL support accessible reading on 
 
 - **WHEN** a seeded analysis is read through the queue and workspace on desktop or mobile
 - **THEN** serious and critical axe checks pass for both populated screens and keyboard evidence disclosures remain usable
+
+### Requirement: Explanatory read-only blocked workspace
+
+The reader SHALL show a provenance-labeled plain-language outcome reason for blocked analyses, without decision controls, generic review tasks or proposal decision counts. It SHALL retain the patient-status link and demonstrative labels.
+
+#### Scenario: Symptoms exclude the screening demonstration
+
+- **WHEN** Daniel's analyzed profile reports rectal bleeding and the evaluator returns OUT_OF_SCOPE
+- **THEN** the physician sees that symptoms were reported, this screening demonstration does not apply, and symptoms need assessment by a clinician; no save or finalize controls appear
+
+#### Scenario: Failure provenance
+
+- **WHEN** a blocked analysis represents provider failure or missing information
+- **THEN** the read-only explanation distinguishes retryable system failure from clarification without implying that a model generated a deterministic exclusion

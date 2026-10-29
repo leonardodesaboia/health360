@@ -107,20 +107,30 @@ export function evaluateScreening(input: unknown): RuleResult {
       "Restricted to never-screened, asymptomatic people reporting first-degree colorectal cancer before age 60; syndromes, other family-history patterns and surveillance require individual assessment.",
       "Patient-reported family history requires physician verification. The 2017 source describes a weak recommendation with low-quality evidence; this demonstration is not clinical validation.",
     ];
+    if (facts.symptoms === true)
+      return finish("OUT_OF_SCOPE", "Symptoms reported");
+    if (facts.personalRiskHistory === true)
+      return finish("OUT_OF_SCOPE", "Personal risk history reported");
+    if (facts.familySyndrome === true)
+      return finish("OUT_OF_SCOPE", "Family syndrome reported");
     if (
-      facts.symptoms === true ||
-      facts.personalRiskHistory === true ||
-      facts.familySyndrome === true ||
       facts.familyRiskHistory === false ||
       facts.familyCrc === false ||
-      facts.familyCrcFirstDegree === false ||
-      (profile.age !== null && profile.age > prevention.maxAge) ||
-      (facts.priorScreening !== null &&
-        facts.priorScreening !== "NEVER_SCREENED")
+      facts.familyCrcFirstDegree === false
     )
       return finish(
         "OUT_OF_SCOPE",
-        "Restricted family-history early-start criteria do not apply",
+        "Family history is outside demonstration criteria",
+      );
+    if (profile.age !== null && profile.age > prevention.maxAge)
+      return finish("OUT_OF_SCOPE", "Age is outside demonstration criteria");
+    if (
+      facts.priorScreening !== null &&
+      facts.priorScreening !== "NEVER_SCREENED"
+    )
+      return finish(
+        "OUT_OF_SCOPE",
+        "Prior screening is outside family-history criteria",
       );
     if (profile.age === null) result.missingFields.push("profile.age");
     for (const field of [
@@ -154,14 +164,13 @@ export function evaluateScreening(input: unknown): RuleResult {
       prevention.minAge,
       diagnosisAge - prevention.yearsBeforeDiagnosis,
     );
-    if (
-      diagnosisAge >= prevention.relativeDiagnosisBeforeAge ||
-      profile.age! < startAge
-    )
+    if (diagnosisAge >= prevention.relativeDiagnosisBeforeAge)
       return finish(
         "OUT_OF_SCOPE",
-        "Restricted family-history early-start criteria do not apply",
+        "Family history is outside demonstration criteria",
       );
+    if (profile.age! < startAge)
+      return finish("OUT_OF_SCOPE", "Age is outside demonstration criteria");
     result.findings.push({
       category: prevention.category,
       ruleId: prevention.id,
@@ -175,18 +184,22 @@ export function evaluateScreening(input: unknown): RuleResult {
       "Preliminary deterministic finding awaiting physician review",
     );
   }
-  if (
-    facts.symptoms === true ||
-    facts.personalRiskHistory === true ||
-    facts.familyRiskHistory === true ||
-    (profile.age !== null &&
-      (profile.age < prevention.minAge || profile.age > prevention.maxAge)) ||
-    facts.priorScreening === "OTHER"
-  )
+  if (facts.symptoms === true)
+    return finish("OUT_OF_SCOPE", "Symptoms reported");
+  if (facts.personalRiskHistory === true)
+    return finish("OUT_OF_SCOPE", "Personal risk history reported");
+  if (facts.familyRiskHistory === true)
     return finish(
       "OUT_OF_SCOPE",
-      "Routine average-risk screening criteria do not apply",
+      "Family history is outside demonstration criteria",
     );
+  if (
+    profile.age !== null &&
+    (profile.age < prevention.minAge || profile.age > prevention.maxAge)
+  )
+    return finish("OUT_OF_SCOPE", "Age is outside demonstration criteria");
+  if (facts.priorScreening === "OTHER")
+    return finish("OUT_OF_SCOPE", "Other prior screening test reported");
   if (profile.age === null) result.missingFields.push("profile.age");
   for (const field of [
     "symptoms",

@@ -47,3 +47,18 @@ The service SHALL bind storage to the active demo session, record profile/contex
 
 - **WHEN** a request is duplicated or a newer profile/context appears during a provider call
 - **THEN** no duplicate successful analysis or stale proposal is persisted
+
+### Requirement: Outcome-specific patient guidance
+
+Patient guidance SHALL distinguish stored out-of-scope, deterministic blocked, provider-failure and missing-information outcomes without exposing preliminary proposals. Existing stored facts and a read-only evaluator replay of exact analyzed versions MAY explain historical records. Presentation SHALL NOT change clinical eligibility or publish a plan.
+
+#### Scenario: Out-of-scope information correction
+
+- **WHEN** a saved analysis is out of scope because symptoms, age, risk history, syndrome history or prior test information do not meet demonstration criteria
+- **THEN** patient guidance explains the specific recorded reason, labels its provenance and offers Update my information instead of retry
+- **AND** correction starts the existing ANALYSIS_FAILED to INTAKE_IN_PROGRESS transition and saves a new profile before another analysis
+
+#### Scenario: Provider failure or missing facts
+
+- **WHEN** the saved result reflects provider failure or missing required information
+- **THEN** provider failure retains retry and missing information leads to clarification, with physician review still required before publication

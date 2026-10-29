@@ -15,6 +15,7 @@ export default async function AnalysisPage({
   return (
     <AnalysisStatus
       status={state.status}
+      outcome={state.outcome}
       error={params.error === "1"}
       analyzeAction={analyzeAndShowStatus}
     />

@@ -1,3 +1,5 @@
+import type { AnalysisOutcome } from "../workflow/outcome";
+import { analysisOutcome } from "../workflow/outcome";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -32,15 +34,18 @@ const categories = {
 export function WorkspaceReader({
   workspace,
   children,
+  outcome: providedOutcome,
 }: {
   workspace: ReviewWorkspace;
   children?: ReactNode;
+  outcome?: AnalysisOutcome | null;
 }) {
   const { profile, analysis, context, contextDetails, examinations, stale } =
     workspace;
   const proposals = reviewableProposals(analysis);
   const facts = declaredFacts(profile);
   const presentation = analysisPresentation(analysis);
+  const outcome = providedOutcome ?? analysisOutcome(analysis);
   const completed = Boolean(workspace.review?.completedAt);
   const pendingCount = proposals.filter((proposal) => {
     const decision = workspace.review?.decisions.find(
@@ -50,26 +55,30 @@ export function WorkspaceReader({
   }).length;
   return (
     <>
-      <section aria-label="Review tasks" className="space-y-3">
-        <ol className="list-inside list-decimal space-y-2 text-sm">
-          <li>Check context and evidence.</li>
-          <li>Decide on every proposal.</li>
-          <li>Finalize to publish the reviewed demonstration plan.</li>
-        </ol>
-        <p className="text-sm tabular-nums">
-          {pendingCount.toLocaleString("en-US")} of{" "}
-          {proposals.length.toLocaleString("en-US")} proposals still need a
-          decision in the recorded review.
-        </p>
-        <nav aria-label="Review sections" className="flex flex-wrap gap-3">
-          <Button asChild variant="outline">
-            <a href="#review-proposals">Go to proposals and evidence</a>
-          </Button>
-          <Button asChild variant="outline">
-            <a href="#physician-decisions-heading">Go to physician decisions</a>
-          </Button>
-        </nav>
-      </section>
+      {analysis.status !== "BLOCKED" && (
+        <section aria-label="Review tasks" className="space-y-3">
+          <ol className="list-inside list-decimal space-y-2 text-sm">
+            <li>Check context and evidence.</li>
+            <li>Decide on every proposal.</li>
+            <li>Finalize to publish the reviewed demonstration plan.</li>
+          </ol>
+          <p className="text-sm tabular-nums">
+            {pendingCount.toLocaleString("en-US")} of{" "}
+            {proposals.length.toLocaleString("en-US")} proposals still need a
+            decision in the recorded review.
+          </p>
+          <nav aria-label="Review sections" className="flex flex-wrap gap-3">
+            <Button asChild variant="outline">
+              <a href="#review-proposals">Go to proposals and evidence</a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="#physician-decisions-heading">
+                Go to physician decisions
+              </a>
+            </Button>
+          </nav>
+        </section>
+      )}
       <Notice title="DEMONSTRATIVE — NOT CLINICALLY VALIDATED" tone="warning">
         {analysis.status === "BLOCKED"
           ? "Synthetic data. This analysis is blocked. System and rule context are shown without an AI recommendation. A demo reviewer does not provide clinical validation."
@@ -93,8 +102,13 @@ export function WorkspaceReader({
           title="This analysis cannot be reviewed or published."
           tone="warning"
         >
-          The patient must retry analysis or provide the requested information
-          before a new review can continue.
+          <p>{outcome?.explanation}</p>
+          <p className="mt-3 text-xs text-muted-foreground">
+            {outcome?.provenance}
+          </p>
+          <p className="mt-3">
+            Read-only result. There are no decisions to save or finalize.
+          </p>
           <p className="mt-3">
             Demo role navigation only; no sign-in or authorization.
           </p>
@@ -204,7 +218,9 @@ export function WorkspaceReader({
           <Surface>
             <h2>{presentation.summaryHeading}</h2>
             <p className="mt-3 text-sm">
-              {uniqueDemonstrativeLabel(analysis.summary)}
+              {uniqueDemonstrativeLabel(
+                outcome?.explanation ?? analysis.summary,
+              )}
             </p>
             <p className="mt-3 text-xs text-muted-foreground">
               {presentation.summaryProvenance} · Analysis v{analysis.version} ·
@@ -421,7 +437,7 @@ export function WorkspaceReader({
               </article>
             ))}
           </Surface>
-          {children}
+          {analysis.status !== "BLOCKED" && children}
         </div>
       </div>
     </>

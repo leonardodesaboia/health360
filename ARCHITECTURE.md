@@ -389,8 +389,15 @@ are retained. Unknown required information routes to CLARIFICATION_REQUIRED; fai
 out-of-scope or unsupported results contain no proposals and go to ANALYSIS_FAILED.
 
 The cookie-bound `analyzeCurrentDemo` server action accepts no client-selected record
-scope. `/patient/analysis` reads administrative status only and offers analysis/retry
-when allowed; it never reads or renders preliminary proposals. Missing sessions and
+scope. Patient guidance reads administrative status plus a bounded, provenance-labeled
+outcome projection. Stored `AIAnalysis.failureReason` distinguishes out-of-scope,
+missing information, deterministic blocking and provider failure; considered facts
+remain in `relevantInformation`. New deterministic failures retain the evaluator's
+reason in the existing summary. Legacy exclusion details can be replayed read-only
+through the existing evaluator using the exact saved profile, linked examinations,
+context version and analysis date. No migration, provider invocation or state change
+is involved. Out-of-scope results offer an intake correction, provider failures offer
+retry and missing information uses clarification; it never reads or renders preliminary proposals. Missing sessions and
 storage errors have explicit states. This service writes no MedicalReview or
 PreventivePlan. Physician review and explicit finalization remain mandatory.
 

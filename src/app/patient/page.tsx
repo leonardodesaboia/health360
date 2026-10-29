@@ -1,3 +1,4 @@
+import { getAnalysisPageState } from "@/server/analysis/read";
 import { ContentContainer, PageHeader } from "@/components/layout/page";
 import { EmptyState, Notice } from "@/components/shared/primitives";
 import {
@@ -24,9 +25,13 @@ export default async function PatientHome() {
       </ContentContainer>
     );
   const patient = session.patient;
+  const analysisState = await getAnalysisPageState();
+  if (analysisState.unavailable)
+    throw new Error("Evaluation could not be loaded");
   const model = workflowPresentation(
     {
       status: patient.status,
+      outcome: analysisState.outcome,
       planState: "none",
       canContinueSavedAnalysis: false,
     },

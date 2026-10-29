@@ -71,6 +71,7 @@ describe("cookie-bound analysis entry points", () => {
     expect(await getAnalysisPageState()).toEqual({
       status: "MEDICAL_REVIEW_PENDING",
       unavailable: false,
+      outcome: null,
     });
     expect(mocks.status).toHaveBeenCalledWith(
       mocks.database.mock.results[0].value,

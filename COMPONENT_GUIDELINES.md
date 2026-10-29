@@ -55,8 +55,13 @@ behavioral tests for meaningful interaction. Avoid snapshot tests that mirror JS
 
 `workflowPresentation(snapshot, page)` projects the current administrative cycle into
 Intake, Analysis, Physician review and Plan. Supply only the recorded status,
-guarded plan availability and existing saved-analysis recovery availability; never
-include proposals or preliminary AI text. A missing/unavailable plan read cannot
+guarded plan availability, saved-analysis recovery availability, and safe outcome
+guidance from the stored analysis. Never include proposals or preliminary AI text.
+Out-of-scope and deterministic blocked results explain their provenance and offer
+Update my information; provider failures offer retry and missing facts lead to
+clarification. Existing out-of-scope records use a read-only evaluator replay with
+the exact saved profile/context versions to distinguish age and family-history
+exclusions. Presentation never changes eligibility or publication state. A missing/unavailable plan read cannot
 complete the Plan stage. Route read failures remain route errors.
 
 `JourneyProgress({ model, id })` is informational, with an ordered list and text
