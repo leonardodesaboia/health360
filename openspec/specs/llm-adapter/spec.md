@@ -66,3 +66,13 @@ The live smoke check SHALL require an explicit environment flag and SHALL never 
 
 - **WHEN** tests run without explicit opt-in or in CI
 - **THEN** all provider checks remain deterministic with no live API request
+
+### Requirement: Specific deterministic mock copy
+
+The mock SHALL derive specific proposal titles and summaries only from the supplied rule rationale and retain visible deterministic mock labeling. Category, rule and evidence IDs SHALL remain unchanged and pass the existing structured-output and evidence validators.
+
+#### Scenario: Supplied screening findings
+
+- **WHEN** the mock receives a screening-due, routine-repeat or family-history early-start finding
+- **THEN** its title names the supplied proposed action and its summary includes the supplied first-sentence rationale, with no new clinical criteria
+- **AND** explicit approval publishes the specific title while a physician modification publishes only the physician's revised wording

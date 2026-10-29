@@ -20,6 +20,7 @@ import {
 
 import {
   provenanceLabels,
+  proposalRuleGuidance,
   readableConsideredData,
   uniqueDemonstrativeLabel,
   visibleLimitations,
@@ -326,10 +327,41 @@ export function WorkspaceReader({
                     <dd>DEMONSTRATIVE — NOT CLINICALLY VALIDATED</dd>
                   </div>
                 </dl>
+                {proposalRuleGuidance(proposal.ruleReferences ?? []).map(
+                  (item, index) => (
+                    <div key={index} className="mt-4 space-y-2 text-sm">
+                      <p>
+                        <span className="font-medium">Proposed:</span>{" "}
+                        {item.proposed}{" "}
+                        <span className="text-xs text-muted-foreground">
+                          · Rule-generated
+                        </span>
+                      </p>
+                      <p>
+                        <span className="font-medium">Why:</span> {item.why}{" "}
+                        <span className="text-xs text-muted-foreground">
+                          · Rule-generated
+                        </span>
+                      </p>
+                    </div>
+                  ),
+                )}
+                {!proposal.ruleReferences?.length && (
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    Rule-generated proposal and reason are unavailable in this
+                    record. See the AI-generated explanation below.
+                  </p>
+                )}
                 <details className="mt-4 text-sm">
                   <summary className="min-h-11 cursor-pointer content-center font-medium">
                     View rationale and criteria
                   </summary>
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    AI-generated explanation
+                    {analysis.provider === "mock"
+                      ? " · Deterministic mock"
+                      : ""}
+                  </p>
                   <p className="mt-3">{proposal.rationale}</p>
                   <p className="mt-3 font-medium">
                     Rule-generated criteria · Context v{context.version}

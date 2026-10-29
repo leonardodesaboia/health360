@@ -94,3 +94,11 @@ capability changed after a restart, a failed reset re-reads that capability and
 explains the mock requirement plus the plain-case selection recovery. Other reset
 failures report an unconfirmed outcome and ask the presenter to reload; they do
 not claim a storage outage or a successful reset.
+
+Physician proposal articles show Proposed and Why inline using only each recorded
+rule reference's rationale. Both lines carry Rule-generated provenance. The full
+AI-generated explanation (labeled Deterministic mock when applicable), rule
+criteria, uncertainty and evidence remain in keyboard-operable disclosures.
+Missing rule references are labeled unavailable rather than attributing AI text
+to deterministic rules. Mock titles and summaries extract supplied rationale
+wording; approved action titles therefore remain specific on the patient plan.

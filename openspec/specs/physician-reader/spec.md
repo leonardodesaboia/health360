@@ -80,3 +80,12 @@ The reader SHALL show a provenance-labeled plain-language outcome reason for blo
 
 - **WHEN** a blocked analysis represents provider failure or missing information
 - **THEN** the read-only explanation distinguishes retryable system failure from clarification without implying that a model generated a deterministic exclusion
+
+### Requirement: Inline rule-derived proposal explanation
+
+Each proposal SHALL expose Proposed and Why wording from its recorded rule-generated rationale without requiring a disclosure. AI-generated explanation SHALL retain distinct provenance, and full criteria and evidence SHALL remain available in disclosures. Missing rule references SHALL be labeled unavailable rather than replaced by AI wording.
+
+#### Scenario: Prepared family-history review
+
+- **WHEN** a physician opens Daniel's prepared preliminary review
+- **THEN** the proposed screening discussion and the reported first-degree relative diagnosis reason are visible inline with Rule-generated labels before expanding criteria or evidence

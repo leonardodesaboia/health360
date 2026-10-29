@@ -68,6 +68,11 @@ for (const state of [
         "Reviewed demonstration plan",
       );
       await expect(page.getByRole("main")).toContainText("Plan version: 1");
+      await expect(
+        page.getByText("Discuss age-appropriate colorectal screening options", {
+          exact: true,
+        }),
+      ).toBeVisible();
       await page.getByRole("link", { name: "History", exact: true }).click();
       await expect(
         page.getByRole("button", {
@@ -107,6 +112,32 @@ for (const state of [
         await expect(page.getByRole("main")).toContainText(
           "Possible redundant test",
         );
+      const proposed =
+        state.id === "jordan-review"
+          ? "A routine repeat colonoscopy may be redundant"
+          : "Discuss age-appropriate colorectal screening options";
+      const why =
+        state.id === "jordan-review"
+          ? "within the ten-year interval after a reported normal complete adequately prepared examination; verify the report and indication."
+          : "no prior screening is reported.";
+      const article = page.getByRole("article");
+      await expect(
+        article.getByRole("heading", { name: proposed, exact: true }),
+      ).toBeVisible();
+      await expect(
+        article.getByText(`Proposed: ${proposed} · Rule-generated`, {
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(
+        article.getByText(`Why: ${why} · Rule-generated`, { exact: true }),
+      ).toBeVisible();
+      await expect(article.locator("details").first()).not.toHaveAttribute(
+        "open",
+      );
+      await expect(page.getByRole("main")).toContainText(
+        "Deterministic mock explanation, awaiting physician review.",
+      );
       // The deterministic analysis lists no missing information, so no empty warning appears.
       await expect(
         page.getByText(

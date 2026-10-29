@@ -1,3 +1,4 @@
+import { ruleCopy } from "../analysis/rule-copy";
 import type { ReviewWorkspace } from "./reader";
 
 /** Presentation only; the server remains authoritative for review permissions. */
@@ -100,4 +101,14 @@ export function visibleLimitations(
       category === "POSSIBLE_REDUNDANCY" ||
       !item.startsWith("A recent test alone does not establish redundancy"),
   );
+}
+
+/** Use only recorded deterministic rule references, never the AI explanation. */
+export function proposalRuleGuidance(
+  references: readonly { rationale: string }[],
+) {
+  return references.map(({ rationale }) => {
+    const { proposed, why } = ruleCopy(rationale);
+    return { proposed, why };
+  });
 }
