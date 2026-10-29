@@ -355,3 +355,5 @@ retry, idempotency, no leaked key/raw output and no fallback recommendation.
 - Scope: additive nullable family intake facts, separate source-backed demonstrative rule, Daniel seed and producer-built mock review/plan starting points, presenter script and regression tests.
 - Depends on: merged UX PRs #39, #40 and #41; UX follow-up #42 merged; branch rebased before presenter-panel edit.
 - Acceptance and verification: [verification and conformance](../../openspec/changes/archive/2026-10-29-daniel-family-history-case/tasks.md); verified primary full-text source recorded in design. No real clinical validation or live API calls.
+
+- PR: [#43](https://github.com/leonardodesaboia/health360/pull/43). Local verification: 528 unit passed (1 existing skip), 103 integration passed, 170 serial desktop/mobile e2e passed; format and strict OpenSpec passed. User merges.
