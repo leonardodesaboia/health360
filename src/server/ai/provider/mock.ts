@@ -1,15 +1,10 @@
 import "server-only";
 import { z } from "zod";
+import { ruleCopy } from "../../../features/analysis/rule-copy";
 import { analysisInputSchema, type AnalysisOutput } from "../schemas/analysis";
 import type { LlmProvider, ProviderRequest, ProviderResult } from "./types";
 
 const label = "DEMONSTRATIVE — NOT CLINICALLY VALIDATED.";
-const titles = {
-  PREVENTIVE_OPPORTUNITY: "Review supplied prevention finding",
-  POSSIBLE_REDUNDANCY: "Review supplied possible redundancy",
-  CLARIFICATION: "Review supplied clarification finding",
-};
-
 export class MockProvider implements LlmProvider {
   readonly id = "mock";
   constructor(
@@ -61,7 +56,7 @@ export class MockProvider implements LlmProvider {
         seen.add(allowed.ruleId);
         proposals.push({
           category: allowed.category,
-          title: titles[allowed.category],
+          title: ruleCopy(match[3]).proposed,
           rationale: match[3],
           ruleIds: [allowed.ruleId],
           evidenceIds: [...allowed.evidenceIds],
@@ -72,7 +67,7 @@ export class MockProvider implements LlmProvider {
       return {
         ok: true,
         data: {
-          summary: "Synthetic demonstration awaiting physician review.",
+          summary: `Deterministic mock explanation, awaiting physician review. ${proposals.length ? proposals.map((proposal) => ruleCopy(proposal.rationale).summary).join(" ") : "No supplied rule findings."}`,
           relevantInformation: proposals.map((proposal) => proposal.rationale),
           missingInformation: [...input.profile.missingInformation],
           proposals,

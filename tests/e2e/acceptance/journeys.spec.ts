@@ -398,7 +398,7 @@ test("Flow B completion: a modified redundancy proposal publishes only the physi
     ],
   });
   await expect(plan).not.toContainText(
-    /Review supplied possible redundancy|crc-routine-repeat/,
+    /A routine repeat colonoscopy may be redundant|crc-routine-repeat/,
   );
 });
 test("Flow B: Jordan's recent normal colonoscopy yields a traceable preliminary possible-redundancy proposal", async ({

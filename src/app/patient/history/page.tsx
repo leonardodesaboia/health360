@@ -1,3 +1,4 @@
+import { getAnalysisPageState } from "@/server/analysis/read";
 import Link from "next/link";
 import { ContentContainer, PageHeader } from "@/components/layout/page";
 import { EmptyState, Notice, Surface } from "@/components/shared/primitives";
@@ -23,10 +24,14 @@ export default async function History({
     data?.status === "REASSESSMENT_PENDING" ||
     data?.status === "INTAKE_IN_PROGRESS";
   const unavailable = (await searchParams).update === "unavailable";
+  const analysisState = await getAnalysisPageState();
+  if (analysisState.unavailable)
+    throw new Error("Evaluation could not be loaded");
   const model = data
     ? workflowPresentation(
         {
           status: data.status,
+          outcome: analysisState.outcome,
           planState: latest ? (canUpdate ? "current" : "previous") : "none",
           canContinueSavedAnalysis: false,
         },
@@ -52,38 +57,40 @@ export default async function History({
               preserved.
             </Notice>
           )}
-          <div
-            id="update-information"
-            role="region"
-            tabIndex={-1}
-            aria-labelledby="update-information-heading"
-          >
-            <FocusHashTarget id="update-information" />
-            <Surface>
-              <h2 id="update-information-heading">Update your information</h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                An update starts another evaluation. Your earlier reviewed plan
-                stays in history while new information goes through analysis and
-                physician review.
-              </p>
-              {canUpdate && latest ? (
-                <form action={startReassessment} className="mt-4">
-                  <input type="hidden" name="planId" value={latest.id} />
-                  <input
-                    type="hidden"
-                    name="profileVersion"
-                    value={data.latestProfileVersion}
-                  />
-                  <ReassessmentButton />
-                </form>
-              ) : !canResume ? (
-                <p className="mt-4 text-sm text-muted-foreground">
-                  Complete the current evaluation and physician review before
-                  starting another update.
+          {data.status !== "ANALYSIS_FAILED" && (
+            <div
+              id="update-information"
+              role="region"
+              tabIndex={-1}
+              aria-labelledby="update-information-heading"
+            >
+              <FocusHashTarget id="update-information" />
+              <Surface>
+                <h2 id="update-information-heading">Update your information</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  An update starts another evaluation. Your earlier reviewed
+                  plan stays in history while new information goes through
+                  analysis and physician review.
                 </p>
-              ) : null}
-            </Surface>
-          </div>
+                {canUpdate && latest ? (
+                  <form action={startReassessment} className="mt-4">
+                    <input type="hidden" name="planId" value={latest.id} />
+                    <input
+                      type="hidden"
+                      name="profileVersion"
+                      value={data.latestProfileVersion}
+                    />
+                    <ReassessmentButton />
+                  </form>
+                ) : !canResume ? (
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    Complete the current evaluation and physician review before
+                    starting another update.
+                  </p>
+                ) : null}
+              </Surface>
+            </div>
+          )}
           <section aria-labelledby="plan-history-title">
             <h2 id="plan-history-title">Reviewed plan versions</h2>
             {data.plans.length ? (

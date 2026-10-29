@@ -327,7 +327,9 @@ export async function assertNoUnreviewedPlan(page: Page) {
     page.getByRole("heading", { name: "Selected actions", exact: true }),
   ).toHaveCount(0);
   await expect(
-    page.getByText("Review supplied prevention finding", { exact: true }),
+    page.getByText("Discuss age-appropriate colorectal screening options", {
+      exact: true,
+    }),
   ).toHaveCount(0);
   await expect(page.getByText("UNTRUSTED_RESPONSE_MARKER")).toHaveCount(0);
 }

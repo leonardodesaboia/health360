@@ -1,3 +1,4 @@
+import { describeAnalysisOutcome } from "@/server/analysis/outcome";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ContentContainer, PageHeader } from "@/components/layout/page";
@@ -29,7 +30,15 @@ export default async function Review({
           </Button>
         }
       />
-      <WorkspaceReader workspace={workspace}>
+      <WorkspaceReader
+        workspace={workspace}
+        outcome={describeAnalysisOutcome(
+          workspace.analysis,
+          workspace.profile,
+          workspace.examinations,
+          workspace.context,
+        )}
+      >
         <DecisionForm workspace={workspace} />
         <DecisionHistory workspace={workspace} />
       </WorkspaceReader>

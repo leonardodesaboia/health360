@@ -1,4 +1,5 @@
-﻿import { statusLabels, type WorkflowStatus } from "./workflow";
+import type { AnalysisOutcome } from "./outcome";
+import { statusLabels, type WorkflowStatus } from "./workflow";
 
 export type JourneyStageId = "intake" | "analysis" | "review" | "plan";
 export type JourneyStageState =
@@ -13,6 +14,7 @@ export type GuidancePage =
   | "history";
 export type PatientWorkflowSnapshot = Readonly<{
   status: WorkflowStatus;
+  outcome?: AnalysisOutcome | null;
   planState: "none" | "current" | "previous" | "unavailable";
   canContinueSavedAnalysis: boolean;
 }>;
@@ -43,6 +45,7 @@ export type WorkflowPresentation = Readonly<{
   actor: "You" | "System" | "Demo reviewer";
   primary: GuidanceAction;
   previousPlanMessage: string | null;
+  provenance?: string;
 }>;
 
 type Copy = {
@@ -162,7 +165,7 @@ const stageNames = [
   ["plan", "Plan"],
 ] as const;
 
-/** Presentation only: accepts administrative state and guarded plan availability, never clinical content. */
+/** Presentation only: recorded status and safe outcome guidance, never preliminary proposals. */
 export function workflowPresentation(
   snapshot: PatientWorkflowSnapshot,
   page: GuidancePage,
@@ -249,10 +252,28 @@ export function workflowPresentation(
       label: "View update options",
       href: "/patient/history#update-information",
     };
+  const outcome = ["ANALYSIS_FAILED", "CLARIFICATION_REQUIRED"].includes(status)
+    ? snapshot.outcome
+    : null;
+  if (
+    outcome &&
+    (outcome.kind === "out-of-scope" || outcome.kind === "blocked")
+  ) {
+    primary = {
+      kind: "link",
+      label: "Update my information",
+      href: "/patient/intake",
+    };
+    explanation = outcome.explanation;
+  }
   return {
+    provenance: outcome?.provenance,
     status,
     label: unverifiedPlan ? "Review finalized" : statusLabels[status],
-    heading: entry.heading,
+    heading:
+      outcome && (outcome.kind === "out-of-scope" || outcome.kind === "blocked")
+        ? outcome.heading
+        : entry.heading,
     explanation,
     actor: entry.actor,
     primary,

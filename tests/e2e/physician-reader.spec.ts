@@ -329,7 +329,16 @@ test("blocked analysis has no fallback proposals", async ({
   ).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "Finalize review", exact: true }),
-  ).toBeDisabled();
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Save decisions", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByText(
+      "Read-only result. There are no decisions to save or finalize.",
+      { exact: true },
+    ),
+  ).toBeVisible();
   await page.goto("/doctor");
   await expect(
     page

@@ -16,7 +16,12 @@ export async function startIntake(
 ): Promise<void> {
   await inDatasetTransaction(db, datasetId, async (_repo, tx) => {
     const status = await getWorkflowStatus(tx, datasetId, patientId);
-    if (status !== "NOT_STARTED" && status !== "REASSESSMENT_PENDING") return;
+    if (
+      !["NOT_STARTED", "REASSESSMENT_PENDING", "ANALYSIS_FAILED"].includes(
+        status,
+      )
+    )
+      return;
     await transitionWorkflow(tx, datasetId, {
       patientId,
       expectedFrom: status,

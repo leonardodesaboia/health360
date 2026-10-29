@@ -55,6 +55,26 @@ for (const state of [
       await expect(
         page.getByRole("button", { name: "Finalize review", exact: true }),
       ).toBeDisabled();
+      const proposed =
+        "Discuss starting colorectal screening by colonoscopy now";
+      const article = page.getByRole("article");
+      await expect(
+        article.getByRole("heading", { name: proposed, exact: true }),
+      ).toBeVisible();
+      await expect(
+        article.getByText(`Proposed: ${proposed} · Rule-generated`, {
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(
+        article.getByText(
+          "Why: a parent, sibling or child was diagnosed with colorectal cancer at age 50. · Rule-generated",
+          { exact: true },
+        ),
+      ).toBeVisible();
+      await expect(article.locator("details").first()).not.toHaveAttribute(
+        "open",
+      );
       await page
         .getByText("View rationale and criteria", { exact: true })
         .first()
@@ -90,6 +110,12 @@ for (const state of [
       expect(snapshot.plans).toHaveLength(1);
       expect(snapshot.plans[0].version).toBe(1);
       expect(snapshot.reviews).toBe(1);
+      await expect(
+        page.getByText(
+          "Discuss colorectal screening with your physician based on first-degree family history. Confirm your father's diagnosis history before deciding on screening.",
+          { exact: true },
+        ),
+      ).toBeVisible();
       expect(snapshot.eventKinds).toContain("REVIEW_COMPLETED");
       expect(snapshot.eventKinds).toContain("PLAN_PUBLISHED");
       await expect(page.getByRole("main")).toContainText(

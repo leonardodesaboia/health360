@@ -1,3 +1,4 @@
+import type { AnalysisOutcome } from "../workflow/outcome";
 import Link from "next/link";
 import { ContentContainer, PageHeader } from "@/components/layout/page";
 import { EmptyState, Notice } from "@/components/shared/primitives";
@@ -12,16 +13,18 @@ import { AnalyzeButton } from "./analyze-button";
 
 export function AnalysisStatus({
   status,
+  outcome,
   analyzeAction,
   error,
 }: {
   status: WorkflowStatus | null;
+  outcome?: AnalysisOutcome | null;
   analyzeAction: () => Promise<void>;
   error?: boolean;
 }) {
   const model = status
     ? workflowPresentation(
-        { status, planState: "none", canContinueSavedAnalysis: false },
+        { status, outcome, planState: "none", canContinueSavedAnalysis: false },
         "analysis",
       )
     : null;

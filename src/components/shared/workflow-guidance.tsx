@@ -118,6 +118,9 @@ export function NextStepPanel({
         <p id={`${id}-description`} className="text-sm text-muted-foreground">
           {model.explanation}
         </p>
+        {model.provenance && (
+          <p className="text-xs text-muted-foreground">{model.provenance}</p>
+        )}
         <p className="text-sm font-medium">Next: {model.actor}</p>
         {model.previousPlanMessage ? (
           <p className="text-sm">{model.previousPlanMessage}</p>

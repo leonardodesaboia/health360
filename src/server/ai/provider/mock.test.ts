@@ -217,3 +217,53 @@ describe("default deterministic mock finding explanations", () => {
     expect(input).toEqual(before);
   });
 });
+
+describe("specific rule-derived mock copy", () => {
+  it.each([
+    [
+      "crc-screening-due",
+      "Discuss age-appropriate colorectal screening options; no prior screening is reported.",
+      "Discuss age-appropriate colorectal screening options",
+    ],
+    [
+      "crc-routine-repeat",
+      "A routine repeat colonoscopy may be redundant within the ten-year interval after a reported normal complete adequately prepared examination; verify the report and indication.",
+      "A routine repeat colonoscopy may be redundant",
+    ],
+    [
+      "crc-family-history-early-start",
+      "Discuss starting colorectal screening by colonoscopy now because a parent, sibling or child was diagnosed with colorectal cancer at age 50. Verify the family history.",
+      "Discuss starting colorectal screening by colonoscopy now",
+    ],
+  ])(
+    "describes %s using only the supplied rationale",
+    async (ruleId, supplied, title) => {
+      const value = structuredClone(input);
+      value.context.allowedProposals[0].ruleId = ruleId;
+      value.profile.personalHistory = [
+        {
+          value: `Rule ${ruleId}, version 1; evidence version 1: ${supplied}`,
+          provenance: "SYSTEM_STRUCTURED",
+        },
+      ];
+      const result = await run(value);
+      expect(result.status).toBe("NEEDS_REVIEW");
+      if (result.status !== "NEEDS_REVIEW")
+        throw new Error("Expected validated mock output");
+      expect(result.data.proposals[0]).toMatchObject({
+        title,
+        rationale: supplied,
+        ruleIds: [ruleId],
+        category: "PREVENTIVE_OPPORTUNITY",
+        evidenceIds: ["demo-evidence"],
+      });
+      expect(result.data.summary).toBe(
+        `Deterministic mock explanation, awaiting physician review. ${supplied.split(/(?<=[.!?])\s+/)[0]}`,
+      );
+      expect(result.meta).toMatchObject({
+        provider: "mock",
+        model: "deterministic-v1",
+      });
+    },
+  );
+});

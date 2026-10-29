@@ -46,6 +46,13 @@ name one related intake question. Saving it keeps completedAt empty and transiti
 through CLARIFICATION_REQUIRED. Updated information and a new analysis are required;
 there is no direct return to review or publication. Blocked records display
 system-generated status and rule-generated context rather than AI attribution.
+Blocked workspaces show the specific outcome explanation, patient-status link and
+read-only notice instead of review tasks, proposal counts or decision controls.
+Reported symptoms explain that this screening demonstration does not apply and
+that symptoms need assessment by a clinician. Out-of-scope results offer an intake
+update for mistaken answers; provider failures retain retry and missing information
+uses clarification. Starting intake from ANALYSIS_FAILED uses its existing guarded
+INTAKE_IN_PROGRESS transition, preserving the previous analysis and profile.
 A read-only decision history lists each saved review version with its decisions,
 reasons, revised text and questions; the reviewer is labeled as a demo reviewer,
 not a real clinician. All decisions remain synthetic demonstrations, without

@@ -59,7 +59,7 @@ export async function prepareAnalysis(
     profileVersion: input.profile.version,
     contextId: context.id,
     contextVersion: context.version,
-    summary: `${DEMONSTRATIVE_LABEL}. Analysis could not be completed. Retry the analysis or update the information.`,
+    summary: `${DEMONSTRATIVE_LABEL}. Rule-generated: ${rules.reason}.`,
     relevantInformation: rules.consideredData,
     missingInformation: rules.missingFields,
     uncertainties: rules.limitations,
@@ -90,7 +90,11 @@ export async function prepareAnalysis(
     const failed = (
       failureReason: AIAnalysis["failureReason"],
     ): PreparedAnalysis => ({
-      analysis: aiAnalysisSchema.parse({ ...base, failureReason }),
+      analysis: aiAnalysisSchema.parse({
+        ...base,
+        summary: `${DEMONSTRATIVE_LABEL}. System-generated: Analysis could not be completed. Retry the analysis.`,
+        failureReason,
+      }),
       to: "ANALYSIS_FAILED",
     });
     const blocked = z
@@ -154,7 +158,11 @@ export async function prepareAnalysis(
     return { analysis, to: "MEDICAL_REVIEW_PENDING" };
   } catch {
     return {
-      analysis: aiAnalysisSchema.parse({ ...base, failureReason: "api_error" }),
+      analysis: aiAnalysisSchema.parse({
+        ...base,
+        summary: `${DEMONSTRATIVE_LABEL}. System-generated: Analysis could not be completed. Retry the analysis.`,
+        failureReason: "api_error",
+      }),
       to: "ANALYSIS_FAILED",
     };
   }

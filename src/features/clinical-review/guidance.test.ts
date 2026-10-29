@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readerFixture } from "../../../tests/fixtures/clinical-review";
 import { findWorkspace, workspaceId } from "./reader";
 import {
+  proposalRuleGuidance,
   queueAction,
   readableConsideredData,
   uniqueDemonstrativeLabel,
@@ -148,4 +149,16 @@ describe("physician display guidance", () => {
       `${label}. Synthetic summary.`,
     );
   });
+});
+
+it("shows proposed action and reason from rule provenance without attributing AI text to rules", () => {
+  const rationale =
+    "Discuss starting colorectal screening by colonoscopy now because a parent, sibling or child was diagnosed with colorectal cancer at age 50. Verify the family history.";
+  expect(proposalRuleGuidance([{ rationale }])).toEqual([
+    {
+      proposed: "Discuss starting colorectal screening by colonoscopy now",
+      why: "a parent, sibling or child was diagnosed with colorectal cancer at age 50.",
+    },
+  ]);
+  expect(proposalRuleGuidance([])).toEqual([]);
 });

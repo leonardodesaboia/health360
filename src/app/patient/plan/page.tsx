@@ -1,3 +1,4 @@
+import { getAnalysisPageState } from "@/server/analysis/read";
 import Link from "next/link";
 import { ContentContainer, PageHeader } from "@/components/layout/page";
 import { EmptyState, Notice } from "@/components/shared/primitives";
@@ -12,10 +13,14 @@ import { loadPatientPlan } from "@/server/preventive-plan/load";
 
 export default async function Plan() {
   const data = await loadPatientPlan();
+  const analysisState = await getAnalysisPageState();
+  if (analysisState.unavailable)
+    throw new Error("Evaluation could not be loaded");
   const model = data
     ? workflowPresentation(
         {
           status: data.status,
+          outcome: analysisState.outcome,
           planState: data.plan
             ? data.previous
               ? "previous"
