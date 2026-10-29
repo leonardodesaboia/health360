@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown, RotateCcw } from "lucide-react";
@@ -15,6 +15,8 @@ type PresenterState = {
   session: CurrentCase | null;
   preparedStatesAvailable: boolean;
 };
+const preparedResetError =
+  "This prepared starting point requires the mock provider. Select Alex Example or Jordan Example to start a plain case, or restart the server with LLM_PROVIDER=mock before resetting.";
 type LoadState = "loading" | "preparing" | "ready" | "error";
 
 /** Reads the session client-side so shell routes stay static (and keep real 404 statuses). */
@@ -29,6 +31,7 @@ export function DemoControlsClient({
   const pathname = usePathname();
   const [current, setCurrent] = useState<CurrentCase | null>(null);
   const [state, setState] = useState<LoadState>("loading");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [preparedAvailable, setPreparedAvailable] = useState(true);
   const [preparedOpen, setPreparedOpen] = useState(false);
   const busy = state === "loading" || state === "preparing";
@@ -40,8 +43,13 @@ export function DemoControlsClient({
       setCurrent(presenter.session);
       setPreparedAvailable(presenter.preparedStatesAvailable);
       setState("ready");
+      return presenter;
     } catch {
+      setErrorMessage(
+        "The demo storage could not be reached. Try again, or reload the page.",
+      );
       setState("error");
+      return null;
     }
   }, []);
   useEffect(() => {
@@ -49,7 +57,20 @@ export function DemoControlsClient({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void refresh();
   }, [refresh]);
-  async function run(action: () => Promise<string | null>) {
+  async function run(
+    action: () => Promise<string | null>,
+    operation: "select" | "reset" = "select",
+  ) {
+    if (
+      operation === "reset" &&
+      current?.preparedStateId &&
+      !preparedAvailable
+    ) {
+      setErrorMessage(preparedResetError);
+      setState("error");
+      return;
+    }
+    setErrorMessage(null);
     setState("preparing");
     try {
       const destination = await action();
@@ -57,6 +78,14 @@ export function DemoControlsClient({
       if (destination) router.push(destination);
       router.refresh();
     } catch {
+      const latest = operation === "reset" ? await refresh() : null;
+      setErrorMessage(
+        operation === "reset"
+          ? latest?.session?.preparedStateId && !latest.preparedStatesAvailable
+            ? preparedResetError
+            : "The reset could not be confirmed. Reload this page to check its recorded state."
+          : "The case change could not be confirmed. Reload this page to check the selected case.",
+      );
       setState("error");
     }
   }
@@ -88,12 +117,7 @@ export function DemoControlsClient({
               : "Choose Alex Example or Jordan Example in Presenter controls to begin this synthetic demonstration."}
           </p>
         </div>
-        {state === "error" ? (
-          <p role="alert">
-            The demo storage could not be reached. Try again, or reload the
-            page.
-          </p>
-        ) : null}
+        {state === "error" ? <p role="alert">{errorMessage}</p> : null}
         <details
           key={`${pathname}-${current?.preparedStateId ?? current?.caseId ?? "none"}`}
           open={state === "ready" && !current}
@@ -101,11 +125,11 @@ export function DemoControlsClient({
           <summary className="min-h-11 cursor-pointer content-center font-medium">
             Presenter controls
           </summary>
-          <div className="mt-3 space-y-4">
+          <div className="mt-3 flex flex-col items-start gap-4 lg:flex-row lg:flex-wrap">
             <form
               action={(data) => run(() => selectDemoCase(data))}
               aria-label="Choose demo case"
-              className="flex flex-wrap gap-2"
+              className="flex shrink-0 flex-wrap gap-2"
             >
               {cases.map(({ id, displayName }) => {
                 const selected =
@@ -126,7 +150,7 @@ export function DemoControlsClient({
             </form>
             {preparedStates.length ? (
               <details
-                className="group"
+                className="group min-w-0 lg:flex-1"
                 onToggle={(event) => setPreparedOpen(event.currentTarget.open)}
               >
                 <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-md border border-input bg-card px-4 py-2 font-medium">
@@ -179,11 +203,12 @@ export function DemoControlsClient({
             ) : null}
             {current ? (
               <>
-                <p className="text-xs text-muted-foreground">
+                <p className="order-last w-full text-xs text-muted-foreground">
                   {current.summary}. Shared by the patient and physician views.
                 </p>
                 <form
-                  action={() => run(resetDemo)}
+                  action={() => run(resetDemo, "reset")}
+                  className="max-w-form lg:w-64 lg:shrink-0"
                   aria-describedby="demo-reset-help"
                 >
                   <PendingButton variant="ghost" disabled={busy}>
