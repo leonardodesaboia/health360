@@ -27,7 +27,16 @@ export function ProfileView({ stored }: { stored?: StoredProfile | null }) {
         <ProfileNotice>
           Synthetic, patient-reported information saved to this demo case.
         </ProfileNotice>
-        {stored ? <ProfileDetails {...stored} /> : <NoProfile />}
+        {stored ? (
+          <>
+            <Button asChild variant="outline">
+              <Link href="/patient/analysis">View evaluation status</Link>
+            </Button>
+            <ProfileDetails {...stored} />
+          </>
+        ) : (
+          <NoProfile selected />
+        )}
       </>
     );
   return <LocalProfileView />;
@@ -41,11 +50,15 @@ function ProfileNotice({ children }: { children: React.ReactNode }) {
   );
 }
 
-function NoProfile() {
+function NoProfile({ selected = false }: { selected?: boolean }) {
   return (
     <EmptyState
-      title="No confirmed profile yet"
-      description="Complete and confirm the synthetic intake to create a profile version."
+      title={selected ? "No confirmed intake yet" : "No confirmed profile yet"}
+      description={
+        selected
+          ? "Complete and confirm your intake to create a saved profile."
+          : "Complete and confirm the synthetic intake to create a profile version."
+      }
       action={
         <Button asChild>
           <Link href="/patient/intake">Complete intake</Link>

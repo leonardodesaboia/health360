@@ -26,6 +26,9 @@ export default async function HistoricalPlan({
         title={`Plan version ${data.plan.version}`}
         description="Preserved content from a finalized demonstration physician review."
       />
+      <Button asChild>
+        <Link href="/patient">View current evaluation</Link>
+      </Button>
       <Button asChild variant="outline">
         <Link href="/patient/history">Back to history</Link>
       </Button>

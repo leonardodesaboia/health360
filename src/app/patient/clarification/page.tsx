@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { ContentContainer, PageHeader } from "@/components/layout/page";
 import { Notice, Surface } from "@/components/shared/primitives";
+import {
+  JourneyProgress,
+  NextStepPanel,
+} from "@/components/shared/workflow-guidance";
 import { Button } from "@/components/ui/button";
+import { workflowPresentation } from "@/features/workflow/presentation";
 import {
   ClarificationForm,
   ContinueAnalysisButton,
@@ -14,64 +19,90 @@ import {
 
 export default async function ClarificationPage() {
   const data = await loadCurrentClarification();
+  const model =
+    data.status === "READY" || data.status === "PENDING"
+      ? workflowPresentation(
+          {
+            status:
+              data.status === "READY"
+                ? "CLARIFICATION_REQUIRED"
+                : "ANALYSIS_PENDING",
+            planState: "none",
+            canContinueSavedAnalysis: data.status === "PENDING",
+          },
+          "clarification",
+        )
+      : null;
   return (
     <ContentContainer width="form">
       <PageHeader
         eyebrow="My evaluation"
-        title="Confirm missing information"
+        title="Information needed before review can continue"
         description="Answer the specific questions needed for another preliminary analysis of your synthetic case."
       />
       <Notice title="DEMONSTRATIVE — NOT CLINICALLY VALIDATED">
         Patient-reported answers are not verified clinical facts. A physician
         must review proposals before any new plan is available.
       </Notice>
-      <Surface>
-        {data.status === "READY" ? (
+      {data.status === "PENDING" && model ? (
+        <NextStepPanel
+          model={model}
+          id="saved-analysis-next-step"
+          taskAction={
+            <form action={continueSavedAnalysis}>
+              <ContinueAnalysisButton />
+            </form>
+          }
+        />
+      ) : data.status === "READY" ? (
+        <Surface>
           <ClarificationForm
             key={`${data.form.analysisId}:${data.form.profileVersion}:${data.form.reviewId ?? "analysis"}:${data.form.reviewVersion ?? 0}`}
             {...data.form}
             submitAction={submitClarification}
           />
-        ) : (
-          <>
-            <h2>
+        </Surface>
+      ) : (
+        <Surface>
+          <h2>
+            {data.status === "NO_SESSION"
+              ? "Select a demonstration case"
+              : data.status === "UNSUPPORTED"
+                ? "Supported questions are unavailable"
+                : data.status === "UNAVAILABLE"
+                  ? "Questions could not be loaded"
+                  : "No clarification is currently requested"}
+          </h2>
+          <p role="status" className="mt-3 text-sm text-muted-foreground">
+            {data.status === "NO_SESSION"
+              ? "Choose Alex Example or Jordan Example in Presenter controls to begin this synthetic demonstration."
+              : data.status === "UNSUPPORTED"
+                ? "This request needs a supported question set before you can answer it here. No information will be invented to complete the request."
+                : data.status === "UNAVAILABLE"
+                  ? "Your evaluation may have changed or storage may be unavailable. Check the analysis status and reload before trying again."
+                  : "Check the analysis status for your current next step."}
+          </p>
+          <Button asChild className="mt-6">
+            <Link
+              href={
+                data.status === "NO_SESSION"
+                  ? "/patient#demo-case-title"
+                  : "/patient/analysis"
+              }
+            >
               {data.status === "NO_SESSION"
-                ? "Select a demo case"
-                : data.status === "PENDING"
-                  ? "Your information is saved"
-                  : data.status === "UNSUPPORTED"
-                    ? "Supported questions are unavailable"
-                    : data.status === "UNAVAILABLE"
-                      ? "Questions could not be loaded"
-                      : "No clarification is currently requested"}
-            </h2>
-            <p role="status" className="mt-3 text-sm text-muted-foreground">
-              {data.status === "NO_SESSION"
-                ? "Choose a synthetic demonstration case before answering questions."
-                : data.status === "PENDING"
-                  ? "Continue the analysis of your saved information. Your previous profile and any reviewed plan remain preserved."
-                  : data.status === "UNSUPPORTED"
-                    ? "This request needs a supported question set before you can answer it here. No information will be invented to complete the request."
-                    : data.status === "UNAVAILABLE"
-                      ? "Your evaluation may have changed or storage may be unavailable. Check the analysis status and reload before trying again."
-                      : "Check the analysis status for your current next step."}
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              {data.status === "PENDING" && (
-                <form action={continueSavedAnalysis}>
-                  <ContinueAnalysisButton />
-                </form>
-              )}
-              <Button asChild variant="outline">
-                <Link href="/patient/analysis">View analysis status</Link>
-              </Button>
-              <Button asChild variant="ghost">
-                <Link href="/patient">Back to home</Link>
-              </Button>
-            </div>
-          </>
-        )}
-      </Surface>
+                ? "Choose a demo case"
+                : "View analysis status"}
+            </Link>
+          </Button>
+        </Surface>
+      )}
+      {model && (
+        <JourneyProgress model={model} id="clarification-evaluation-progress" />
+      )}
+      <Button asChild variant="ghost">
+        <Link href="/patient">Back to home</Link>
+      </Button>
     </ContentContainer>
   );
 }

@@ -11,10 +11,11 @@ export default async function AnalysisPage({
     getAnalysisPageState(),
     searchParams,
   ]);
+  if (state.unavailable) throw new Error("Evaluation could not be loaded");
   return (
     <AnalysisStatus
       status={state.status}
-      error={state.unavailable || params.error === "1"}
+      error={params.error === "1"}
       analyzeAction={analyzeAndShowStatus}
     />
   );
