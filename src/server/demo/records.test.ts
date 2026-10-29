@@ -12,6 +12,8 @@ describe("demo session records", () => {
     const records = demoCaseRecords(scenario.id);
     const facts = intakeFactsSchema.parse(records.profile.intakeFacts);
     expect(mapIntakeFacts(facts)).toEqual(scenario.input.facts);
+    const family = scenario.id === "family-history-screening";
+    const repeat = scenario.id === "repeat-screening";
     expect(facts).toEqual({
       provenance: "PATIENT_REPORTED",
       rectalBleeding: false,
@@ -22,13 +24,15 @@ describe("demo session records", () => {
       ibd: false,
       hereditaryCancerSyndrome: false,
       serratedPolyposis: false,
-      familyCrc: false,
+      familyCrc: family,
+      ...(family
+        ? { familyCrcFirstDegree: true, familyCrcDiagnosisAge: 50 }
+        : {}),
       familySyndrome: false,
-      priorScreening:
-        scenario.id === "first-screening" ? "NEVER_SCREENED" : "COLONOSCOPY",
-      colonoscopyNormal: scenario.id === "first-screening" ? null : true,
-      colonoscopyComplete: scenario.id === "first-screening" ? null : true,
-      colonoscopyAdequatePrep: scenario.id === "first-screening" ? null : true,
+      priorScreening: repeat ? "COLONOSCOPY" : "NEVER_SCREENED",
+      colonoscopyNormal: repeat ? true : null,
+      colonoscopyComplete: repeat ? true : null,
+      colonoscopyAdequatePrep: repeat ? true : null,
     });
     const result = evaluateScreening({
       ...scenario.input,

@@ -99,8 +99,10 @@ export function declaredFacts(profile: HealthProfile) {
           ? "Yes"
           : value === false
             ? "No"
-            : (field.options?.find(([option]) => option === value)?.[1] ??
-              "Unknown");
+            : typeof value === "number"
+              ? new Intl.NumberFormat("en-US").format(value)
+              : (field.options?.find(([option]) => option === value)?.[1] ??
+                "Unknown");
     return [{ id: key, label: field.label, text }];
   });
 }

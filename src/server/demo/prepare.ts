@@ -73,7 +73,7 @@ export async function prepareDemoDataset(
       throw new Error(
         "Prepared analysis did not reach its required starting point.",
       );
-    if (stateId === "alex-plan-v1") {
+    if (stateId === "alex-plan-v1" || stateId === "daniel-plan-v1") {
       const analysis = (
         await datasetRepository(db, datasetId).list("analysis")
       ).find((item) => item.id === result.analysisId);
@@ -83,10 +83,15 @@ export async function prepareDemoDataset(
         intent: "finalize",
         decisions: analysis.proposals.map((proposal) => ({
           proposalId: proposal.id,
-          decision: "APPROVE",
+          decision: stateId === "daniel-plan-v1" ? "MODIFY" : "APPROVE",
           reason:
-            "DEMONSTRATIVE — NOT CLINICALLY VALIDATED. Fictional demo reviewer approval for presentation only.",
-          revisedText: null,
+            stateId === "daniel-plan-v1"
+              ? "DEMONSTRATIVE — NOT CLINICALLY VALIDATED. Fictional demo reviewer wording clarifies the first-degree family-history opportunity for presentation only."
+              : "DEMONSTRATIVE — NOT CLINICALLY VALIDATED. Fictional demo reviewer approval for presentation only.",
+          revisedText:
+            stateId === "daniel-plan-v1"
+              ? "Discuss colorectal screening with your physician based on first-degree family history. Confirm your father's diagnosis history before deciding on screening."
+              : null,
         })),
       });
     }

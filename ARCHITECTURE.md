@@ -170,6 +170,12 @@ It wraps existing profile/examination contracts with explicit nullable screening
 facts; it has no database, provider or publication dependency. Findings require
 physician review and always deny publication authority. See the
 [scenario pack](docs/product/DEMO_SCENARIOS.md) for limits and source verification.
+The separate `crc-family-history-demo` v1 context adds the synthetic Daniel
+scenario without changing `crc-screening-demo` v1. It evaluates nullable
+patient-reported first-degree status and youngest diagnosis age against the
+verified 2017 USMSTF early-start criterion. Its mock-only prepared states use the
+same intake, analysis, physician decision/finalization and publication producers;
+no workflow or publication gate is bypassed.
 The following boundaries now have server-only modules. Physician decisions,
 finalization and typed clarification requests are implemented; see [STATUS](docs/STATUS.md).
 Keep `src/server` modules marked with `import "server-only"`:

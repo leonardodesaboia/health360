@@ -9,6 +9,8 @@ export const fieldIds = [
   "polyps",
   "ibd",
   "familyCrc",
+  "familyCrcFirstDegree",
+  "familyCrcDiagnosisAge",
   "familySyndrome",
   "historyDetails",
   "hereditaryCancerSyndrome",
@@ -61,6 +63,16 @@ export const fields: {
     id: "familySyndrome",
     label: "Family history of Lynch syndrome or familial adenomatous polyposis",
     kind: "choice",
+  },
+  {
+    id: "familyCrcFirstDegree",
+    label: "Was a parent, sibling or child diagnosed with colorectal cancer?",
+    kind: "choice",
+  },
+  {
+    id: "familyCrcDiagnosisAge",
+    label: "Age at diagnosis of the youngest affected parent, sibling or child",
+    kind: "age",
   },
   {
     id: "historyDetails",
@@ -129,6 +141,11 @@ export const fields: {
 ];
 
 export function isVisible(id: FieldId, answers: Partial<IntakeAnswers>) {
+  if (id === "familyCrcFirstDegree") return answers.familyCrc === "yes";
+  if (id === "familyCrcDiagnosisAge")
+    return (
+      answers.familyCrc === "yes" && answers.familyCrcFirstDegree === "yes"
+    );
   if (id === "historyDetails")
     return [
       answers.colorectalCancer,
@@ -160,6 +177,8 @@ const historyIds: FieldId[] = [
   "hereditaryCancerSyndrome",
   "serratedPolyposis",
   "familyCrc",
+  "familyCrcFirstDegree",
+  "familyCrcDiagnosisAge",
   "familySyndrome",
   "historyDetails",
   "medications",
@@ -233,7 +252,13 @@ export const draftSchema = z.object({
     .int()
     .min(0)
     .max(steps.length - 1),
-  answers: answersSchema,
+  answers: z.preprocess(
+    (input) =>
+      input && typeof input === "object" && !Array.isArray(input)
+        ? { familyCrcFirstDegree: null, familyCrcDiagnosisAge: null, ...input }
+        : input,
+    answersSchema,
+  ),
   updatedAt: z.iso.datetime(),
 });
 export type IntakeDraft = z.infer<typeof draftSchema>;

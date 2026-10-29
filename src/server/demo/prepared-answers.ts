@@ -5,9 +5,10 @@ import type { DemoCaseId } from "./contracts";
 /** Explicit fictional answers for presentation preparation, never unknown-value defaults. */
 export function preparedIntakeAnswers(caseId: DemoCaseId) {
   const repeat = caseId === "repeat-screening";
+  const family = caseId === "family-history-screening";
   return intakeSchema.parse({
     ...Object.fromEntries(fieldIds.map((field) => [field, null])),
-    age: repeat ? "60" : "50",
+    age: family ? "40" : repeat ? "60" : "50",
     rectalBleeding: "no",
     bowelChange: "no",
     weightLoss: "no",
@@ -16,7 +17,9 @@ export function preparedIntakeAnswers(caseId: DemoCaseId) {
     ibd: "no",
     hereditaryCancerSyndrome: "no",
     serratedPolyposis: "no",
-    familyCrc: "no",
+    familyCrc: family ? "yes" : "no",
+    familyCrcFirstDegree: family ? "yes" : null,
+    familyCrcDiagnosisAge: family ? "50" : null,
     familySyndrome: "no",
     medications: "None",
     smoking: "no",

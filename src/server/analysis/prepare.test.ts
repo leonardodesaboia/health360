@@ -43,6 +43,39 @@ const identity = {
 };
 
 describe("preliminary analysis pipeline", () => {
+  it.each(["evidence", "category", "rule"])(
+    "rejects model changes to Daniel's deterministic %s",
+    async (field) => {
+      const input = scenarioVariant("family-history-screening");
+      const response = successfulResponse(input);
+      const proposal = response.data.proposals[0];
+      if (field === "evidence") proposal.evidenceIds = ["uspstf-crc-2021"];
+      if (field === "category") proposal.category = "POSSIBLE_REDUNDANCY";
+      if (field === "rule") proposal.ruleIds = ["crc-screening-due"];
+      const result = await prepareAnalysis(
+        input,
+        identity,
+        async () => response,
+      );
+      expect(result.to).toBe("ANALYSIS_FAILED");
+      expect(result.analysis.proposals).toEqual([]);
+    },
+  );
+  it("never calls the model to override Daniel's unknown or syndromic history", async () => {
+    for (const patch of [
+      { familyCrcFirstDegree: null },
+      { familyCrcDiagnosisAge: null },
+      { familySyndrome: true },
+    ]) {
+      const input = scenarioVariant("family-history-screening");
+      Object.assign(input.facts, patch);
+      const explain = vi.fn();
+      const result = await prepareAnalysis(input, identity, explain);
+      expect(explain).not.toHaveBeenCalled();
+      expect(result.analysis.status).toBe("BLOCKED");
+      expect(result.analysis.proposals).toEqual([]);
+    }
+  });
   it("keeps deterministic considered data and limits despite model omissions", async () => {
     const input = scenarioVariant("first-screening");
     const result = await prepareAnalysis(input, identity, async () =>

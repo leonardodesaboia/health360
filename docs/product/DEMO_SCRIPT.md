@@ -7,8 +7,8 @@ browser acceptance suite (`tests/e2e/acceptance/journeys.spec.ts`).
 
 ## Honesty disclaimers (say them; never soften them)
 
-- **Synthetic data only.** Alex and Jordan are fictional; no real patient records exist.
-- **Demonstrative rules, not clinically validated.** The two screening rules were
+- **Synthetic data only.** Alex, Jordan and Daniel are fictional; no real patient records exist.
+- **Demonstrative rules, not clinically validated.** The three screening rules were
   authored for this demonstration. Software checks are not medical approval.
 - **Physician review is mandatory.** Nothing reaches the patient until a physician
   explicitly decides and finalizes. The demo reviewer is not a real clinician, and the
@@ -56,6 +56,8 @@ first (about 10 seconds; selected cases survive the restart) and say so.
 | **Jordan — possible redundancy review**    | `jordan-review`        | `/doctor`           | Jordan step 4: **Possible redundant test** awaiting review       |
 | **Alex — reviewed plan v1**                | `alex-plan-v1`         | `/patient/plan`     | Reassessment: plan v1 shown, **Update my information** available |
 | **Alex — analysis failed, ready to retry** | `alex-analysis-failed` | `/patient/analysis` | Safety close: **Retry analysis** after a blocked analysis        |
+| **Daniel — family-history review**         | `daniel-review`        | `/doctor`           | Family-history opportunity, decisions pending                    |
+| **Daniel — reviewed plan v1**              | `daniel-plan-v1`       | `/patient/plan`     | Reviewed family-history plan v1                                  |
 
 Say that a prepared state was produced by the synthetic workflow (real intake, mock
 analysis) and the demo reviewer, not a real clinician. `jordan-review` skips the
@@ -202,3 +204,13 @@ producing plan v2 while v1 is preserved; E six provider faults with safe retry. 
 test owns an isolated synthetic dataset and removes it afterwards. A live provider
 check is separate (`LLM_LIVE_SMOKE=1`, explicit authorization); neither mock nor live
 runs establish clinical validity.
+
+## Optional Daniel segment (about 45 seconds)
+
+**DEMONSTRATIVE — NOT CLINICALLY VALIDATED.** Daniel is a fictional 40-year-old man who has never smoked, has no symptoms or relevant personal history, and has never had colorectal screening. His father was diagnosed with colorectal cancer at 50.
+
+Open **Presenter controls > Prepared starting points > Daniel — family-history review** (`daniel-review`, mock only). In `/doctor`, select **Start review** and open **View rationale and criteria** and **View evidence and sources**. Explain: "Daniel meets this demonstrative first-degree family-history criterion now: his father's diagnosis at 50 gives a start age of 40. He is not eligible through the average-risk age-45 criterion. This remains a proposal until the physician reviews and finalizes it." The 2017 USMSTF source describes colonoscopy every five years, starting at 40 or ten years before the youngest affected relative's diagnosis, whichever is earlier, for one first-degree relative diagnosed before 60 or two affected first-degree relatives. The demo implements the under-60 diagnosis branch only; other patterns and surveillance require individual assessment.
+
+The verified full article is [Rex et al., USMSTF, 2017](https://www.asge.org/home/resources/publications/guidelines/colorectal-cancer-screening-recommendations-for-physicians-and-patients-from-the-u.s.-multi-society-task-force-on-colorectal-cancer), DOI 10.1016/j.gie.2017.04.003; see **Family history of CRC and polyps > Recommendations > item 1**. Accessed October 29, 2026. Source verification is not clinical validation.
+
+For the reviewed result, choose **Daniel — reviewed plan v1** (`daniel-plan-v1`) to open `/patient/plan`. Say that real application producers created this synthetic intake, deterministic mock analysis and fictional reviewer modification and finalization. The shortcut does not bypass finalization. **Reset demo** rebuilds the same point. To enter the case manually, choose **Daniel Example**, complete intake with family CRC **Yes**, parent/sibling/child **Yes**, youngest diagnosis age **50**, Lynch/FAP **No**, and previous screening **Never screened**. Unknown degree or diagnosis age requires clarification; second-degree history alone, symptoms or Lynch/FAP do not produce this early-start finding. Both shortcuts and nullable intake controls are covered on desktop/mobile in `tests/e2e/daniel.spec.ts`.

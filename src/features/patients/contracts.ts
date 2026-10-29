@@ -47,6 +47,8 @@ export const intakeFactsSchema = z.object({
   hereditaryCancerSyndrome: z.boolean().nullable(),
   serratedPolyposis: z.boolean().nullable(),
   familyCrc: z.boolean().nullable(),
+  familyCrcFirstDegree: z.boolean().nullable().optional(),
+  familyCrcDiagnosisAge: z.number().int().min(0).max(120).nullable().optional(),
   familySyndrome: z.boolean().nullable(),
   colonoscopyNormal: z.boolean().nullable(),
   colonoscopyComplete: z.boolean().nullable(),
