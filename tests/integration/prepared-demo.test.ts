@@ -23,6 +23,7 @@ import { getWorkflowStatus } from "../../src/server/workflow/state";
 import { canTransition } from "../../src/features/workflow/workflow";
 import * as intakeProducer from "../../src/server/intake/service";
 import * as demoRecords from "../../src/server/demo/records";
+import { readIntakePrefill } from "../../src/server/intake/read";
 
 const sessionMocks = vi.hoisted(() => ({
   token: undefined as string | undefined,
@@ -64,6 +65,18 @@ const preparedStates = [
     "PREVENTIVE_OPPORTUNITY",
   ],
   ["alex-analysis-failed", "first-screening", "ANALYSIS_FAILED", null],
+  [
+    "daniel-review",
+    "family-history-screening",
+    "MEDICAL_REVIEW_PENDING",
+    "PREVENTIVE_OPPORTUNITY",
+  ],
+  [
+    "daniel-plan-v1",
+    "family-history-screening",
+    "PLAN_AVAILABLE",
+    "PREVENTIVE_OPPORTUNITY",
+  ],
 ] as const;
 
 beforeEach(() => {
@@ -88,6 +101,21 @@ afterAll(async () => {
 });
 
 describe("producer-built presentation starting points", () => {
+  it("restores Daniel's numeric diagnosis age from typed seed facts before intake exists", async () => {
+    await selectDemoCaseForSession("family-history-screening");
+    const session = (await getDemoSession())!;
+    const prefill = await readIntakePrefill(
+      db,
+      session.datasetId,
+      session.patientId,
+    );
+    expect(prefill.answers.familyCrc).toBe("yes");
+    expect(prefill.answers.familyCrcFirstDegree).toBe("yes");
+    expect(prefill.answers.familyCrcDiagnosisAge).toBe("50");
+    expect(
+      await datasetRepository(db, session.datasetId).list("intake"),
+    ).toEqual([]);
+  });
   it.each(preparedStates)(
     "prepares %s with real records and a legal history",
     async (stateId, caseId, status, category) => {
@@ -151,6 +179,17 @@ describe("producer-built presentation starting points", () => {
         expect(analysis.proposals.map((proposal) => proposal.category)).toEqual(
           [category],
         );
+        if (caseId === "family-history-screening") {
+          expect(analysis.proposals[0].ruleIds).toEqual([
+            "crc-family-history-early-start",
+          ]);
+          expect(analysis.proposals[0].evidenceIds).toEqual([
+            "usmstf-crc-family-history-2017",
+          ]);
+          expect(analysis.proposals[0].rationale).toContain(
+            "first-degree family history",
+          );
+        }
       } else {
         expect(analysis.status).toBe("BLOCKED");
         expect(analysis.proposals).toEqual([]);
@@ -164,7 +203,9 @@ describe("producer-built presentation starting points", () => {
         expect(reviews[0].completedAt).not.toBeNull();
         expect(
           reviews[0].decisions.every(
-            (decision) => decision.decision === "APPROVE",
+            (decision) =>
+              decision.decision ===
+              (stateId === "daniel-plan-v1" ? "MODIFY" : "APPROVE"),
           ),
         ).toBe(true);
         expect(reviews[0].reviewerId).toBe("demo-physician");

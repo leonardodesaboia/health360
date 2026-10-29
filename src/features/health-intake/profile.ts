@@ -61,7 +61,12 @@ export function buildCompletedIntake(
   submissionId: string,
   timestamp: string,
 ): CompletedIntake {
-  const parsed = intakeSchema.parse(input);
+  const parsed = intakeSchema.parse(
+    Object.assign(
+      { familyCrcFirstDegree: null, familyCrcDiagnosisAge: null },
+      input,
+    ),
+  );
   const answers = Object.fromEntries(
     fieldIds.map((id) => [id, isVisible(id, parsed) ? parsed[id] : null]),
   ) as IntakeAnswers;
@@ -84,6 +89,7 @@ export function buildCompletedIntake(
         "hereditaryCancerSyndrome",
         "serratedPolyposis",
         "familyCrc",
+        "familyCrcFirstDegree",
         "familySyndrome",
         "colonoscopyNormal",
         "colonoscopyComplete",
@@ -91,6 +97,10 @@ export function buildCompletedIntake(
       ].map((id) => [id, booleanFact(id as FieldId)]),
     ),
     priorScreening: answers.priorScreening,
+    familyCrcDiagnosisAge:
+      answers.familyCrcDiagnosisAge === null
+        ? null
+        : Number(answers.familyCrcDiagnosisAge),
   });
   const missingInformation = fields
     .filter(
@@ -169,7 +179,12 @@ export function buildCompletedIntake(
         "serratedPolyposis",
         "historyDetails",
       ]),
-      familyHistory: history(["familyCrc", "familySyndrome"]),
+      familyHistory: history([
+        "familyCrc",
+        "familyCrcFirstDegree",
+        "familyCrcDiagnosisAge",
+        "familySyndrome",
+      ]),
       medications: [reported(answers.medications)],
       habits: history(["smoking", "activity"]),
       missingInformation,

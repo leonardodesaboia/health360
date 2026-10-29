@@ -17,6 +17,10 @@ const paths: Record<string, FieldId[]> = {
     "serratedPolyposis",
   ],
   "facts.familyRiskHistory": ["familyCrc", "familySyndrome"],
+  "facts.familyCrc": ["familyCrc"],
+  "facts.familySyndrome": ["familySyndrome"],
+  "facts.familyCrcFirstDegree": ["familyCrcFirstDegree"],
+  "facts.familyCrcDiagnosisAge": ["familyCrcDiagnosisAge"],
   "facts.priorScreening": ["priorScreening"],
   "facts.normal": ["colonoscopyNormal"],
   "facts.complete": ["colonoscopyComplete"],
@@ -35,6 +39,10 @@ const prompts: Partial<Record<FieldId, string>> = {
     "Have you had a hereditary colorectal cancer syndrome?",
   serratedPolyposis: "Have you had serrated polyposis syndrome?",
   familyCrc: "Has anyone in your family had colorectal cancer?",
+  familyCrcFirstDegree:
+    "Was a parent, sibling or child diagnosed with colorectal cancer?",
+  familyCrcDiagnosisAge:
+    "How old was the youngest affected parent, sibling or child at diagnosis?",
   familySyndrome:
     "Has anyone in your family had Lynch syndrome or familial adenomatous polyposis?",
   priorScreening: "What colorectal screening have you had before?",

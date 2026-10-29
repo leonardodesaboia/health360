@@ -3,6 +3,38 @@ import { intakeSchema, initialAnswers } from "./contracts";
 import { createDraftRepository } from "./repository";
 
 describe("synthetic intake draft", () => {
+  it("restores older version-2 drafts with new family facts unknown", async () => {
+    const answers: Record<string, string | null> = {
+      ...initialAnswers,
+      familyCrc: "yes",
+    };
+    delete answers.familyCrcFirstDegree;
+    delete answers.familyCrcDiagnosisAge;
+    const raw = JSON.stringify({
+      schemaVersion: 2,
+      draft: {
+        schemaVersion: 1,
+        synthetic: true,
+        validation: "demonstrative",
+        patientId: "legacy-family",
+        revision: 1,
+        step: 1,
+        answers,
+        updatedAt: "2026-10-29T12:00:00Z",
+      },
+      completions: [],
+    });
+    const repo = createDraftRepository({
+      getItem: () => raw,
+      setItem: () => {
+        throw new Error("read only");
+      },
+    });
+    const draft = await repo.load("legacy-family");
+    expect(draft?.answers.familyCrc).toBe("yes");
+    expect(draft?.answers.familyCrcFirstDegree).toBeNull();
+    expect(draft?.answers.familyCrcDiagnosisAge).toBeNull();
+  });
   it("preserves unknown answers without inventing negative facts", () => {
     const answers = Object.fromEntries(
       Object.keys(initialAnswers).map((id) => [id, null]),

@@ -194,9 +194,9 @@ test("presenter QA: a prepared reset explains the mock-provider requirement", as
     }),
   ).toBeVisible();
   await expect(
-    page
-      .getByRole("alert")
-      .filter({ hasText: "Select Alex Example or Jordan Example" }),
+    page.getByRole("alert").filter({
+      hasText: "Select Alex Example, Jordan Example or Daniel Example",
+    }),
   ).toBeVisible();
   expect(submissions).toBe(0);
   await page.getByText("Presenter controls", { exact: true }).click();

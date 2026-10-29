@@ -53,10 +53,11 @@ export function evaluateScreening(input: unknown): RuleResult {
     return finish("BLOCKED", "Unsupported scenario or context version");
   }
   result.contextVersion = context.version;
+  const familyHistoryScenario = scenarioId === "family-history-screening";
   const [prevention, redundancy] = context.rules;
   if (
     !prevention ||
-    !redundancy ||
+    (!familyHistoryScenario && !redundancy) ||
     !context.rules.every((rule) => evidenceSupportsRule(context, rule))
   )
     return finish("BLOCKED", "Missing or unsupported evidence");
@@ -100,6 +101,80 @@ export function evaluateScreening(input: unknown): RuleResult {
       ))
   )
     return finish("BLOCKED", "Screening history contradicts examination facts");
+  if (familyHistoryScenario) {
+    result.limitations = [
+      "Preliminary synthetic demonstration; physician review and explicit finalization are mandatory.",
+      "Restricted to never-screened, asymptomatic people reporting first-degree colorectal cancer before age 60; syndromes, other family-history patterns and surveillance require individual assessment.",
+      "Patient-reported family history requires physician verification. The 2017 source describes a weak recommendation with low-quality evidence; this demonstration is not clinical validation.",
+    ];
+    if (
+      facts.symptoms === true ||
+      facts.personalRiskHistory === true ||
+      facts.familySyndrome === true ||
+      facts.familyRiskHistory === false ||
+      facts.familyCrc === false ||
+      facts.familyCrcFirstDegree === false ||
+      (profile.age !== null && profile.age > prevention.maxAge) ||
+      (facts.priorScreening !== null &&
+        facts.priorScreening !== "NEVER_SCREENED")
+    )
+      return finish(
+        "OUT_OF_SCOPE",
+        "Restricted family-history early-start criteria do not apply",
+      );
+    if (profile.age === null) result.missingFields.push("profile.age");
+    for (const field of [
+      "symptoms",
+      "personalRiskHistory",
+      "familyCrc",
+      "familySyndrome",
+      "familyCrcFirstDegree",
+      "familyCrcDiagnosisAge",
+      "priorScreening",
+    ] as const)
+      if (facts[field] === null || facts[field] === undefined)
+        result.missingFields.push(`facts.${field}`);
+    result.missingFields.push(
+      ...profile.missingInformation.map(
+        (field) => `profile.missingInformation:${field}`,
+      ),
+    );
+    if (result.missingFields.length)
+      return finish(
+        "NEEDS_CLARIFICATION",
+        "Required family-history screening facts remain unknown",
+      );
+    const diagnosisAge = facts.familyCrcDiagnosisAge!;
+    if (
+      !prevention.relativeDiagnosisBeforeAge ||
+      !prevention.yearsBeforeDiagnosis
+    )
+      return finish("BLOCKED", "Missing family-history rule parameters");
+    const startAge = Math.min(
+      prevention.minAge,
+      diagnosisAge - prevention.yearsBeforeDiagnosis,
+    );
+    if (
+      diagnosisAge >= prevention.relativeDiagnosisBeforeAge ||
+      profile.age! < startAge
+    )
+      return finish(
+        "OUT_OF_SCOPE",
+        "Restricted family-history early-start criteria do not apply",
+      );
+    result.findings.push({
+      category: prevention.category,
+      ruleId: prevention.id,
+      ruleVersion: prevention.version,
+      evidenceIds: [...prevention.evidenceIds],
+      evidenceVersion: prevention.evidenceVersion,
+      rationale: `Discuss starting colorectal screening by colonoscopy now because a parent, sibling or child was diagnosed with colorectal cancer at age ${diagnosisAge}. The 2017 USMSTF family-history criterion starts at age ${startAge} (age 40 or 10 years before the youngest diagnosis, whichever is earlier), with a ${prevention.intervalYears}-year colonoscopy interval. Eligibility here is based on first-degree family history, not the age-45 average-risk criterion. Verify the family history and individual circumstances before deciding.`,
+    });
+    return finish(
+      "READY_FOR_REVIEW",
+      "Preliminary deterministic finding awaiting physician review",
+    );
+  }
   if (
     facts.symptoms === true ||
     facts.personalRiskHistory === true ||

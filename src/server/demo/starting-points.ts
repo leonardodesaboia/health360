@@ -27,6 +27,18 @@ const startingPoints = [
     label: "Alex — analysis failed, ready to retry",
     destination: "/patient/analysis",
   },
+  {
+    id: "daniel-review",
+    caseId: "family-history-screening",
+    label: "Daniel — family-history review",
+    destination: "/doctor",
+  },
+  {
+    id: "daniel-plan-v1",
+    caseId: "family-history-screening",
+    label: "Daniel — reviewed plan v1",
+    destination: "/patient/plan",
+  },
 ] as const;
 export const preparedDemoStates = startingPoints.map((state) => ({
   ...state,

@@ -7,6 +7,45 @@ The software demonstrates restricted decision support; it does not establish a
 diagnosis, recommend care autonomously or claim medical validation. Physician
 review and explicit finalization remain mandatory before any patient plan.
 
+## Daniel: separate first-degree family-history scenario
+
+**DEMONSTRATIVE — NOT CLINICALLY VALIDATED.** Daniel Example is a fictional
+40-year-old man, asymptomatic, never smoked, without relevant personal history
+and never screened. His father was diagnosed with colorectal cancer at 50.
+`family-history-screening` uses its own `crc-family-history-demo` v1 context;
+Alex/Jordan and `crc-screening-demo` v1 retain their existing rules and evidence.
+
+The separate `crc-family-history-early-start` rule generates only a preliminary
+PREVENTIVE_OPPORTUNITY. It implements the first-degree relative diagnosed before
+60 branch of the 2017 USMSTF source: start at 40 or ten years before the youngest
+diagnosis, whichever is earlier, with a five-year colonoscopy interval. Daniel's
+start age is 40 because of his father's history, not the average-risk age-45
+criterion. Two affected relatives at any age and a single relative diagnosed at
+60 or older are described by the source but not implemented by this restricted
+rule; the intake does not establish relative count. The demo retains a 75-year
+upper scope bound and excludes previous screening/surveillance.
+
+`familyCrcFirstDegree` and `familyCrcDiagnosisAge` are additive nullable typed
+facts. Unknown relative degree or diagnosis age requires clarification. Missing
+legacy values remain unknown. Second-degree-only history and absent family
+history do not qualify at 40. Symptoms, relevant personal history and family
+Lynch/FAP remain out of scope. `familyCrc` and `familySyndrome` retain their
+existing meanings, and the LLM cannot change the deterministic result or evidence.
+
+Evidence **usmstf-crc-family-history-2017**, version 1: US Multi-Society Task Force
+on Colorectal Cancer (ACG, AGA, ASGE), _Colorectal cancer screening:
+Recommendations for physicians and patients from the U.S. Multi-Society Task Force
+on Colorectal Cancer_, 2017, Gastrointestinal Endoscopy 86(1):18–33,
+DOI 10.1016/j.gie.2017.04.003. [Full primary article on ASGE](https://www.asge.org/home/resources/publications/guidelines/colorectal-cancer-screening-recommendations-for-physicians-and-patients-from-the-u.s.-multi-society-task-force-on-colorectal-cancer),
+accessed October 29, 2026. Verified in **Family history of CRC and polyps →
+Recommendations → item 1** (`p0315`). The source calls this a weak recommendation
+with low-quality evidence. Registered as `public_source`, `validation: demonstrative`,
+`medicallyReviewed: false`; software verification is not clinical validation.
+
+Mock-only `daniel-review` and `daniel-plan-v1` are built through real producers.
+The latter includes a fictional physician modification and explicit finalization
+before publishing plan v1. See [presenter segment](DEMO_SCRIPT.md#optional-daniel-segment-about-45-seconds).
+
 ## The story judges will see
 
 **First screening:** a synthetic 50-year-old reports no colorectal screening and
@@ -52,7 +91,7 @@ versions, considered facts, limitations and the demonstrative label. Consumers
 must display that label wherever this content appears and keep findings out of
 patient views until finalized review.
 
-## Structured facts and limits
+## Structured facts and limits (original average-risk scenarios)
 
 All clinical booleans accept `null`; omitted fields are invalid. `symptoms` asks
 about signs/symptoms relevant to colorectal assessment. `personalRiskHistory`
@@ -79,7 +118,7 @@ with a Feb 29 anniversary clamped to Feb 28 in a non-leap year. At the anniversa
 the possible-redundancy flag becomes a preliminary screening discussion opportunity.
 The implementation narrows public guidance to a demo; it is not the full guideline.
 
-## Evidence register
+## Evidence register (original average-risk scenarios)
 
 Both references have evidence version 1, `validation: demonstrative` and
 `medicallyReviewed: false`. A public source is not clinical approval. No placeholder

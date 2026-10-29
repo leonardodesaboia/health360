@@ -16,7 +16,7 @@ type PresenterState = {
   preparedStatesAvailable: boolean;
 };
 const preparedResetError =
-  "This prepared starting point requires the mock provider. Select Alex Example or Jordan Example to start a plain case, or restart the server with LLM_PROVIDER=mock before resetting.";
+  "This prepared starting point requires the mock provider. Select Alex Example, Jordan Example or Daniel Example to start a plain case, or restart the server with LLM_PROVIDER=mock before resetting.";
 type LoadState = "loading" | "preparing" | "ready" | "error";
 
 /** Reads the session client-side so shell routes stay static (and keep real 404 statuses). */
@@ -114,7 +114,7 @@ export function DemoControlsClient({
           <p className="text-xs text-muted-foreground">
             {current
               ? startingPoint
-              : "Choose Alex Example or Jordan Example in Presenter controls to begin this synthetic demonstration."}
+              : "Choose Alex Example, Jordan Example or Daniel Example in Presenter controls to begin this synthetic demonstration."}
           </p>
         </div>
         {state === "error" ? <p role="alert">{errorMessage}</p> : null}

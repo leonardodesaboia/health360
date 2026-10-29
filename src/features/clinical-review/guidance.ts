@@ -33,6 +33,12 @@ const consideredLabels: Record<string, string> = {
   symptoms: "Symptoms",
   personalRiskHistory: "Personal risk history",
   familyRiskHistory: "Family risk history",
+  familyCrc: "Family history of colorectal cancer",
+  familySyndrome:
+    "Family history of Lynch syndrome or familial adenomatous polyposis",
+  familyCrcFirstDegree: "Affected parent, sibling or child",
+  familyCrcDiagnosisAge:
+    "Youngest affected first-degree relative's diagnosis age",
   priorScreening: "Previous colorectal screening",
   normal: "Colonoscopy result was normal",
   complete: "Colonoscopy was complete",

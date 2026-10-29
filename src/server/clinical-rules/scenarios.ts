@@ -99,7 +99,44 @@ export const demoScenarios = [
     input: preparedInput("repeat-screening", 60, true),
     expectedCategory: "POSSIBLE_REDUNDANCY",
   },
+  {
+    id: "family-history-screening",
+    synthetic: true,
+    validation: "demonstrative",
+    input: familyHistoryInput(),
+    expectedCategory: "PREVENTIVE_OPPORTUNITY",
+  },
 ] as const;
+
+function familyHistoryInput(): ScreeningInput {
+  const input = preparedInput("family-history-screening", 40, false);
+  Object.assign(input.profile.intakeFacts!, {
+    familyCrc: true,
+    familyCrcFirstDegree: true,
+    familyCrcDiagnosisAge: 50,
+  });
+  Object.assign(input.facts, {
+    familyRiskHistory: true,
+    familyCrc: true,
+    familySyndrome: false,
+    familyCrcFirstDegree: true,
+    familyCrcDiagnosisAge: 50,
+  });
+  input.profile.familyHistory = [
+    {
+      value:
+        "Father diagnosed with colorectal cancer at age 50 (first-degree relative). DEMONSTRATIVE — NOT CLINICALLY VALIDATED.",
+      provenance: "PATIENT_REPORTED",
+    },
+  ];
+  input.profile.habits = [
+    { value: "Never smoked", provenance: "PATIENT_REPORTED" },
+  ];
+  input.profile.medications = [
+    { value: "None", provenance: "PATIENT_REPORTED" },
+  ];
+  return input;
+}
 
 export function scenarioVariant(
   scenarioId: string,

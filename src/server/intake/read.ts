@@ -37,7 +37,9 @@ export async function readIntakePrefill(
             : "no"
           : id === "priorScreening" && typeof fact === "string"
             ? fact
-            : null;
+            : id === "familyCrcDiagnosisAge" && typeof fact === "number"
+              ? fact.toString()
+              : null;
   }
   return {
     answers: answersSchema.parse(answers),

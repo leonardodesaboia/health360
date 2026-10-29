@@ -5,7 +5,11 @@ import {
   type DemoRule,
 } from "./contracts";
 
-export const scenarioIds = ["first-screening", "repeat-screening"] as const;
+export const scenarioIds = [
+  "first-screening",
+  "repeat-screening",
+  "family-history-screening",
+] as const;
 const evidence = [
   {
     id: "uspstf-crc-2021",
@@ -41,6 +45,47 @@ export function loadClinicalContext(
 ): DemoContext {
   if (!scenarioIds.some((id) => id === scenarioId) || version !== 1)
     throw new Error("Unsupported scenario or context version");
+  if (scenarioId === "family-history-screening") {
+    const source = {
+      id: "usmstf-crc-family-history-2017",
+      version: 1,
+      issuer:
+        "US Multi-Society Task Force on Colorectal Cancer (ACG, AGA, ASGE)",
+      title:
+        "Colorectal cancer screening: Recommendations for physicians and patients from the U.S. Multi-Society Task Force on Colorectal Cancer",
+      year: 2017,
+      sourceUrl:
+        "https://www.asge.org/home/resources/publications/guidelines/colorectal-cancer-screening-recommendations-for-physicians-and-patients-from-the-u.s.-multi-society-task-force-on-colorectal-cancer",
+      accessedAt: "2026-10-29",
+      evidenceStatus: "public_source",
+      validation: "demonstrative",
+      medicallyReviewed: false,
+    };
+    const rule = {
+      id: "crc-family-history-early-start",
+      version: 1,
+      validation: "demonstrative",
+      category: "PREVENTIVE_OPPORTUNITY",
+      evidenceIds: [source.id],
+      evidenceVersion: 1,
+      minAge: 40,
+      maxAge: 75,
+      intervalYears: 5,
+      relativeDiagnosisBeforeAge: 60,
+      yearsBeforeDiagnosis: 10,
+    };
+    return demoContextSchema.parse({
+      id: "crc-family-history-demo",
+      version,
+      scenarioId,
+      demonstrative: true,
+      validation: "demonstrative",
+      label: "DEMONSTRATIVE — NOT CLINICALLY VALIDATED",
+      evidence: [source],
+      rules: [rule],
+      ruleIds: [rule.id],
+    });
+  }
   const rules = [
     {
       id: "crc-screening-due",

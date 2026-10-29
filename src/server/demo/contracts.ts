@@ -10,7 +10,11 @@ import { demoScenarios } from "../clinical-rules/scenarios";
 import type { PreparedDemoStateId } from "./starting-points";
 
 // Demonstration navigation state only. A demo session is never an identity or authorization.
-export const demoCaseIds = ["first-screening", "repeat-screening"] as const;
+export const demoCaseIds = [
+  "first-screening",
+  "repeat-screening",
+  "family-history-screening",
+] as const;
 export const demoCaseIdSchema = z.enum(demoCaseIds);
 export type DemoCaseId = z.infer<typeof demoCaseIdSchema>;
 
@@ -40,6 +44,11 @@ export const demoCaseLabels: Record<
   DemoCaseId,
   { displayName: string; summary: string }
 > = {
+  "family-history-screening": {
+    displayName: "Daniel Example",
+    summary:
+      "Synthetic male, age 40 · Never smoked · Father diagnosed with colorectal cancer at 50",
+  },
   "first-screening": {
     displayName: "Alex Example",
     summary: "Synthetic, age 50 · No previous colorectal screening reported",
