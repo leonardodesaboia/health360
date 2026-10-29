@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({
   status: vi.fn(),
 }));
 vi.mock("../demo/session", () => ({ getDemoSession: mocks.session }));
-vi.mock("../db/client", () => ({ createDatabase: mocks.db }));
+vi.mock("../db/client", () => ({ getDatabase: mocks.db }));
 vi.mock("../db/repository", () => ({ inDatasetTransaction: mocks.tx }));
 vi.mock("./reader", () => ({ readPatientHistory: mocks.history }));
 vi.mock("../preventive-plan/reader", () => ({ readPatientPlan: mocks.plan }));
@@ -57,15 +57,15 @@ it("scopes history and historical URLs to the session dataset and patient", asyn
     "dataset-a",
     expect.any(Function),
   );
-  expect(mocks.disconnect).toHaveBeenCalledTimes(2);
+  expect(mocks.disconnect).not.toHaveBeenCalled();
 });
 
-it("fails explicitly on storage errors and closes its database connection", async () => {
+it("fails explicitly on storage errors without disconnecting another reader", async () => {
   mocks.session.mockResolvedValue({
     datasetId: "dataset-a",
     patientId: "patient-a",
   });
   mocks.history.mockRejectedValue(new Error("Storage unavailable"));
   await expect(loadPatientHistory()).rejects.toThrow("Storage unavailable");
-  expect(mocks.disconnect).toHaveBeenCalledOnce();
+  expect(mocks.disconnect).not.toHaveBeenCalled();
 });

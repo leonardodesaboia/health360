@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { getDatabase } from "../db/client";
 import {
@@ -7,7 +8,12 @@ import {
   type DemoSession,
 } from "./contracts";
 import { demoDatasetId, newDemoSessionToken } from "./records";
-import { loadDemoCase, replaceDemoDataset, resetDemoDataset } from "./store";
+import {
+  loadDemoCase,
+  loadDemoPresenterCase,
+  replaceDemoDataset,
+  resetDemoDataset,
+} from "./store";
 import { prepareDemoDataset, requirePreparedMockProvider } from "./prepare";
 import {
   resolveDemoSelection,
@@ -44,7 +50,7 @@ async function activatePreparedState(
 }
 
 /** Read-only browser demo context. This cookie grants no real identity or clinical authority. */
-export async function getDemoSession(): Promise<DemoSession | null> {
+export const getDemoSession = cache(async (): Promise<DemoSession | null> => {
   const cookieStore = await cookies();
   const token = demoSessionTokenSchema.safeParse(
     cookieStore.get(demoSessionCookie)?.value,
@@ -55,7 +61,7 @@ export async function getDemoSession(): Promise<DemoSession | null> {
   return selected
     ? { ...selected, datasetId, patientId: selected.patient.id }
     : null;
-}
+});
 
 /** Invoke only from a Server Action/Route Handler; validates the case before any writes. */
 export async function selectDemoCaseForSession(
@@ -97,3 +103,13 @@ export async function resetDemoSession(): Promise<boolean> {
 }
 
 export type { DemoSession, StoredDemoCase, DemoCaseId } from "./contracts";
+
+/** Minimal uncached request read; presenter controls never need clinical records. */
+export async function getDemoPresenterSession() {
+  const cookieStore = await cookies();
+  const token = demoSessionTokenSchema.safeParse(
+    cookieStore.get(demoSessionCookie)?.value,
+  );
+  if (!token.success) return null;
+  return loadDemoPresenterCase(getDatabase(), demoDatasetId(token.data));
+}

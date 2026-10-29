@@ -116,3 +116,34 @@ test("unknown review does not disclose another fixture", async ({ page }) => {
     page.getByRole("heading", { name: "Page not found" }),
   ).toBeVisible();
 });
+
+test("case-selection guidance names every available synthetic demo case", async ({
+  page,
+}, info) => {
+  await page.setViewportSize({
+    width: info.project.name === "mobile" ? 390 : 1440,
+    height: 900,
+  });
+  for (const route of [
+    "/patient",
+    "/patient/analysis",
+    "/patient/clarification",
+    "/patient/plan",
+    "/patient/history",
+    "/doctor",
+  ]) {
+    await page.goto(route);
+    const main = page.getByRole("main");
+    for (const name of ["Alex Example", "Jordan Example", "Daniel Example"]) {
+      await expect(main).toContainText(name);
+      await expect(
+        page.getByRole("button", { name, exact: true }),
+      ).toBeVisible();
+    }
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+  }
+});

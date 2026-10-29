@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
   status: vi.fn(),
 }));
 vi.mock("../demo/session", () => ({ getDemoSession: mocks.session }));
-vi.mock("../db/client", () => ({ createDatabase: mocks.database }));
+vi.mock("../db/client", () => ({ getDatabase: mocks.database }));
 vi.mock("../db/repository", () => ({
   inDatasetTransaction: mocks.transaction,
 }));
@@ -53,15 +53,15 @@ it("uses the session dataset and patient rather than a client supplied scope", a
     "patient-a",
     "MEDICAL_REVIEW_PENDING",
   );
-  expect(mocks.disconnect).toHaveBeenCalledOnce();
+  expect(mocks.disconnect).not.toHaveBeenCalled();
 });
 
-it("surfaces storage failure to the error boundary and closes its connection", async () => {
+it("surfaces storage failure to the error boundary without disconnecting another reader", async () => {
   mocks.session.mockResolvedValue({
     datasetId: "dataset-a",
     patientId: "patient-a",
   });
   mocks.read.mockRejectedValue(new Error("Storage unavailable"));
   await expect(loadPatientPlan()).rejects.toThrow("Storage unavailable");
-  expect(mocks.disconnect).toHaveBeenCalledOnce();
+  expect(mocks.disconnect).not.toHaveBeenCalled();
 });

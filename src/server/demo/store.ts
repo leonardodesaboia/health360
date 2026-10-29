@@ -1,5 +1,6 @@
 import "server-only";
 import { z } from "zod";
+import { patientSchema } from "../../features/patients/contracts";
 import { loadClinicalContext } from "../clinical-rules/context";
 import { demoContextSchema } from "../clinical-rules/contracts";
 import type { Prisma, PrismaClient } from "../../generated/prisma/client";
@@ -129,6 +130,38 @@ export async function loadDemoCase(
         },
         profile,
         examinations,
+      };
+    },
+    { isolationLevel: "RepeatableRead" },
+  );
+}
+
+/** Presenter identity only: no clinical snapshot or workflow status is needed for labels. */
+export async function loadDemoPresenterCase(
+  db: PrismaClient,
+  datasetId: string,
+) {
+  z.string().min(1).parse(datasetId);
+  return db.$transaction(
+    async (tx) => {
+      const dataset = await tx.dataset.findUnique({ where: { id: datasetId } });
+      const parsed = demoSelectionIdSchema.safeParse(dataset?.scenarioId);
+      if (!parsed.success) return null;
+      const selection = resolveDemoSelection(parsed.data);
+      const patientId = demoCaseRecords(selection.caseId).patient.id;
+      const row = await tx.patient.findUnique({
+        where: { datasetId_id: { datasetId, id: patientId } },
+      });
+      if (!row) throw new Error("Selected demo case is incomplete");
+      const patient = patientSchema.parse(row.payload);
+      if (patient.id !== patientId)
+        throw new Error("Selected demo patient does not match case");
+      return {
+        caseId: selection.caseId,
+        ...(selection.preparedStateId
+          ? { preparedStateId: selection.preparedStateId }
+          : {}),
+        displayName: patient.displayName,
       };
     },
     { isolationLevel: "RepeatableRead" },

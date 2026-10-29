@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { demoCaseLabels } from "../../../server/demo/contracts";
-import { getDemoSession } from "../../../server/demo/session";
+import { getDemoPresenterSession } from "../../../server/demo/session";
 import {
   preparedDemoState,
   preparedStatesAvailable,
@@ -9,13 +9,13 @@ import {
 // Minimal presenter state for the shell controls; no profile or clinical data leaves here.
 export async function GET() {
   try {
-    const session = await getDemoSession();
+    const session = await getDemoPresenterSession();
     return NextResponse.json(
       {
         session: session
           ? {
               caseId: session.caseId,
-              displayName: session.patient.displayName,
+              displayName: session.displayName,
               summary: session.preparedStateId
                 ? `${demoCaseLabels[session.caseId].summary}. Prepared starting point: ${preparedDemoState(session.preparedStateId).label}. DEMONSTRATIVE — NOT CLINICALLY VALIDATED`
                 : demoCaseLabels[session.caseId].summary,
