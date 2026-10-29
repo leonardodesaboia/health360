@@ -118,7 +118,7 @@ export default async function Queue() {
         </>
       ) : (
         <EmptyState
-          title={session ? "No analysis is ready yet" : "Select a demo case"}
+          title={session ? "No analysis is ready yet" : "No demo case selected"}
           description={
             session
               ? "Complete the confirmed intake and analysis for this synthetic case before review can begin."

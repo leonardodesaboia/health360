@@ -46,7 +46,7 @@ test("patient and doctor navigation and review boundary", async ({ page }) => {
   await page.getByRole("link", { name: /View as physician/ }).click();
   const queue = page.getByRole("main");
   await expect(
-    queue.getByRole("heading", { name: "Select a demo case", exact: true }),
+    queue.getByRole("heading", { name: "No demo case selected", exact: true }),
   ).toBeVisible();
   await expect(queue.locator('a[href^="/doctor/reviews/"]')).toHaveCount(0);
   const chooseCase = queue.getByRole("link", {
