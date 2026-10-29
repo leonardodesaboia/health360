@@ -44,12 +44,18 @@ test("patient and doctor navigation and review boundary", async ({ page }) => {
     }),
   ).toBeVisible();
   await page.getByRole("link", { name: /View as physician/ }).click();
+  const queue = page.getByRole("main");
   await expect(
-    page.getByRole("heading", { name: "No analyses to review" }),
+    queue.getByRole("heading", { name: "No demo case selected", exact: true }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Open review" })).toHaveCount(0);
-  await page.getByRole("link", { name: "Go to demonstration case" }).click();
-  await expect(page).toHaveURL(/\/patient$/);
+  await expect(queue.locator('a[href^="/doctor/reviews/"]')).toHaveCount(0);
+  const chooseCase = queue.getByRole("link", {
+    name: "Choose a demo case",
+    exact: true,
+  });
+  await expect(chooseCase).toHaveAttribute("href", "/patient#demo-case-title");
+  await chooseCase.click();
+  await expect(page).toHaveURL(/\/patient#demo-case-title$/);
 });
 test("physician header describes demonstration reviews without validation claims", async ({
   page,

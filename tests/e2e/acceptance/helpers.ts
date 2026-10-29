@@ -339,7 +339,7 @@ export async function completeRepeatIntake(
 export async function openPhysicianWorkspace(page: Page, patient: string) {
   await page.goto("/doctor");
   await expect(page.getByRole("main")).toContainText(patient);
-  await page.getByRole("link", { name: "Open review", exact: true }).click();
+  await page.getByRole("link", { name: "Start review", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Proposals for review", exact: true }),
   ).toBeVisible(afterAction);
@@ -360,7 +360,7 @@ export async function decideAndFinalize(
   await page.goto("/doctor");
   await expect(page.getByRole("main")).toContainText(patient);
   await page
-    .getByRole("link", { name: "Open review", exact: true })
+    .getByRole("link", { name: "Start review", exact: true })
     .first()
     .click();
   const region = page.getByRole("region", {

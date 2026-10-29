@@ -62,8 +62,27 @@ for (const kind of ["bounded", "free-text"] as const)
         await decisions
           .getByLabel("Related intake question (optional)", { exact: true })
           .selectOption("age");
+      await expect(decisions).toContainText(
+        "Sends the question to the patient and requires updated information and a new analysis. This does not publish a plan.",
+      );
+      await expect(
+        decisions.getByRole("button", { name: "Finalize review", exact: true }),
+      ).toBeDisabled();
+      const patient = await context.newPage();
+      await patient.goto("/patient/clarification");
+      await expect(patient.getByLabel(question, { exact: true })).toHaveCount(
+        0,
+      );
+      await patient.goto("/patient/plan");
+      await expect(
+        patient.getByRole("heading", { name: "Selected actions", exact: true }),
+      ).toHaveCount(0);
+      await patient.close();
       await decisions
-        .getByRole("button", { name: "Save decisions", exact: true })
+        .getByRole("button", {
+          name: "Send clarification request",
+          exact: true,
+        })
         .click();
       await expect(decisions.getByRole("status")).toContainText(
         "Clarification requested",
@@ -95,9 +114,11 @@ for (const kind of ["bounded", "free-text"] as const)
           () => document.documentElement.scrollWidth <= innerWidth,
         ),
       ).toBe(true);
-      // The shared case selector hydrates independently; wait for its loading
-      // opacity to settle before measuring whole-page contrast.
-      await expect(page.locator("#demo-case-title")).toHaveText(/^Demo case:/);
+      // The shell reads its session independently. Confirm the visible identity,
+      // then inspect the case controls after opening the presenter disclosure.
+      await expect(page.locator("#demo-case-title")).toHaveText(
+        "Demo case: Alex Example",
+      );
       await page.getByText("Presenter controls", { exact: true }).click();
       const selectedCase = page.getByRole("button", {
         name: "Alex Example",

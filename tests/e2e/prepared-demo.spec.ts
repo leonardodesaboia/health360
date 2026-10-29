@@ -91,7 +91,7 @@ for (const state of [
       await expect(queue).toContainText(state.patient);
       await expect(queue).toContainText("Awaiting physician review");
       await queue
-        .getByRole("link", { name: "Open review", exact: true })
+        .getByRole("link", { name: "Start review", exact: true })
         .filter({ visible: true })
         .click();
       await expect(

@@ -4,7 +4,6 @@ import { resolve } from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { test as base, expect, type Page } from "@playwright/test";
 import { z } from "zod";
-
 const seededSchema = z.object({
   datasetId: z.string(),
   workspaceId: z.string(),
@@ -98,6 +97,8 @@ test("physician reads stored time, exact versions, unknown facts and evidence wi
   baseURL,
   reviewCase,
 }, testInfo) => {
+  if (testInfo.project.name === "desktop")
+    await page.setViewportSize({ width: 1440, height: 900 });
   const reader = page.getByRole("main");
   await page.context().addCookies([
     {
@@ -121,7 +122,17 @@ test("physician reads stored time, exact versions, unknown facts and evidence wi
   ).toBeVisible();
   await expectNoSeriousAxe(page);
   await reader
-    .getByRole("link", { name: "Open review", exact: true })
+    .getByRole("link", { name: "Start review", exact: true })
+    .filter({ visible: true })
+    .hover();
+  await page.reload();
+  await expect(
+    reader
+      .getByRole("link", { name: "Start review", exact: true })
+      .filter({ visible: true }),
+  ).toBeVisible();
+  await reader
+    .getByRole("link", { name: "Start review", exact: true })
     .filter({ visible: true })
     .click();
   await expect(
@@ -134,12 +145,28 @@ test("physician reads stored time, exact versions, unknown facts and evidence wi
       .filter({ visible: true }),
   ).toBeVisible();
   await reader
-    .getByRole("link", { name: "Open review", exact: true })
+    .getByRole("link", { name: "Continue review", exact: true })
     .filter({ visible: true })
     .click();
   await expect(
     reader.getByRole("heading", { name: "Patient context", exact: true }),
   ).toBeVisible();
+  const proposalsLink = reader.getByRole("link", {
+    name: "Go to proposals and evidence",
+    exact: true,
+  });
+  await proposalsLink.focus();
+  await page.keyboard.press("Enter");
+  await expect(
+    reader.getByRole("heading", { name: "Proposals for review", exact: true }),
+  ).toBeFocused();
+  await reader
+    .getByRole("link", { name: "Go to physician decisions", exact: true })
+    .focus();
+  await page.keyboard.press("Enter");
+  await expect(
+    reader.getByRole("heading", { name: "Physician decisions", exact: true }),
+  ).toBeFocused();
   await expect(
     reader
       .getByRole("listitem")
@@ -161,6 +188,23 @@ test("physician reads stored time, exact versions, unknown facts and evidence wi
       "Synthetic rendering fixture only; physician review is required.",
     ),
   ).toBeVisible();
+  await expect(
+    reader.getByText("Personal risk history: No", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    reader.getByText("Patient-reported", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    reader.getByText("Previous colorectal screening: Never screened", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    reader
+      .locator("article")
+      .getByText(/^Colonoscopy (result|was|preparation)/),
+  ).toHaveCount(0);
+  await expect(reader.getByText(/^A recent test alone/)).toHaveCount(0);
   const evidence = reader.getByText("View evidence and sources", {
     exact: true,
   });
@@ -234,7 +278,12 @@ test("newer profile warns about staleness without replacing the analyzed profile
   await page.goto(
     `/doctor/reviews/${encodeURIComponent(reviewCase.workspaceId)}`,
   );
-  await expect(page.getByText("Stale analysis", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Newer information exists.", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Finalize review", exact: true }),
+  ).toBeDisabled();
   await expect(page.getByText(/System-structured profile v1/)).toBeVisible();
   await expect(page.getByText("50", { exact: true })).toBeVisible();
 });
@@ -268,7 +317,9 @@ test("blocked analysis has no fallback proposals", async ({
   ).toHaveCount(0);
   await expect(page.getByText(/mock \/ reader-integration/)).toHaveCount(0);
   await expect(
-    page.getByText("Analysis blocked", { exact: true }),
+    page.getByText("This analysis cannot be reviewed or published.", {
+      exact: true,
+    }),
   ).toBeVisible();
   await expect(
     page.getByText("No proposals available.", { exact: true }),
@@ -276,4 +327,13 @@ test("blocked analysis has no fallback proposals", async ({
   await expect(
     page.getByRole("heading", { name: "Demonstrative review item" }),
   ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Finalize review", exact: true }),
+  ).toBeDisabled();
+  await page.goto("/doctor");
+  await expect(
+    page
+      .getByRole("link", { name: "View blocked analysis", exact: true })
+      .filter({ visible: true }),
+  ).toBeVisible();
 });

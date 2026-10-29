@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import Link from "next/link";
 import { Notice } from "@/components/shared/primitives";
 import { Button } from "@/components/ui/button";
 import { fields } from "../health-intake/contracts";
@@ -27,6 +28,22 @@ const initialState: ReviewActionState = { status: "idle", message: "" };
 const controlClass =
   "min-h-11 w-full rounded-md border border-input bg-card px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground";
 
+async function submitReview(
+  previous: ReviewActionState,
+  form: FormData,
+): Promise<ReviewActionState> {
+  try {
+    return await saveReviewAction(previous, form);
+  } catch {
+    return {
+      status: "error",
+      message:
+        "We could not confirm the result. Reload this review to check its recorded status.",
+      reviewVersion: previous.reviewVersion,
+    };
+  }
+}
+
 export function DecisionForm({ workspace }: { workspace: ReviewWorkspace }) {
   const { analysis, review, stale, workflowStatus } = workspace;
   const proposals = reviewableProposals(analysis);
@@ -42,10 +59,8 @@ export function DecisionForm({ workspace }: { workspace: ReviewWorkspace }) {
       };
     }),
   );
-  const [state, action, pending] = useActionState(
-    saveReviewAction,
-    initialState,
-  );
+  const [state, action, pending] = useActionState(submitReview, initialState);
+  const [submittedIntent, setSubmittedIntent] = useState("save");
   const finalized =
     Boolean(review?.completedAt) || state.status === "finalized";
   const locked =
@@ -58,9 +73,16 @@ export function DecisionForm({ workspace }: { workspace: ReviewWorkspace }) {
     !["MEDICAL_REVIEW_PENDING", "MEDICAL_REVIEW_IN_PROGRESS"].includes(
       workflowStatus,
     );
-  const incomplete = decisions.some((d) =>
+  const incompleteCount = decisions.filter((d) =>
     ["PENDING", "CLARIFY"].includes(d.decision),
-  );
+  ).length;
+  const incomplete = incompleteCount > 0;
+  const hasClarify = decisions.some((d) => d.decision === "CLARIFY");
+  const published =
+    state.status === "finalized" ||
+    (Boolean(review?.completedAt) &&
+      !stale &&
+      workflowStatus === "PLAN_AVAILABLE");
   const readOnly = locked && !pending;
   const clarificationRequested =
     workflowStatus === "CLARIFICATION_REQUIRED" ||
@@ -76,7 +98,13 @@ export function DecisionForm({ workspace }: { workspace: ReviewWorkspace }) {
       aria-labelledby="physician-decisions-heading"
       className="rounded-lg border bg-card p-6 text-card-foreground"
     >
-      <h2 id="physician-decisions-heading">Physician decisions</h2>
+      <h2
+        id="physician-decisions-heading"
+        tabIndex={-1}
+        className="scroll-mt-6"
+      >
+        Physician decisions
+      </h2>
       <p className="mt-3 text-sm text-muted-foreground">
         Demo reviewer — not a real clinician (demo-physician). These synthetic
         decisions do not provide clinical validation.
@@ -88,9 +116,26 @@ export function DecisionForm({ workspace }: { workspace: ReviewWorkspace }) {
       {readOnly && (
         <div className="mt-4">
           {finalized ? (
-            <Notice title="Review finalized">
+            <Notice
+              title={
+                published
+                  ? "Review finalized. Reviewed demonstration plan published."
+                  : "Review finalized. Check plan status."
+              }
+            >
               This review is finalized and cannot be changed. The decisions
               below are read-only.
+              <p className="mt-3">
+                Demo role navigation only; no sign-in or authorization.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-3">
+                <Button asChild>
+                  <Link href="/patient/plan">View patient plan</Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link href="/doctor">Back to queue</Link>
+                </Button>
+              </div>
             </Notice>
           ) : clarificationRequested ? (
             <Notice title="Clarification requested" tone="warning">
@@ -107,6 +152,12 @@ export function DecisionForm({ workspace }: { workspace: ReviewWorkspace }) {
       )}
       <form
         action={action}
+        onSubmit={(event) => {
+          const submitter = (event.nativeEvent as SubmitEvent).submitter;
+          setSubmittedIntent(
+            submitter instanceof HTMLButtonElement ? submitter.value : "save",
+          );
+        }}
         onReset={(event) => {
           // Server Actions reset native controls; keep visible selections aligned with the controlled draft.
           event.preventDefault();
@@ -114,6 +165,7 @@ export function DecisionForm({ workspace }: { workspace: ReviewWorkspace }) {
         aria-label="Review proposal decisions"
         className="mt-6 space-y-6"
         aria-describedby="review-help review-feedback"
+        aria-busy={pending}
       >
         <input type="hidden" name="workspaceId" value={workspaceId(analysis)} />
         <input
@@ -261,32 +313,60 @@ export function DecisionForm({ workspace }: { workspace: ReviewWorkspace }) {
             </div>
           ))}
           <div className="flex flex-wrap gap-3">
-            <Button type="submit" name="intent" value="save" variant="outline">
-              Save decisions
+            <Button
+              type="submit"
+              name="intent"
+              value="save"
+              variant={hasClarify ? "default" : "outline"}
+            >
+              {hasClarify ? "Send clarification request" : "Save decisions"}
             </Button>
             <Button
               type="submit"
               name="intent"
               value="finalize"
               disabled={incomplete}
+              variant={hasClarify ? "outline" : "default"}
             >
               Finalize review
             </Button>
           </div>
         </fieldset>
+        {!readOnly && (
+          <p
+            className="text-sm tabular-nums"
+            aria-live="polite"
+            aria-label="Draft decision completeness"
+          >
+            {incomplete
+              ? `${incompleteCount.toLocaleString("en-US")} of ${decisions.length.toLocaleString("en-US")} proposals still need a decision.`
+              : "Decisions entered. Finalization checks are still required."}
+          </p>
+        )}
+        {!readOnly && hasClarify && (
+          <p className="text-sm">
+            Sends the question to the patient and requires updated information
+            and a new analysis. This does not publish a plan. Selecting Request
+            clarification alone sends nothing.
+          </p>
+        )}
         <p id="review-help" className="text-sm text-muted-foreground">
           {readOnly
             ? "Decisions are read-only in this state."
             : incomplete
               ? "Finalize review becomes available when every proposal is approved, modified or rejected. A clarification request keeps the review incomplete and returns the case for updated information and analysis."
-              : "Every proposal has a decision. Finalize review records them and publishes the reviewed plan."}
+              : "Selecting a decision only edits the draft. Save decisions records a review version; publication requires successful server finalization checks."}
         </p>
         <p
           id="review-feedback"
           role={state.status === "error" ? "alert" : "status"}
           className="text-sm"
         >
-          {pending ? "Saving review…" : state.message}
+          {pending
+            ? submittedIntent === "finalize"
+              ? "Finalizing review…"
+              : "Saving decisions…"
+            : state.message}
         </p>
       </form>
     </section>

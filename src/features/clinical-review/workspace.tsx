@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
   InformationGap,
   Notice,
@@ -14,13 +16,12 @@ import {
   type ReviewWorkspace,
 } from "./reader";
 
-const provenanceLabels = {
-  PATIENT_REPORTED: "Patient-reported",
-  SYSTEM_STRUCTURED: "System-structured",
-  RULE_GENERATED: "Rule-generated",
-  AI_GENERATED: "AI-generated",
-  PHYSICIAN_REVIEWED: "Physician-reviewed",
-};
+import {
+  provenanceLabels,
+  readableConsideredData,
+  uniqueDemonstrativeLabel,
+  visibleLimitations,
+} from "./guidance";
 
 const categories = {
   PREVENTIVE_OPPORTUNITY: "Preventive opportunity",
@@ -41,8 +42,34 @@ export function WorkspaceReader({
   const facts = declaredFacts(profile);
   const presentation = analysisPresentation(analysis);
   const completed = Boolean(workspace.review?.completedAt);
+  const pendingCount = proposals.filter((proposal) => {
+    const decision = workspace.review?.decisions.find(
+      (item) => item.proposalId === proposal.id,
+    )?.decision;
+    return !decision || decision === "PENDING" || decision === "CLARIFY";
+  }).length;
   return (
     <>
+      <section aria-label="Review tasks" className="space-y-3">
+        <ol className="list-inside list-decimal space-y-2 text-sm">
+          <li>Check context and evidence.</li>
+          <li>Decide on every proposal.</li>
+          <li>Finalize to publish the reviewed demonstration plan.</li>
+        </ol>
+        <p className="text-sm tabular-nums">
+          {pendingCount.toLocaleString("en-US")} of{" "}
+          {proposals.length.toLocaleString("en-US")} proposals still need a
+          decision in the recorded review.
+        </p>
+        <nav aria-label="Review sections" className="flex flex-wrap gap-3">
+          <Button asChild variant="outline">
+            <a href="#review-proposals">Go to proposals and evidence</a>
+          </Button>
+          <Button asChild variant="outline">
+            <a href="#physician-decisions-heading">Go to physician decisions</a>
+          </Button>
+        </nav>
+      </section>
       <Notice title="DEMONSTRATIVE — NOT CLINICALLY VALIDATED" tone="warning">
         {analysis.status === "BLOCKED"
           ? "Synthetic data. This analysis is blocked. System and rule context are shown without an AI recommendation. A demo reviewer does not provide clinical validation."
@@ -51,14 +78,31 @@ export function WorkspaceReader({
             : "Synthetic data. AI-generated proposals are preliminary and require physician review. A demo reviewer does not provide clinical validation."}
       </Notice>
       {stale && (
-        <Notice title="Stale analysis" tone="warning">
-          Newer information exists. Decisions must use the current profile,
-          context and analysis versions.
+        <Notice title="Newer information exists." tone="warning">
+          These decisions cannot be finalized. Return to the queue and open the
+          latest analysis.
+          <div className="mt-3">
+            <Button asChild>
+              <Link href="/doctor">Back to queue</Link>
+            </Button>
+          </div>
         </Notice>
       )}
       {analysis.status === "BLOCKED" && (
-        <Notice title="Analysis blocked" tone="warning">
-          This analysis cannot be finalized or published.
+        <Notice
+          title="This analysis cannot be reviewed or published."
+          tone="warning"
+        >
+          The patient must retry analysis or provide the requested information
+          before a new review can continue.
+          <p className="mt-3">
+            Demo role navigation only; no sign-in or authorization.
+          </p>
+          <div className="mt-3">
+            <Button asChild>
+              <Link href="/patient/analysis">View patient status</Link>
+            </Button>
+          </div>
         </Notice>
       )}
       <div className="grid items-start gap-8 lg:grid-cols-2">
@@ -159,7 +203,9 @@ export function WorkspaceReader({
         <div className="space-y-6">
           <Surface>
             <h2>{presentation.summaryHeading}</h2>
-            <p className="mt-3 text-sm">{analysis.summary}</p>
+            <p className="mt-3 text-sm">
+              {uniqueDemonstrativeLabel(analysis.summary)}
+            </p>
             <p className="mt-3 text-xs text-muted-foreground">
               {presentation.summaryProvenance} · Analysis v{analysis.version} ·
               Profile v{analysis.profileVersion} · Context v
@@ -189,7 +235,7 @@ export function WorkspaceReader({
                 empty="No additional relevant information recorded."
               />
               <TextList
-                items={analysis.uncertainties}
+                items={visibleLimitations(analysis.uncertainties)}
                 empty="No additional uncertainty recorded; this is not clinical confirmation."
               />
               <TextList
@@ -199,7 +245,9 @@ export function WorkspaceReader({
             </details>
           </Surface>
           <Surface>
-            <h2>Proposals for review</h2>
+            <h2 id="review-proposals" tabIndex={-1} className="scroll-mt-6">
+              Proposals for review
+            </h2>
             <p className="mt-3 text-sm text-muted-foreground">
               {analysis.status === "BLOCKED"
                 ? "This blocked result contains no reviewable proposals."
@@ -294,14 +342,20 @@ export function WorkspaceReader({
                   })}
                   <p className="mt-3 font-medium">Data considered</p>
                   <TextList
-                    items={proposal.consideredData}
+                    items={readableConsideredData(
+                      proposal.consideredData,
+                      profile.intakeFacts?.priorScreening === "COLONOSCOPY",
+                    )}
                     empty="No considered data recorded."
                   />
                   <p className="mt-3 font-medium">
                     Uncertainty and limitations
                   </p>
                   <TextList
-                    items={proposal.uncertainties}
+                    items={visibleLimitations(
+                      proposal.uncertainties,
+                      proposal.category,
+                    )}
                     empty="No uncertainty supplied; physician review is still required."
                   />
                 </details>

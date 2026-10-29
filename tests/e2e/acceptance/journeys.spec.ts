@@ -43,11 +43,11 @@ test("Flow A part 1: real intake reaches the physician queue, persists and reset
   await page.goto("/doctor");
   await expect(page.getByRole("main")).toContainText("Alex Example");
   await expect(
-    page.getByRole("link", { name: "Open review", exact: true }),
+    page.getByRole("link", { name: "Start review", exact: true }),
   ).toHaveCount(1);
-  await page.getByRole("link", { name: "Open review", exact: true }).focus();
+  await page.getByRole("link", { name: "Start review", exact: true }).focus();
   await expect(
-    page.getByRole("link", { name: "Open review", exact: true }),
+    page.getByRole("link", { name: "Start review", exact: true }),
   ).toBeFocused();
   expect(
     await page.evaluate(
