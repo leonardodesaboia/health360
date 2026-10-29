@@ -97,6 +97,8 @@ test("physician reads stored time, exact versions, unknown facts and evidence wi
   baseURL,
   reviewCase,
 }, testInfo) => {
+  if (testInfo.project.name === "desktop")
+    await page.setViewportSize({ width: 1440, height: 900 });
   const reader = page.getByRole("main");
   await page.context().addCookies([
     {
