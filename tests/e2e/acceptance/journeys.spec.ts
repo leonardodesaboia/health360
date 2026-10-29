@@ -8,6 +8,7 @@ import {
   decideAndFinalize,
   assertNoUnreviewedPlan,
   afterAction,
+  assertPatientGuidance,
 } from "./helpers";
 
 test.setTimeout(180000);
@@ -29,10 +30,34 @@ test("Flow A part 1: real intake reaches the physician queue, persists and reset
   await expect(
     page.getByText("Awaiting physician review", { exact: true }),
   ).toBeVisible(afterAction);
+  await assertPatientGuidance(page, {
+    heading: "Waiting for the demo reviewer",
+    actor: "Demo reviewer",
+    action: "Refresh status",
+    kind: "button",
+    stages: [
+      "IntakeComplete",
+      "AnalysisComplete",
+      "Physician reviewCurrent",
+      "PlanWaiting",
+    ],
+  });
   await page.reload();
   await expect(
     page.getByText("Awaiting physician review", { exact: true }),
   ).toBeVisible(afterAction);
+  await assertPatientGuidance(page, {
+    heading: "Waiting for the demo reviewer",
+    actor: "Demo reviewer",
+    action: "Refresh status",
+    kind: "button",
+    stages: [
+      "IntakeComplete",
+      "AnalysisComplete",
+      "Physician reviewCurrent",
+      "PlanWaiting",
+    ],
+  });
   const persisted = await demo.inspect(token);
   expect(persisted.profiles).toContainEqual({ version: 2, age: 50 });
   expect(persisted.analyses).toEqual([
@@ -79,6 +104,19 @@ test("Flow A part 1: real intake reaches the physician queue, persists and reset
   await expect(
     page.getByRole("link", { name: /^Open source: / }).first(),
   ).toBeVisible();
+  await page.goto("/patient/analysis");
+  await assertPatientGuidance(page, {
+    heading: "Review has started",
+    actor: "Demo reviewer",
+    action: "Refresh status",
+    kind: "button",
+    stages: [
+      "IntakeComplete",
+      "AnalysisComplete",
+      "Physician reviewCurrent",
+      "PlanWaiting",
+    ],
+  });
   await page.goto("/doctor");
 
   const other = await browser.newContext();
@@ -131,13 +169,30 @@ for (const [variant, reason] of [
     ]);
     expect(failed.plans).toEqual([]);
     await page.reload();
-    await expect(page.getByRole("status")).toContainText(
-      "No new proposals are available",
-    );
+    await assertPatientGuidance(page, {
+      heading: "Retry the analysis",
+      actor: "You",
+      action: "Retry analysis",
+      kind: "button",
+      stages: [
+        "IntakeComplete",
+        "AnalysisBlocked",
+        "Physician reviewWaiting",
+        "PlanWaiting",
+      ],
+    });
+    await expect(
+      page.getByRole("region", { name: "What happens next", exact: true }),
+    ).toContainText("This attempt did not produce reviewable proposals.");
     await expect(page.getByRole("main")).not.toContainText(
       /UNTRUSTED_RESPONSE_MARKER|unknown-evidence-test-only|OPENAI_API_KEY|stack trace/,
     );
     await assertNoUnreviewedPlan(page);
+    await expect(
+      page
+        .getByRole("region", { name: "What happens next", exact: true })
+        .getByRole("link", { name: "Go to retry analysis", exact: true }),
+    ).toHaveAttribute("href", "/patient/analysis");
     await page.goto("/patient/analysis");
     await page
       .getByRole("button", { name: "Retry analysis", exact: true })
@@ -145,6 +200,18 @@ for (const [variant, reason] of [
     await expect(
       page.getByText("Awaiting physician review", { exact: true }),
     ).toBeVisible(afterAction);
+    await assertPatientGuidance(page, {
+      heading: "Waiting for the demo reviewer",
+      actor: "Demo reviewer",
+      action: "Refresh status",
+      kind: "button",
+      stages: [
+        "IntakeComplete",
+        "AnalysisComplete",
+        "Physician reviewCurrent",
+        "PlanWaiting",
+      ],
+    });
     await page.reload();
     await expect(
       page.getByRole("button", { name: "Retry analysis", exact: true }),
@@ -192,6 +259,18 @@ test("Flow D start: fixture-reviewed plan v1 is preserved when real reassessment
     page.getByLabel("Age in the synthetic scenario", { exact: true }),
   ).toHaveValue("50");
   await page.goto("/patient/plan");
+  await assertPatientGuidance(page, {
+    heading: "Update your information",
+    actor: "You",
+    action: "Continue health intake",
+    kind: "link",
+    stages: [
+      "IntakeCurrent",
+      "AnalysisWaiting",
+      "Physician reviewWaiting",
+      "PlanWaiting",
+    ],
+  });
   await expect(
     page.getByText("Previous reviewed plan", { exact: true }),
   ).toBeVisible();
@@ -224,6 +303,18 @@ test("Flow A completion: explicit approval and finalization publish only the rev
   await expect(
     page.getByText("Awaiting physician review", { exact: true }),
   ).toBeVisible(afterAction);
+  await assertPatientGuidance(page, {
+    heading: "Waiting for the demo reviewer",
+    actor: "Demo reviewer",
+    action: "Refresh status",
+    kind: "button",
+    stages: [
+      "IntakeComplete",
+      "AnalysisComplete",
+      "Physician reviewCurrent",
+      "PlanWaiting",
+    ],
+  });
   await assertNoUnreviewedPlan(page);
   await decideAndFinalize(page, "Alex Example", { kind: "APPROVE" });
 
@@ -232,6 +323,18 @@ test("Flow A completion: explicit approval and finalization publish only the rev
   expect(persisted.plans[0].version).toBe(1);
   await page.goto("/patient/plan");
   const plan = page.getByRole("main");
+  await assertPatientGuidance(page, {
+    heading: "Your reviewed demonstration plan",
+    actor: "You",
+    action: "View update options",
+    kind: "link",
+    stages: [
+      "IntakeComplete",
+      "AnalysisComplete",
+      "Physician reviewComplete",
+      "PlanComplete",
+    ],
+  });
   await expect(
     plan.getByText("Reviewed demonstration plan", { exact: true }),
   ).toBeVisible();
@@ -259,6 +362,18 @@ test("Flow B completion: a modified redundancy proposal publishes only the physi
   await expect(
     page.getByText("Awaiting physician review", { exact: true }),
   ).toBeVisible(afterAction);
+  await assertPatientGuidance(page, {
+    heading: "Waiting for the demo reviewer",
+    actor: "Demo reviewer",
+    action: "Refresh status",
+    kind: "button",
+    stages: [
+      "IntakeComplete",
+      "AnalysisComplete",
+      "Physician reviewCurrent",
+      "PlanWaiting",
+    ],
+  });
   const revised =
     "Discuss with your physician whether a repeat colonoscopy is needed now.";
   await decideAndFinalize(page, "Jordan Example", {
@@ -270,6 +385,18 @@ test("Flow B completion: a modified redundancy proposal publishes only the physi
   await page.goto("/patient/plan");
   const plan = page.getByRole("main");
   await expect(plan.getByText(revised, { exact: true })).toBeVisible();
+  await assertPatientGuidance(page, {
+    heading: "Your reviewed demonstration plan",
+    actor: "You",
+    action: "View update options",
+    kind: "link",
+    stages: [
+      "IntakeComplete",
+      "AnalysisComplete",
+      "Physician reviewComplete",
+      "PlanComplete",
+    ],
+  });
   await expect(plan).not.toContainText(
     /Review supplied possible redundancy|crc-routine-repeat/,
   );
@@ -288,6 +415,18 @@ test("Flow B: Jordan's recent normal colonoscopy yields a traceable preliminary 
   await expect(
     page.getByText("Awaiting physician review", { exact: true }),
   ).toBeVisible(afterAction);
+  await assertPatientGuidance(page, {
+    heading: "Waiting for the demo reviewer",
+    actor: "Demo reviewer",
+    action: "Refresh status",
+    kind: "button",
+    stages: [
+      "IntakeComplete",
+      "AnalysisComplete",
+      "Physician reviewCurrent",
+      "PlanWaiting",
+    ],
+  });
   const persisted = await demo.inspect(token);
   expect(persisted.analyses).toEqual([
     { status: "PRELIMINARY", profileVersion: 2, proposalCount: 1 },
@@ -342,6 +481,18 @@ for (const answer of ["date", "unknown"] as const) {
     await expect(
       page.getByText("More information needed", { exact: true }),
     ).toBeVisible(afterAction);
+    await assertPatientGuidance(page, {
+      heading: "Answer the requested questions",
+      actor: "You",
+      action: "Answer missing information",
+      kind: "link",
+      stages: [
+        "IntakeComplete",
+        "AnalysisBlocked",
+        "Physician reviewWaiting",
+        "PlanWaiting",
+      ],
+    });
     await assertNoUnreviewedPlan(page);
 
     await page.goto("/patient/analysis");
@@ -355,6 +506,12 @@ for (const answer of ["date", "unknown"] as const) {
       { exact: true },
     );
     await expect(unknown).toBeChecked();
+    await expect(
+      page.getByText(
+        "Enter the date in the order the field shows. Your browser sets that order; in US format it is month/day/year.",
+        { exact: true },
+      ),
+    ).toBeVisible();
     if (answer === "date") {
       await unknown.uncheck();
       await page.getByLabel(question, { exact: true }).fill("2022-11-03");
@@ -375,6 +532,34 @@ for (const answer of ["date", "unknown"] as const) {
       ),
     ).toBeVisible(afterAction);
 
+    await assertPatientGuidance(
+      page,
+      answer === "date"
+        ? {
+            heading: "Waiting for the demo reviewer",
+            actor: "Demo reviewer",
+            action: "Refresh status",
+            kind: "button",
+            stages: [
+              "IntakeComplete",
+              "AnalysisComplete",
+              "Physician reviewCurrent",
+              "PlanWaiting",
+            ],
+          }
+        : {
+            heading: "Answer the requested questions",
+            actor: "You",
+            action: "Answer missing information",
+            kind: "link",
+            stages: [
+              "IntakeComplete",
+              "AnalysisBlocked",
+              "Physician reviewWaiting",
+              "PlanWaiting",
+            ],
+          },
+    );
     const persisted = await demo.inspect(token);
     expect(persisted.profiles.map((profile) => profile.version)).toEqual(
       expect.arrayContaining([1, 2, 3]),
@@ -422,6 +607,18 @@ test("Flow D completion: updated information receives a new finalized review and
   await expect(
     page.getByText("Awaiting physician review", { exact: true }),
   ).toBeVisible(afterAction);
+  await assertPatientGuidance(page, {
+    heading: "Waiting for the demo reviewer",
+    actor: "Demo reviewer",
+    action: "Refresh status",
+    kind: "button",
+    stages: [
+      "IntakeComplete",
+      "AnalysisComplete",
+      "Physician reviewCurrent",
+      "PlanWaiting",
+    ],
+  });
   await decideAndFinalize(page, "Alex Example", { kind: "APPROVE" });
   const cycleOne = await demo.inspect(token);
   expect(cycleOne.plans).toHaveLength(1);
@@ -438,12 +635,37 @@ test("Flow D completion: updated information receives a new finalized review and
   await expect(
     page.getByText("Awaiting physician review", { exact: true }),
   ).toBeVisible(afterAction);
+  await assertPatientGuidance(page, {
+    heading: "Waiting for the demo reviewer",
+    actor: "Demo reviewer",
+    action: "Refresh status",
+    kind: "button",
+    stages: [
+      "IntakeComplete",
+      "AnalysisComplete",
+      "Physician reviewCurrent",
+      "PlanWaiting",
+    ],
+  });
   await decideAndFinalize(page, "Alex Example", { kind: "APPROVE" });
 
   const cycleTwo = await demo.inspect(token);
   expect(cycleTwo.plans.map((plan) => plan.version).sort()).toEqual([1, 2]);
   expect(cycleTwo.plans).toEqual(expect.arrayContaining(cycleOne.plans));
   expect(cycleTwo.eventKinds).toContain("REASSESSMENT_REQUESTED");
+  await page.goto("/patient/plan");
+  await assertPatientGuidance(page, {
+    heading: "Your reviewed demonstration plan",
+    actor: "You",
+    action: "View update options",
+    kind: "link",
+    stages: [
+      "IntakeComplete",
+      "AnalysisComplete",
+      "Physician reviewComplete",
+      "PlanComplete",
+    ],
+  });
   await page.goto("/patient/history");
   for (const version of [1, 2])
     await expect(
