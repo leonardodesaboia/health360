@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   cookies: vi.fn(),
   database: vi.fn(),
   load: vi.fn(),
+  presenter: vi.fn(),
   replace: vi.fn(),
   reset: vi.fn(),
 }));
@@ -12,11 +13,13 @@ vi.mock("next/headers", () => ({ cookies: mocks.cookies }));
 vi.mock("../db/client", () => ({ getDatabase: mocks.database }));
 vi.mock("./store", () => ({
   loadDemoCase: mocks.load,
+  loadDemoPresenterCase: mocks.presenter,
   replaceDemoDataset: mocks.replace,
   resetDemoDataset: mocks.reset,
 }));
 import {
   getDemoSession,
+  getDemoPresenterSession,
   selectDemoCaseForSession,
   resetDemoSession,
 } from "./session";
@@ -136,4 +139,21 @@ describe("cookie-bound demo session", () => {
     );
     expect(mocks.set).not.toHaveBeenCalled();
   });
+});
+
+it("does not read presenter storage without a valid cookie", async () => {
+  expect(await getDemoPresenterSession()).toBeNull();
+  mocks.get.mockReturnValue({ value: "invalid" });
+  expect(await getDemoPresenterSession()).toBeNull();
+  expect(mocks.presenter).not.toHaveBeenCalled();
+  expect(mocks.database).not.toHaveBeenCalled();
+});
+
+it("derives presenter scope from the cookie without reading the full clinical session", async () => {
+  mocks.get.mockReturnValue({ value: token });
+  const identity = { caseId: "first-screening", displayName: "Alex Example" };
+  mocks.presenter.mockResolvedValue(identity);
+  expect(await getDemoPresenterSession()).toEqual(identity);
+  expect(mocks.presenter).toHaveBeenCalledWith({}, demoDatasetId(token));
+  expect(mocks.load).not.toHaveBeenCalled();
 });

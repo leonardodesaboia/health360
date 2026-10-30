@@ -125,6 +125,8 @@ for (const scenario of ["known", "unknown", "interrupted"] as const) {
         if (scenario === "known") {
           stalePage = await context.newPage();
           await stalePage.goto("/patient/clarification");
+          // The stale tab is foregrounded by newPage; target the original tab for keyboard input.
+          await page.bringToFront();
           await unknown.focus();
           await expect(unknown).toBeFocused();
           await page.keyboard.press("Space");

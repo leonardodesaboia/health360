@@ -122,7 +122,7 @@ export default async function Queue() {
           description={
             session
               ? "Complete the confirmed intake and analysis for this synthetic case before review can begin."
-              : "Choose Alex Example or Jordan Example in Presenter controls to begin this synthetic demonstration."
+              : "Choose Alex Example, Jordan Example or Daniel Example in Presenter controls to begin this synthetic demonstration."
           }
           action={
             <Button asChild>

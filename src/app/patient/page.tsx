@@ -16,11 +16,11 @@ export default async function PatientHome() {
         <PageHeader
           eyebrow="My follow-up"
           title="Select a demo case"
-          description="Choose Alex Example or Jordan Example in Presenter controls to begin this synthetic demonstration."
+          description="Choose Alex Example, Jordan Example or Daniel Example in Presenter controls to begin this synthetic demonstration."
         />
         <EmptyState
           title="No demo case selected"
-          description="Alex and Jordan are fictional patients. Choose a case in Presenter controls to begin."
+          description="Alex, Jordan and Daniel are fictional patients. Choose a case in Presenter controls to begin."
         />
       </ContentContainer>
     );

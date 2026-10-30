@@ -324,6 +324,14 @@ resetDemoSession(): Promise<boolean> resets that dataset's current stored case,
 returning false for no selection. Invoke mutations only from Server Actions or
 Route Handlers; they are not public endpoints or authentication.
 
+Read-only Server Component calls to `getDemoSession` share React's request-local
+memoization, so multiple readers in one render do not reload the clinical snapshot.
+This is not a persistent or cross-browser cache. Workflow services still acquire
+the canonical patient lock and check current versions inside their transactions.
+Plan and history readers reuse the process database pool; page reads never disconnect
+that shared pool. `/api/demo-session` resolves only cookie-scoped case identity in a
+repeatable-read snapshot, without loading profiles, evidence or workflow status for
+presenter labels. Its response shape and uncached error behavior are unchanged.
 Storage helpers in store.ts accept (db: PrismaClient, datasetId: string):
 loadDemoCase returns Promise<StoredDemoCase | null>; resetDemoDataset returns
 Promise<boolean>; replaceDemoDataset adds caseId: DemoCaseId and returns Promise<void>.

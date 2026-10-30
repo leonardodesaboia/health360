@@ -121,7 +121,7 @@ test("analysis status without a demo session offers no analysis or proposals", a
       .getByText("DEMONSTRATIVE — NOT CLINICALLY VALIDATED", { exact: true }),
   ).toBeVisible();
   await expect(page.getByRole("main")).toContainText(
-    "Choose Alex Example or Jordan Example in Presenter controls to begin this synthetic demonstration.",
+    "Choose Alex Example, Jordan Example or Daniel Example in Presenter controls to begin this synthetic demonstration.",
   );
   await expect(
     page.getByRole("button", { name: /Analyze|Retry analysis/ }),

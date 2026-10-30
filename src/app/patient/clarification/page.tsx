@@ -75,7 +75,7 @@ export default async function ClarificationPage() {
           </h2>
           <p role="status" className="mt-3 text-sm text-muted-foreground">
             {data.status === "NO_SESSION"
-              ? "Choose Alex Example or Jordan Example in Presenter controls to begin this synthetic demonstration."
+              ? "Choose Alex Example, Jordan Example or Daniel Example in Presenter controls to begin this synthetic demonstration."
               : data.status === "UNSUPPORTED"
                 ? "This request needs a supported question set before you can answer it here. No information will be invented to complete the request."
                 : data.status === "UNAVAILABLE"

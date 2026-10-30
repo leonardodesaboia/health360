@@ -156,7 +156,7 @@ export default async function History({
       ) : (
         <EmptyState
           title="Select a demonstration case"
-          description="Choose Alex Example or Jordan Example in Presenter controls to begin this synthetic demonstration."
+          description="Choose Alex Example, Jordan Example or Daniel Example in Presenter controls to begin this synthetic demonstration."
           action={
             <Button asChild>
               <Link href="/patient#demo-case-title">Choose a demo case</Link>

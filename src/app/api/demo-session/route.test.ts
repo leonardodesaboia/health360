@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { getSession } = vi.hoisted(() => ({ getSession: vi.fn() }));
-vi.mock("../../../server/demo/session", () => ({ getDemoSession: getSession }));
+vi.mock("../../../server/demo/session", () => ({
+  getDemoPresenterSession: getSession,
+}));
 import { GET } from "./route";
 
 describe("demo presenter state", () => {
@@ -29,7 +31,7 @@ describe("demo presenter state", () => {
   it("does not reveal Jordan's examination date before the intake asks for it", async () => {
     getSession.mockResolvedValue({
       caseId: "repeat-screening",
-      patient: { displayName: "Jordan Example" },
+      displayName: "Jordan Example",
     });
     const { session } = await (await GET()).json();
     expect(session.summary).toBe(
@@ -43,7 +45,8 @@ describe("demo presenter state", () => {
       caseId: "first-screening",
       datasetId: "private-dataset",
       patientId: "private-patient",
-      patient: { displayName: "Alex Example", id: "private-patient" },
+      displayName: "Alex Example",
+      patient: { id: "private-patient" },
       profile: { personalHistory: ["private-history"] },
       examinations: ["private-exam"],
     });
@@ -72,7 +75,7 @@ describe("demo presenter state", () => {
       caseId: "first-screening",
       preparedStateId: "alex-plan-v1",
       datasetId: "private-dataset",
-      patient: { displayName: "Alex Example" },
+      displayName: "Alex Example",
     });
     const response = await GET();
     const { session: body } = await response.json();
