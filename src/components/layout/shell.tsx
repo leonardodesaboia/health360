@@ -6,52 +6,17 @@ import { Navigation } from "./navigation";
 
 function Health360BrandLogo() {
   return (
-    <span className="inline-flex items-center gap-2.5">
-      <svg
-        viewBox="0 0 44 44"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
+    <span className="inline-flex items-center">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/logo.svg"
+        alt=""
         aria-hidden="true"
-        className="size-8 shrink-0"
-      >
-        <defs>
-          <linearGradient
-            id="h360-ribbon-top"
-            x1="6"
-            y1="6"
-            x2="34"
-            y2="28"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop offset="0%" stopColor="#38D3F9" />
-            <stop offset="100%" stopColor="#0E8AC4" />
-          </linearGradient>
-          <linearGradient
-            id="h360-ribbon-bottom"
-            x1="8"
-            y1="18"
-            x2="36"
-            y2="40"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop offset="0%" stopColor="#19B5E0" />
-            <stop offset="100%" stopColor="#085E8C" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M27.5 6.5C17.5 4.5 8 11.5 8 21.5C8 26.5 11 30.5 15.5 32C12.5 28.5 12.5 22.5 16.5 18C20.5 13.5 27.5 12.5 32.5 15C32 10.5 30.5 7.1 27.5 6.5Z"
-          fill="url(#h360-ribbon-top)"
-        />
-        <path
-          d="M15.5 32C19.5 36.8 27.5 38.5 32.5 34.5C36.5 31.2 36.2 24.5 32.5 20.5C30.5 26.5 24.5 29.5 18.5 28.5C15.5 28 13.5 26.5 12.5 24.5C12.2 27.5 13.5 30.2 15.5 32Z"
-          fill="url(#h360-ribbon-bottom)"
-        />
-        <circle cx="25.5" cy="21.5" r="7.5" fill="#081521" />
-      </svg>
-      <span className="text-xl font-bold tracking-tight">
-        <span className="text-sidebar-foreground">health</span>
-        <span className="text-brand-cyan">360</span>
-      </span>
+        width={182}
+        height={36}
+        className="h-9 w-auto object-contain"
+      />
+      <span className="sr-only">health360</span>
     </span>
   );
 }
