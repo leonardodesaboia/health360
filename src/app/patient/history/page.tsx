@@ -76,31 +76,55 @@ export default async function History({
             <h2 id="plan-history-title">Reviewed plan versions</h2>
             {data.plans.length ? (
               <ul className="mt-4 divide-y rounded-lg border bg-card px-6">
-                {data.plans.map((plan, index) => (
-                  <li key={plan.id} className="py-4">
-                    <Link
-                      href={`/patient/history/${encodeURIComponent(plan.id)}`}
-                      className="inline-flex min-h-11 items-center font-medium underline underline-offset-4"
+                {data.plans.map((plan, index) => {
+                  const isCurrent =
+                    index === 0 &&
+                    data.status === "PLAN_AVAILABLE" &&
+                    plan.profileVersion === data.latestProfileVersion;
+                  return (
+                    <li
+                      key={plan.id}
+                      className="flex flex-wrap items-center justify-between gap-4 py-4"
                     >
-                      View plan version {plan.version}
-                    </Link>
-                    <p className="text-sm text-muted-foreground">
-                      {index === 0 &&
-                      data.status === "PLAN_AVAILABLE" &&
-                      plan.profileVersion === data.latestProfileVersion
-                        ? "Current reviewed plan"
-                        : "Previous reviewed plan"}{" "}
-                      ·{" "}
-                      <time dateTime={plan.publishedAt}>
-                        {date(plan.publishedAt)}
-                      </time>
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Physician-reviewed · Profile version {plan.profileVersion}{" "}
-                      · Review version {plan.reviewVersion}
-                    </p>
-                  </li>
-                ))}
+                      <div>
+                        <Link
+                          href={`/patient/history/${encodeURIComponent(plan.id)}`}
+                          className="inline-flex min-h-11 items-center font-semibold text-primary underline underline-offset-4"
+                        >
+                          View plan version {plan.version}
+                        </Link>
+                        <p className="text-sm text-muted-foreground">
+                          {isCurrent
+                            ? "Current reviewed plan"
+                            : "Previous reviewed plan"}{" "}
+                          ·{" "}
+                          <time
+                            dateTime={plan.publishedAt}
+                            className="tabular-nums"
+                          >
+                            {date(plan.publishedAt)}
+                          </time>
+                        </p>
+                        <p className="text-sm text-muted-foreground tabular-nums">
+                          Physician-reviewed · Profile version{" "}
+                          {plan.profileVersion} · Review version{" "}
+                          {plan.reviewVersion}
+                        </p>
+                      </div>
+                      <span
+                        className={
+                          isCurrent
+                            ? "rounded-sm border border-brand-cyan/40 bg-success px-2.5 py-1 text-xs font-semibold text-success-foreground"
+                            : "rounded-sm bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground"
+                        }
+                      >
+                        {isCurrent
+                          ? `Active · v${plan.version}`
+                          : `Archived · v${plan.version}`}
+                      </span>
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <p className="mt-4 text-sm text-muted-foreground">
@@ -111,18 +135,27 @@ export default async function History({
           <section aria-labelledby="timeline-title">
             <h2 id="timeline-title">Recorded events</h2>
             {data.events.length ? (
-              <ol className="mt-4 space-y-4 border-l pl-6">
+              <ol className="mt-4 space-y-4 border-l-2 border-brand-cyan pl-6">
                 {data.events.map((event) => (
-                  <li key={event.id}>
-                    <h3>{event.title}</h3>
-                    <p className="text-sm text-muted-foreground">
+                  <li
+                    key={event.id}
+                    className="relative rounded-lg border bg-card p-4"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="absolute top-5 -left-[31px] size-3 rounded-full border-2 border-card bg-brand-cyan"
+                    />
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h3>{event.title}</h3>
+                      <span className="rounded-sm bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
+                        {event.provenanceLabel}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground tabular-nums">
                       <time dateTime={event.occurredAt}>
                         {date(event.occurredAt)}
                       </time>{" "}
                       · Version {event.entityVersion}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {event.provenanceLabel}
                     </p>
                   </li>
                 ))}

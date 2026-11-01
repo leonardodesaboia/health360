@@ -25,9 +25,37 @@ export function Surface({
   );
 }
 export function StatusIndicator({ status }: { status: WorkflowStatus }) {
+  const isCompleted =
+    status === "PLAN_AVAILABLE" || status === "MEDICAL_REVIEW_COMPLETED";
+  const isWarning = status === "CLARIFICATION_REQUIRED";
+  const isFailed = status === "ANALYSIS_FAILED";
+
   return (
-    <span className="inline-flex items-center gap-2 rounded-sm bg-secondary px-3 py-1 text-sm font-medium text-secondary-foreground">
-      <span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />
+    <span
+      className={cn(
+        "inline-flex items-center gap-2 rounded-sm border px-3 py-1 text-xs font-semibold tracking-tight",
+        isCompleted
+          ? "border-brand-cyan/40 bg-success text-success-foreground"
+          : isWarning
+            ? "border-warning-foreground/25 bg-warning text-warning-foreground"
+            : isFailed
+              ? "border-destructive/30 bg-destructive text-destructive-foreground"
+              : "border-brand-cyan/30 bg-secondary text-secondary-foreground",
+      )}
+    >
+      <span
+        aria-hidden="true"
+        className={cn(
+          "size-2 rounded-full",
+          isCompleted
+            ? "bg-brand-cyan"
+            : isWarning
+              ? "bg-warning-foreground"
+              : isFailed
+                ? "bg-destructive-foreground"
+                : "bg-brand-cyan",
+        )}
+      />
       {statusLabels[status]}
     </span>
   );
