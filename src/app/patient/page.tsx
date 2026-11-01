@@ -8,14 +8,23 @@ import {
   Surface,
 } from "@/components/shared/primitives";
 import { demoPatient } from "@/features/patients/fixtures";
-import { getActiveLocalFallback } from "@/server/clinical-review/service";
+import {
+  buildFallbackScenarioState,
+  getActiveLocalFallback,
+} from "@/server/clinical-review/service";
 import { getDemoSession } from "@/server/demo/session";
 
 export default async function PatientHome() {
   // Without a selected demo case, the reference fixture keeps the page illustrative.
   let sessionPatient = null;
   try {
-    sessionPatient = (await getDemoSession())?.patient ?? null;
+    const session = await getDemoSession();
+    if (session?.caseId === "daniel-pitch") {
+      sessionPatient = (await buildFallbackScenarioState("daniel-pitch"))
+        .patient;
+    } else {
+      sessionPatient = session?.patient ?? null;
+    }
   } catch {
     sessionPatient = null;
   }

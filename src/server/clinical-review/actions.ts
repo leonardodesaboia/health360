@@ -30,7 +30,33 @@ export async function prepareScenarioAnalysisForReviewAction(
   const targetCase: DemoCaseId =
     requestedCaseId && demoCaseIdSchema.safeParse(requestedCaseId).success
       ? requestedCaseId
-      : "repeat-screening";
+      : "daniel-pitch";
+
+  if (targetCase === "daniel-pitch") {
+    try {
+      await selectDemoCaseForSession(targetCase);
+    } catch {
+      // Ignore if DB is offline
+    }
+    const cookieStore = await cookies();
+    cookieStore.set(LOCAL_DEMO_COOKIE, targetCase, {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+    });
+    const local = await buildFallbackScenarioState(targetCase);
+    for (const path of [
+      "/doctor",
+      "/patient",
+      "/patient/plan",
+      "/patient/history",
+      "/patient/analysis",
+      "/patient/profile",
+    ]) {
+      revalidatePath(path);
+    }
+    return { ok: true, analysisId: local.analysis.id };
+  }
 
   try {
     let session = await getDemoSession();
@@ -134,13 +160,16 @@ export async function submitMedicalReviewAction(
   const parsed = submitReviewInputSchema.safeParse(rawInput);
   if (
     parsed.success &&
-    (parsed.data.analysisId === "scenario-repeat-screening" ||
+    (parsed.data.analysisId === "scenario-daniel-pitch" ||
+      parsed.data.analysisId === "scenario-repeat-screening" ||
       parsed.data.analysisId === "scenario-first-screening")
   ) {
     const caseId: DemoCaseId =
-      parsed.data.analysisId === "scenario-repeat-screening"
-        ? "repeat-screening"
-        : "first-screening";
+      parsed.data.analysisId === "scenario-daniel-pitch"
+        ? "daniel-pitch"
+        : parsed.data.analysisId === "scenario-repeat-screening"
+          ? "repeat-screening"
+          : "first-screening";
     const cookieStore = await cookies();
     cookieStore.set(LOCAL_DEMO_COOKIE, caseId, {
       httpOnly: true,

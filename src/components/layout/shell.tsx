@@ -40,7 +40,7 @@ function AppShell({
         <strong>Demonstration environment</strong> · Synthetic data ·
         DEMONSTRATIVE — NOT CLINICALLY VALIDATED · Do not use for real care
       </div>
-      <header className="border-b-2 border-brand-cyan bg-sidebar text-sidebar-foreground">
+      <header className="sticky top-0 z-40 border-b-2 border-brand-cyan bg-sidebar text-sidebar-foreground">
         <div className="mx-auto flex max-w-workspace flex-wrap items-center justify-between gap-4 px-4 py-4 md:px-8">
           <Link
             href={role === "patient" ? "/patient" : "/doctor"}
@@ -56,10 +56,16 @@ function AppShell({
           </p>
           <Link
             href={role === "patient" ? "/doctor" : "/patient"}
-            className="inline-flex min-h-11 items-center gap-2 rounded-md border bg-secondary px-3 text-xs font-medium text-secondary-foreground hover:bg-navigation-hover"
+            title={role === "patient" ? "View as physician" : "View as patient"}
+            className="group inline-flex min-h-9 items-center gap-0 rounded-full border border-transparent bg-transparent px-2.5 text-xs font-medium text-muted-foreground/70 transition-all duration-200 hover:min-h-10 hover:gap-2 hover:rounded-md hover:border-border hover:bg-secondary hover:px-3 hover:text-secondary-foreground focus-visible:min-h-10 focus-visible:gap-2 focus-visible:rounded-md focus-visible:border-border focus-visible:bg-secondary focus-visible:px-3 focus-visible:text-secondary-foreground"
           >
-            <ArrowLeftRight aria-hidden="true" className="size-4" />
-            {role === "patient" ? "View as physician" : "View as patient"}
+            <ArrowLeftRight
+              aria-hidden="true"
+              className="size-4 shrink-0 transition-transform duration-200 group-hover:scale-110"
+            />
+            <span className="max-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-all duration-200 group-hover:max-w-44 group-hover:opacity-100 group-focus-visible:max-w-44 group-focus-visible:opacity-100">
+              {role === "patient" ? "View as physician" : "View as patient"}
+            </span>
             <span className="sr-only">
               {" "}
               — demonstration switching, without authorization

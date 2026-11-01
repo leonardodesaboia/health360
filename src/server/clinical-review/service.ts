@@ -141,6 +141,36 @@ function getFallbackStore(): Map<DemoCaseId, LocalFallbackRecord> {
 }
 
 export function baselineAnswersForCase(caseId: DemoCaseId): IntakeAnswers {
+  if (caseId === "daniel-pitch") {
+    return {
+      ...initialAnswers,
+      age: "40",
+      rectalBleeding: "no",
+      bowelChange: "no",
+      weightLoss: "no",
+      colorectalCancer: "no",
+      polyps: "no",
+      ibd: "no",
+      hereditaryCancerSyndrome: "no",
+      serratedPolyposis: "no",
+      familyCrc: "yes",
+      familySyndrome: "no",
+      historyDetails:
+        "Father diagnosed with colorectal cancer at age 50. Prior routine check-up chest CT showed an incidental benign pulmonary nodule.",
+      medications: "None",
+      smoking: "no",
+      activity: "yes",
+      priorScreening: "NEVER_SCREENED",
+      examName: "Routine Check-up Chest CT (Unindicated)",
+      examDatePrecision: "EXACT",
+      examDate: "2026-09-15",
+      examApproximateDate: "",
+      examResult: "Benign pulmonary nodule (incidental false-positive)",
+      colonoscopyNormal: "",
+      colonoscopyComplete: "",
+      colonoscopyAdequatePrep: "",
+    };
+  }
   const repeat = caseId === "repeat-screening";
   return {
     ...initialAnswers,
@@ -247,6 +277,192 @@ export async function buildFallbackScenarioState(
 
   const patientId = `synthetic-${caseId}`;
   const now = "2026-10-25T12:00:00.000Z";
+  const clinicalContext = loadClinicalContext(caseId, 1);
+
+  if (caseId === "daniel-pitch") {
+    const danielExam: PreviousExamination = {
+      id: "synthetic-daniel-chest-ct",
+      patientId,
+      name: "Routine Check-up Chest CT (Unindicated)",
+      performedAt: "2026-09-15",
+      result: {
+        value: "Benign pulmonary nodule (incidental false-positive)",
+        provenance: "PATIENT_REPORTED",
+      },
+      notes:
+        "Ordered in an unindicated comprehensive check-up despite patient being 40 years old and a never-smoker; triggered weeks of unnecessary anxiety and follow-up.",
+    };
+    const danielProfile: HealthProfile = {
+      id: "profile-daniel-pitch",
+      patientId,
+      version: 1,
+      age: 40,
+      personalHistory: [
+        {
+          value:
+            "Healthy, asymptomatic · Prior unindicated check-up chest CT showed benign pulmonary nodule",
+          provenance: "PATIENT_REPORTED",
+        },
+      ],
+      familyHistory: [
+        {
+          value:
+            "First-degree relative (father) diagnosed with colorectal cancer at age 50",
+          provenance: "PATIENT_REPORTED",
+        },
+      ],
+      medications: [{ value: "None", provenance: "PATIENT_REPORTED" }],
+      habits: [
+        {
+          value: "Never smoked · Regular physical activity",
+          provenance: "PATIENT_REPORTED",
+        },
+      ],
+      missingInformation: [],
+      examinationIds: [danielExam.id],
+      intakeFacts: {
+        provenance: "PATIENT_REPORTED",
+        rectalBleeding: false,
+        bowelChange: false,
+        weightLoss: false,
+        colorectalCancer: false,
+        polyps: false,
+        ibd: false,
+        hereditaryCancerSyndrome: false,
+        serratedPolyposis: false,
+        familyCrc: true,
+        familySyndrome: false,
+        priorScreening: "NEVER_SCREENED",
+        colonoscopyNormal: null,
+        colonoscopyComplete: null,
+        colonoscopyAdequatePrep: null,
+      },
+      updatedAt: now,
+    };
+    const danielAnalysis: AIAnalysis = {
+      id: "scenario-daniel-pitch",
+      version: 1,
+      patientId,
+      profileVersion: 1,
+      contextId: clinicalContext.id,
+      contextVersion: clinicalContext.version,
+      status: "PRELIMINARY",
+      summary:
+        "Daniel didn't need more tests — he needed the right tests. At age 40 with a father diagnosed with colorectal cancer at age 50, guidelines indicate initiating colonoscopy screening now, while filtering out unindicated routine chest CT screening in an asymptomatic never-smoker.",
+      relevantInformation: [
+        "Age: 40 years old (healthy, asymptomatic)",
+        "Family risk history: Father diagnosed with colorectal cancer at age 50 (first-degree relative < 60 years)",
+        "Smoking history: Never smoked (0 pack-years; ineligible for low-dose chest CT lung screening)",
+        "Prior colorectal screening: NEVER_SCREENED (Colonoscopy indicated starting at age 40 — 10 years before father's diagnosis)",
+        "Prior unindicated check-up: Routine Chest CT (Sep 2026) yielded an incidental benign pulmonary nodule (>95% false-positive rate in low-risk never-smokers)",
+      ],
+      reviewQuestions: [
+        "Confirm father's colorectal cancer diagnosis at age 50 to initiate colonoscopy screening at age 40.",
+        "Approve Do Not Test recommendation to avoid unindicated routine chest CT in an asymptomatic never-smoker.",
+      ],
+      proposals: [
+        {
+          id: "prop-daniel-crc-40",
+          analysisId: "scenario-daniel-pitch",
+          category: "PREVENTIVE_OPPORTUNITY",
+          title:
+            "Initiate high-risk colorectal cancer screening (Colonoscopy at age 40)",
+          rationale:
+            "Patient is 40 years old with a first-degree relative (father) diagnosed with colorectal cancer at age 50. Multi-society guidelines (USMSTF / USPSTF) recommend initiating colonoscopy screening at age 40 — or 10 years prior to the earliest family diagnosis — rather than waiting until the average-risk threshold of age 45.",
+          ruleIds: ["crc-screening-due"],
+          evidenceIds: ["usmstf-colonoscopy-2020", "uspstf-crc-2021"],
+          consideredData: [
+            "Age 40 (patient-reported)",
+            "Father diagnosed with colorectal cancer at age 50 (patient-reported)",
+            "No prior colorectal screening (NEVER_SCREENED)",
+          ],
+          uncertainties: [
+            "Confirm father's pathology report and age at diagnosis during consultation.",
+          ],
+          provenance: "AI_GENERATED",
+        },
+        {
+          id: "prop-daniel-dnt-chest-ct",
+          analysisId: "scenario-daniel-pitch",
+          category: "POSSIBLE_REDUNDANCY",
+          title:
+            "Do Not Test: Avoid routine check-up Chest CT in asymptomatic never-smoker",
+          rationale:
+            "Patient is 40 years old, healthy, and has never smoked. Routine chest CT screening has no clinical indication in asymptomatic never-smokers (USPSTF restricts LDCT to ages 50–80 with ≥20 pack-year smoking history) and carries a >95% benign pulmonary nodule false-positive rate, generating unnecessary anxiety and invasive follow-up.",
+          ruleIds: ["crc-routine-repeat"],
+          evidenceIds: ["uspstf-lung-2021"],
+          consideredData: [
+            "Age 40 (patient-reported)",
+            "Never smoked (0 pack-years)",
+            "Prior check-up Chest CT (2026-09-15) showing benign pulmonary nodule",
+          ],
+          uncertainties: [
+            "Review prior check-up chest CT report to reassure patient that no repeat routine lung CT screening is indicated.",
+          ],
+          provenance: "AI_GENERATED",
+        },
+      ],
+      uncertainties: [
+        "Confirm pathology details of father's colorectal cancer diagnosis at age 50 during consultation.",
+        "Reassure patient regarding benign incidental pulmonary nodule from prior unindicated check-up chest CT.",
+      ],
+      missingInformation: [],
+      model: "deterministic-v1",
+      provider: "mock",
+      promptVersion: promptMetadata.promptVersion,
+      createdAt: now,
+    };
+
+    const danielRecord: LocalFallbackRecord = {
+      caseId,
+      patient: {
+        id: patientId,
+        displayName: demoCaseLabels[caseId].displayName,
+        synthetic: true,
+        status: "MEDICAL_REVIEW_PENDING",
+      },
+      status: "MEDICAL_REVIEW_PENDING",
+      profile: danielProfile,
+      examinations: [danielExam],
+      clinicalContext,
+      analysis: danielAnalysis,
+      review: null,
+      plan: null,
+      plansHistory: [],
+      eventsHistory: [
+        {
+          id: "evt-profile-daniel-pitch-v1",
+          kind: "PROFILE_UPDATED",
+          occurredAt: now,
+          entityId: danielProfile.id,
+          entityVersion: 1,
+          provenanceLabel: "Patient-reported",
+          title: "Profile created",
+        },
+        {
+          id: "evt-intake-daniel-pitch-v1",
+          kind: "INTAKE_COMPLETED",
+          occurredAt: now,
+          entityId: "intake-daniel-pitch-v1",
+          entityVersion: 1,
+          provenanceLabel: "Patient-reported",
+          title: "Health intake completed",
+        },
+        {
+          id: "evt-analysis-daniel-pitch-v1",
+          kind: "ANALYSIS_CREATED",
+          occurredAt: now,
+          entityId: danielAnalysis.id,
+          entityVersion: 1,
+          provenanceLabel: "AI-generated",
+          title: "Analysis recorded",
+        },
+      ],
+    };
+    store.set(caseId, danielRecord);
+    return danielRecord;
+  }
+
   const completed = buildCompletedIntake(
     patientId,
     baselineAnswersForCase(caseId),
@@ -254,7 +470,6 @@ export async function buildFallbackScenarioState(
     randomUUID(),
     now,
   );
-  const clinicalContext = loadClinicalContext(caseId, 1);
   const config = configuredProvider(process.env);
   const analysisId = `scenario-${caseId}`;
   const prepared = await prepareAnalysis(
@@ -571,8 +786,11 @@ const latestByVersion = <T extends { version: number }>(items: T[]): T | null =>
 export async function loadDoctorQueue(
   session: DemoSession | null,
 ): Promise<DoctorQueueState> {
-  if (!session) {
-    const local = await getActiveLocalFallback();
+  if (!session || session.caseId === "daniel-pitch") {
+    const local =
+      session?.caseId === "daniel-pitch"
+        ? await buildFallbackScenarioState("daniel-pitch")
+        : await getActiveLocalFallback();
     if (local) {
       return {
         mode: "session",
@@ -640,13 +858,16 @@ export async function loadDoctorReview(
   reviewOrAnalysisId: string,
 ): Promise<DoctorReviewState | null> {
   if (
+    reviewOrAnalysisId === "scenario-daniel-pitch" ||
     reviewOrAnalysisId === "scenario-first-screening" ||
     reviewOrAnalysisId === "scenario-repeat-screening"
   ) {
     const caseId: DemoCaseId =
-      reviewOrAnalysisId === "scenario-repeat-screening"
-        ? "repeat-screening"
-        : "first-screening";
+      reviewOrAnalysisId === "scenario-daniel-pitch"
+        ? "daniel-pitch"
+        : reviewOrAnalysisId === "scenario-repeat-screening"
+          ? "repeat-screening"
+          : "first-screening";
     const local = await buildFallbackScenarioState(caseId);
     return {
       mode: "session",

@@ -46,12 +46,24 @@ function defaultRationaleForProposal(
   proposal: RecommendationProposal,
   decision: DecisionValue,
 ): string {
+  const isDanielCrc = proposal.id === "prop-daniel-crc-40";
+  const isDanielDnt = proposal.id === "prop-daniel-dnt-chest-ct";
+
   if (decision === "APPROVE") {
+    if (isDanielCrc) {
+      return "Patient is 40 years old with a first-degree relative (father) diagnosed with colorectal cancer at age 50; approve initiating colonoscopy screening at age 40 per USMSTF/USPSTF high-risk family history criteria.";
+    }
+    if (isDanielDnt) {
+      return "Asymptomatic 40-year-old never-smoker has no clinical indication for routine chest CT screening; approve Do Not Test recommendation to prevent >95% false-positive benign pulmonary nodules and unnecessary anxiety.";
+    }
     return proposal.category === "POSSIBLE_REDUNDANCY"
       ? "Asymptomatic average-risk synthetic patient with normal complete colonoscopy in Nov 2022; routine repeat colonoscopy is redundant before the 10-year guideline interval (2032)."
       : "Asymptomatic average-risk synthetic patient aged 50 with no prior colorectal screening; approve preventive screening discussion per USPSTF 2021.";
   }
   if (decision === "MODIFY") {
+    if (isDanielDnt) {
+      return "Clarified patient-facing explanation of why routine chest CT check-ups are avoided in asymptomatic never-smokers.";
+    }
     return proposal.category === "POSSIBLE_REDUNDANCY"
       ? "Clarified patient-facing explanation of the 10-year colonoscopy interval and alarm symptom precautions."
       : "Adjusted patient-facing wording to present colorectal screening options clearly for the follow-up plan.";
@@ -277,7 +289,9 @@ export function ReviewWorkspace({
                 </dt>
                 <dd className="mt-1 font-medium tabular-nums">
                   {profile.age !== null
-                    ? `${profile.age} years old (Average-risk screening window: 45–75 years)`
+                    ? caseId === "daniel-pitch"
+                      ? `${profile.age} years old (High-risk family history window: initiate at age 40 — 10 years before father's diagnosis at 50)`
+                      : `${profile.age} years old (Average-risk screening window: 45–75 years)`
                     : "Unknown age"}
                 </dd>
               </div>
@@ -298,9 +312,11 @@ export function ReviewWorkspace({
                   Personal & family colorectal risk · Patient-reported
                 </dt>
                 <dd className="mt-1">
-                  {hasRiskHistory
-                    ? "Increased personal or family risk history reported"
-                    : "No personal or family history of colorectal cancer, adenomatous polyps, IBD, or hereditary syndromes"}
+                  {caseId === "daniel-pitch"
+                    ? "First-degree relative (father) diagnosed with colorectal cancer at age 50 · Healthy, asymptomatic"
+                    : hasRiskHistory
+                      ? "Increased personal or family risk history reported"
+                      : "No personal or family history of colorectal cancer, adenomatous polyps, IBD, or hereditary syndromes"}
                 </dd>
               </div>
 
@@ -469,18 +485,37 @@ export function ReviewWorkspace({
                         <p className="font-semibold">
                           Clinical protection — Unnecessary examination filtered
                         </p>
-                        <p className="mt-1">
-                          A normal, complete colonoscopy with adequate bowel
-                          preparation in November 2022 supports a{" "}
-                          <span className="font-medium tabular-nums">
-                            10-year
-                          </span>{" "}
-                          follow-up interval for average-risk patients. Avoiding
-                          an early repeat colonoscopy protects the patient from
-                          unnecessary bowel preparation, sedation and procedural
-                          perforation risk, pending physician verification of
-                          the original report.
-                        </p>
+                        {proposal.id === "prop-daniel-dnt-chest-ct" ? (
+                          <p className="mt-1">
+                            Routine check-up chest CT has no clinical indication
+                            in an asymptomatic 40-year-old never-smoker (USPSTF
+                            criteria require age 50–80 with{" "}
+                            <span className="font-medium tabular-nums">
+                              ≥20 pack-years
+                            </span>
+                            ). Filtering out unindicated chest CT protects
+                            Daniel from a{" "}
+                            <span className="font-medium tabular-nums">
+                              &gt;95%
+                            </span>{" "}
+                            benign pulmonary nodule false-positive rate,
+                            radiation exposure, and weeks of unnecessary cancer
+                            anxiety.
+                          </p>
+                        ) : (
+                          <p className="mt-1">
+                            A normal, complete colonoscopy with adequate bowel
+                            preparation in November 2022 supports a{" "}
+                            <span className="font-medium tabular-nums">
+                              10-year
+                            </span>{" "}
+                            follow-up interval for average-risk patients.
+                            Avoiding an early repeat colonoscopy protects the
+                            patient from unnecessary bowel preparation, sedation
+                            and procedural perforation risk, pending physician
+                            verification of the original report.
+                          </p>
+                        )}
                       </div>
                     )}
 

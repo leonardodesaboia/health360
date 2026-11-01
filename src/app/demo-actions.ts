@@ -14,29 +14,31 @@ import {
 // Demonstration navigation only: these actions never grant identity or clinical authority.
 export async function selectDemoCase(formData: FormData) {
   const rawCaseId = formData.get("caseId");
+  const parsed = demoCaseIdSchema.safeParse(rawCaseId);
+  if (parsed.success) {
+    const cookieStore = await cookies();
+    cookieStore.set(LOCAL_DEMO_COOKIE, parsed.data, {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+    });
+    await buildFallbackScenarioState(parsed.data);
+  }
   try {
     await selectDemoCaseForSession(rawCaseId);
   } catch {
-    const parsed = demoCaseIdSchema.safeParse(rawCaseId);
-    if (parsed.success) {
-      const cookieStore = await cookies();
-      cookieStore.set(LOCAL_DEMO_COOKIE, parsed.data, {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-      });
-      await buildFallbackScenarioState(parsed.data);
-    }
+    // Handled via local fallback cookie when PostgreSQL is offline
   }
   revalidatePath("/", "layout");
 }
 
 export async function resetDemo() {
+  const cookieStore = await cookies();
+  cookieStore.delete(LOCAL_DEMO_COOKIE);
   try {
     await resetDemoSession();
   } catch {
-    const cookieStore = await cookies();
-    cookieStore.delete(LOCAL_DEMO_COOKIE);
+    // Handled via local fallback cookie deletion when PostgreSQL is offline
   }
   revalidatePath("/", "layout");
 }

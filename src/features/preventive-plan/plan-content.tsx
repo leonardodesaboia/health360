@@ -105,8 +105,10 @@ export function PlanContent({
                     <div>
                       <p className="font-semibold">{action.text}</p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Approved during demonstration physician review for
-                        average-risk preventive follow-up.
+                        {action.proposalId === "prop-daniel-crc-40" ||
+                        action.text.toLowerCase().includes("age 40")
+                          ? "Approved during physician review based on first-degree family history (father diagnosed with colorectal cancer at age 50)."
+                          : "Approved during demonstration physician review for average-risk preventive follow-up."}
                       </p>
                     </div>
                   </div>
@@ -162,18 +164,39 @@ export function PlanContent({
                   </span>
                 </div>
                 <p className="mt-3 font-semibold">{text}</p>
-                <div className="mt-3 grid gap-2 border-t border-current/15 pt-3 text-xs sm:grid-cols-2">
-                  <div>
-                    <span className="font-semibold">Clinical reason: </span>
-                    Previous normal, complete colonoscopy reported within the
-                    recommended 10-year guideline interval.
+                {text.toLowerCase().includes("chest ct") ? (
+                  <div className="mt-3 grid gap-2 border-t border-current/15 pt-3 text-xs sm:grid-cols-2">
+                    <div>
+                      <span className="font-semibold">Clinical reason: </span>
+                      Patient is 40 years old, healthy, and has never smoked;
+                      routine check-up chest CT has no clinical indication under
+                      USPSTF lung screening criteria.
+                    </div>
+                    <div>
+                      <span className="font-semibold">
+                        Patient protection:{" "}
+                      </span>
+                      Prevents &gt;95% false-positive benign pulmonary nodule
+                      findings, unnecessary radiation exposure, and cascading
+                      anxiety or invasive follow-up.
+                    </div>
                   </div>
-                  <div>
-                    <span className="font-semibold">Patient protection: </span>
-                    Avoids unnecessary repeat bowel preparation, sedation and
-                    procedural risks without clinical indication.
+                ) : (
+                  <div className="mt-3 grid gap-2 border-t border-current/15 pt-3 text-xs sm:grid-cols-2">
+                    <div>
+                      <span className="font-semibold">Clinical reason: </span>
+                      Previous normal, complete colonoscopy reported within the
+                      recommended 10-year guideline interval.
+                    </div>
+                    <div>
+                      <span className="font-semibold">
+                        Patient protection:{" "}
+                      </span>
+                      Avoids unnecessary repeat bowel preparation, sedation and
+                      procedural risks without clinical indication.
+                    </div>
                   </div>
-                </div>
+                )}
               </li>
             ))}
           </ul>

@@ -5,7 +5,11 @@ import {
   type DemoRule,
 } from "./contracts";
 
-export const scenarioIds = ["first-screening", "repeat-screening"] as const;
+export const scenarioIds = [
+  "daniel-pitch",
+  "first-screening",
+  "repeat-screening",
+] as const;
 const evidence = [
   {
     id: "uspstf-crc-2021",
@@ -35,12 +39,31 @@ const evidence = [
   },
 ];
 
+const danielPitchExtraEvidence = {
+  id: "uspstf-lung-2021",
+  version: 1,
+  issuer: "US Preventive Services Task Force",
+  title:
+    "Lung Cancer: Screening — Clinician Summary (Do Not Screen Asymptomatic Never-Smokers)",
+  year: 2021,
+  sourceUrl:
+    "https://www.uspreventiveservicestaskforce.org/uspstf/recommendation/lung-cancer-screening",
+  accessedAt: "2026-10-22",
+  evidenceStatus: "public_source",
+  validation: "demonstrative",
+  medicallyReviewed: false,
+};
+
 export function loadClinicalContext(
   scenarioId: string,
   version: number,
 ): DemoContext {
   if (!scenarioIds.some((id) => id === scenarioId) || version !== 1)
     throw new Error("Unsupported scenario or context version");
+  const scenarioEvidence =
+    scenarioId === "daniel-pitch"
+      ? [...evidence, danielPitchExtraEvidence]
+      : evidence;
   const rules = [
     {
       id: "crc-screening-due",
@@ -68,7 +91,7 @@ export function loadClinicalContext(
     demonstrative: true,
     validation: "demonstrative",
     label: "DEMONSTRATIVE — NOT CLINICALLY VALIDATED",
-    evidence,
+    evidence: scenarioEvidence,
     rules,
     ruleIds: rules.map((rule) => rule.id),
   });

@@ -9,21 +9,26 @@ import { localPatientId } from "./intake-form";
 import { fieldIds, type IntakeAnswers } from "./contracts";
 import { formatExaminationDate, type CompletedIntake } from "./profile";
 
-export function ProfileView() {
+export function ProfileView({
+  fallbackProfile = null,
+}: {
+  fallbackProfile?: CompletedIntake | null;
+} = {}) {
   const [profile, setProfile] = useState<CompletedIntake | null>();
   const [error, setError] = useState("");
   const load = useCallback(async () => {
     try {
-      setProfile(
-        await createDraftRepository(window.localStorage).latest(localPatientId),
+      const stored = await createDraftRepository(window.localStorage).latest(
+        localPatientId,
       );
+      setProfile(stored ?? fallbackProfile);
       setError("");
     } catch {
       setError(
         "The clinical profile could not be loaded from this browser. Restore storage access and retry.",
       );
     }
-  }, []);
+  }, [fallbackProfile]);
   useEffect(() => {
     let active = true;
     queueMicrotask(() => {

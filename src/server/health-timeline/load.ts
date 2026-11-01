@@ -1,5 +1,8 @@
 import "server-only";
-import { getActiveLocalFallback } from "../clinical-review/service";
+import {
+  buildFallbackScenarioState,
+  getActiveLocalFallback,
+} from "../clinical-review/service";
 import { getDemoSession } from "../demo/session";
 import { createDatabase } from "../db/client";
 import { inDatasetTransaction } from "../db/repository";
@@ -9,7 +12,7 @@ import { getWorkflowStatus } from "../workflow/state";
 
 export async function loadPatientHistory() {
   const session = await getDemoSession().catch(() => null);
-  if (session) {
+  if (session && session.caseId !== "daniel-pitch") {
     const db = createDatabase();
     try {
       return await inDatasetTransaction(
@@ -27,7 +30,10 @@ export async function loadPatientHistory() {
     }
   }
 
-  const local = await getActiveLocalFallback();
+  const local =
+    session?.caseId === "daniel-pitch"
+      ? await buildFallbackScenarioState("daniel-pitch")
+      : await getActiveLocalFallback();
   if (!local) return null;
   const plansHistory = local.plansHistory ?? (local.plan ? [local.plan] : []);
   const eventsHistory = local.eventsHistory ?? [];
@@ -48,7 +54,7 @@ export async function loadPatientHistory() {
 
 export async function loadHistoricalPlan(planId: string) {
   const session = await getDemoSession().catch(() => null);
-  if (session) {
+  if (session && session.caseId !== "daniel-pitch") {
     const db = createDatabase();
     try {
       return await inDatasetTransaction(
@@ -67,7 +73,10 @@ export async function loadHistoricalPlan(planId: string) {
     }
   }
 
-  const local = await getActiveLocalFallback();
+  const local =
+    session?.caseId === "daniel-pitch"
+      ? await buildFallbackScenarioState("daniel-pitch")
+      : await getActiveLocalFallback();
   if (!local) return null;
   const plansHistory = local.plansHistory ?? (local.plan ? [local.plan] : []);
   const plan = plansHistory.find((p) => p.id === planId) ?? null;

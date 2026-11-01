@@ -140,7 +140,36 @@ export default async function Queue() {
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-3">
+          <div className="flex flex-col justify-between gap-4 rounded-lg border-2 border-brand-cyan/40 bg-secondary/40 p-5">
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="inline-flex items-center gap-1 rounded-sm bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
+                  Pitch Case · Slides 1–3
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-sm bg-success px-2 py-0.5 text-xs font-semibold text-success-foreground">
+                  <ShieldCheck aria-hidden="true" className="size-3.5" />
+                  Do Not Test + Action
+                </span>
+              </div>
+              <h3 className="text-base font-semibold">
+                Daniel (Age 40 · daniel-pitch)
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Healthy, never smoked; father had colorectal cancer at age 50.
+                Combines <strong>Colonoscopy at age 40</strong> (what to do)
+                with <strong>Do Not Test: Avoid routine Chest CT</strong> (what
+                not to do).
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
+              <PrepareAnalysisButton
+                caseId="daniel-pitch"
+                label="Prepare & open Daniel review"
+              />
+            </div>
+          </div>
+
           <div className="flex flex-col justify-between gap-4 rounded-lg border bg-background p-5">
             <div className="space-y-2">
               <span className="inline-flex items-center gap-1.5 rounded-sm bg-success px-2.5 py-1 text-xs font-semibold text-success-foreground">
@@ -159,6 +188,7 @@ export default async function Queue() {
             <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
               <PrepareAnalysisButton
                 caseId="repeat-screening"
+                variant="outline"
                 label="Prepare & open Jordan review"
               />
             </div>

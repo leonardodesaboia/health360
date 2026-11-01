@@ -1,6 +1,9 @@
 import "server-only";
 
-import { getActiveLocalFallback } from "../clinical-review/service";
+import {
+  buildFallbackScenarioState,
+  getActiveLocalFallback,
+} from "../clinical-review/service";
 import { getDemoSession } from "../demo/session";
 import { getDatabase } from "../db/client";
 import { getWorkflowStatus } from "../workflow/state";
@@ -13,6 +16,10 @@ export async function getAnalysisPageState(): Promise<{
 }> {
   try {
     const session = await getDemoSession();
+    if (session?.caseId === "daniel-pitch") {
+      const daniel = await buildFallbackScenarioState("daniel-pitch");
+      return { status: daniel.status, unavailable: false };
+    }
     if (session) {
       const db = getDatabase();
       const status = await getWorkflowStatus(
