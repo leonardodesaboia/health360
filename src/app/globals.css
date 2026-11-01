@@ -2,34 +2,35 @@
 @import "tw-animate-css";
 
 :root {
-  --background: #f8f9fa;
-  --foreground: #0a1128;
+  --background: #f7fafc;
+  --foreground: #081521;
   --card: #ffffff;
-  --card-foreground: #0a1128;
-  --primary: #1b2040;
+  --card-foreground: #081521;
+  --primary: #0b1c3d;
   --primary-foreground: #ffffff;
-  --secondary: #eef2f6;
-  --secondary-foreground: #1b2040;
-  --muted: #f1f5f9;
-  --muted-foreground: #475569;
-  --accent: #eef2f6;
-  --accent-foreground: #1b2040;
-  --border: #e2e8f0;
-  --input: #64748b;
-  --ring: #1b2040;
+  --secondary: #e6f7fb;
+  --secondary-foreground: #081521;
+  --muted: #eef4f8;
+  --muted-foreground: #3b5064;
+  --accent: #e6f7fb;
+  --accent-foreground: #081521;
+  --border: #d5e6ef;
+  --input: #526980;
+  --ring: #0c6996;
   --destructive: #a52b36;
   --destructive-foreground: #ffffff;
-  --success: #ecfdf5;
-  --success-foreground: #065f46;
+  --success: #e0f6fc;
+  --success-foreground: #07475b;
   --warning: #fff4db;
   --warning-foreground: #795012;
-  --information: #edf3f8;
-  --information-foreground: #1e3a5f;
-  --sidebar: #1b2040;
-  --sidebar-foreground: #ffffff;
-  --navigation-active: #ffffff;
-  --navigation-active-foreground: #1b2040;
-  --navigation-hover: #283059;
+  --information: #e6f4fa;
+  --information-foreground: #0b3c5d;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #081521;
+  --navigation-active: #0b1c3d;
+  --navigation-active-foreground: #ffffff;
+  --navigation-hover: #e6f7fb;
+  --brand-cyan: #1ab8e3;
   --radius: 0.5rem;
 }
 
@@ -62,6 +63,7 @@
   --color-navigation-active: var(--navigation-active);
   --color-navigation-active-foreground: var(--navigation-active-foreground);
   --color-navigation-hover: var(--navigation-hover);
+  --color-brand-cyan: var(--brand-cyan);
   --radius-sm: 0.375rem;
   --radius-md: var(--radius);
   --radius-lg: 0.75rem;
