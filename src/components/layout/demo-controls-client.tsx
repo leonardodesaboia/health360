@@ -104,7 +104,7 @@ export function DemoControlsClient({
             title="Switch demonstration case"
             onClick={() => setOpen((prev) => !prev)}
             className={cn(
-              "inline-flex min-h-9 items-center gap-0 rounded-full border border-transparent bg-transparent px-2.5 text-xs font-medium text-muted-foreground/70 transition-all duration-200 hover:min-h-10 hover:gap-2 hover:rounded-md hover:border-border hover:bg-secondary hover:px-3 hover:text-secondary-foreground focus-visible:min-h-10 focus-visible:gap-2 focus-visible:rounded-md focus-visible:border-border focus-visible:bg-secondary focus-visible:px-3 focus-visible:text-secondary-foreground",
+              "inline-flex min-h-9 items-center gap-0 rounded-full border border-transparent bg-transparent px-2.5 text-xs font-medium text-muted-foreground transition-all duration-200 hover:min-h-10 hover:gap-2 hover:rounded-md hover:border-border hover:bg-secondary hover:px-3 hover:text-secondary-foreground focus-visible:min-h-10 focus-visible:gap-2 focus-visible:rounded-md focus-visible:border-border focus-visible:bg-secondary focus-visible:px-3 focus-visible:text-secondary-foreground",
               open &&
                 "min-h-10 gap-2 rounded-md border-border bg-secondary px-3 text-secondary-foreground",
             )}
@@ -132,8 +132,9 @@ export function DemoControlsClient({
 
           <div
             className={cn(
-              "invisible absolute top-full right-0 z-50 w-56 pt-1.5 opacity-0 transition-all duration-150 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100",
-              open && "visible opacity-100",
+              "absolute top-0 right-0 z-50 h-9 w-9 overflow-hidden opacity-0 transition-all duration-150 group-focus-within:top-full group-focus-within:h-auto group-focus-within:w-56 group-focus-within:overflow-visible group-focus-within:pt-1.5 group-focus-within:opacity-100 group-hover:top-full group-hover:h-auto group-hover:w-56 group-hover:overflow-visible group-hover:pt-1.5 group-hover:opacity-100",
+              open &&
+                "top-full h-auto w-56 overflow-visible pt-1.5 opacity-100",
             )}
           >
             <div className="rounded-lg border bg-card p-1.5 shadow-md">

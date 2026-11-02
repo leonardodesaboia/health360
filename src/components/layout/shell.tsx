@@ -57,7 +57,7 @@ function AppShell({
           <Link
             href={role === "patient" ? "/doctor" : "/patient"}
             title={role === "patient" ? "View as physician" : "View as patient"}
-            className="group inline-flex min-h-9 items-center gap-0 rounded-full border border-transparent bg-transparent px-2.5 text-xs font-medium text-muted-foreground/70 transition-all duration-200 hover:min-h-10 hover:gap-2 hover:rounded-md hover:border-border hover:bg-secondary hover:px-3 hover:text-secondary-foreground focus-visible:min-h-10 focus-visible:gap-2 focus-visible:rounded-md focus-visible:border-border focus-visible:bg-secondary focus-visible:px-3 focus-visible:text-secondary-foreground"
+            className="group inline-flex min-h-9 items-center gap-0 rounded-full border border-transparent bg-transparent px-2.5 text-xs font-medium text-muted-foreground transition-all duration-200 hover:min-h-10 hover:gap-2 hover:rounded-md hover:border-border hover:bg-secondary hover:px-3 hover:text-secondary-foreground focus-visible:min-h-10 focus-visible:gap-2 focus-visible:rounded-md focus-visible:border-border focus-visible:bg-secondary focus-visible:px-3 focus-visible:text-secondary-foreground"
           >
             <ArrowLeftRight
               aria-hidden="true"
