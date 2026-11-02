@@ -57,7 +57,10 @@ export function WorkspaceReader({
   return (
     <>
       {analysis.status !== "BLOCKED" && (
-        <section aria-label="Review tasks" className="space-y-3">
+        <section
+          aria-label="Review tasks"
+          className="space-y-3 rounded-lg border bg-secondary p-6"
+        >
           <ol className="list-inside list-decimal space-y-2 text-sm">
             <li>Check context and evidence.</li>
             <li>Decide on every proposal.</li>

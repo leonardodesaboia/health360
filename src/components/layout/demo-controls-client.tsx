@@ -96,11 +96,14 @@ export function DemoControlsClient({
     <section
       aria-labelledby="demo-case-title"
       aria-busy={busy || undefined}
-      className="border-b bg-muted text-sm"
+      className="border-b bg-card text-sm"
     >
       <div className="mx-auto max-w-workspace space-y-3 px-4 py-3 md:px-8">
         <div aria-live="polite">
-          <h2 id="demo-case-title" className="text-sm font-medium">
+          <h2
+            id="demo-case-title"
+            className="text-sm font-semibold text-primary"
+          >
             {state === "loading"
               ? "Loading demo case…"
               : state === "preparing"
@@ -122,10 +125,10 @@ export function DemoControlsClient({
           key={`${pathname}-${current?.preparedStateId ?? current?.caseId ?? "none"}`}
           open={state === "ready" && !current}
         >
-          <summary className="min-h-11 cursor-pointer content-center font-medium">
+          <summary className="min-h-11 cursor-pointer content-center text-xs font-semibold tracking-wide text-muted-foreground">
             Presenter controls
           </summary>
-          <div className="mt-3 flex flex-col items-start gap-4 lg:flex-row lg:flex-wrap">
+          <div className="mt-3 flex flex-col items-start gap-4 rounded-lg border bg-background p-4 lg:flex-row lg:flex-wrap">
             <form
               action={(data) => run(() => selectDemoCase(data))}
               aria-label="Choose demo case"

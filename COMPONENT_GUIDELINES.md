@@ -102,3 +102,12 @@ criteria, uncertainty and evidence remain in keyboard-operable disclosures.
 Missing rule references are labeled unavailable rather than attributing AI text
 to deterministic rules. Mock titles and summaries extract supplied rationale
 wording; approved action titles therefore remain specific on the patient plan.
+
+## Precision visual styling
+
+The shell uses the original PR #46 logo, a cyan brand separator, navy active
+navigation and a pale blue semantic palette. Role and demonstrative labels stay
+visible, and role-switch controls retain 44 px targets. PageHeader uses a compact
+eyebrow and decorative cyan rule. StatusIndicator retains its exhaustive main
+status labels with a compact outlined style; cyan dots are decorative. Existing
+showcase examples exercise these shared styles without changing their APIs.

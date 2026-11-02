@@ -28,7 +28,7 @@ export function AnswerSummary({
               </Button>
             )}
           </div>
-          <dl className="space-y-4 text-sm">
+          <dl className="grid gap-4 pt-1 text-sm sm:grid-cols-2">
             {fields
               .filter(
                 (field) =>
@@ -36,9 +36,9 @@ export function AnswerSummary({
                   isVisible(field.id, answers),
               )
               .map((field) => (
-                <div key={field.id}>
+                <div key={field.id} className="border-b pb-3">
                   <dt className="text-muted-foreground">{field.label}</dt>
-                  <dd className="mt-1 font-medium break-words">
+                  <dd className="mt-1 font-semibold break-words tabular-nums">
                     {field.options?.find(
                       ([value]) => value === answers[field.id],
                     )?.[1] ??

@@ -15,7 +15,7 @@ export function IntakeField({
   const { field: input } = useController({ control, name: definition.id });
   const help = error ? `${definition.id}-error` : undefined;
   return (
-    <div>
+    <div className="border-b pb-6 last:border-0 last:pb-0">
       <label htmlFor={definition.id} className="block text-sm font-medium">
         {definition.label}
       </label>
@@ -65,9 +65,9 @@ export function IntakeField({
             maxLength={120}
             aria-invalid={!!error}
             aria-describedby={help}
-            className="mt-2"
+            className="mt-2 bg-card tabular-nums"
           />
-          <label className="mt-2 flex min-h-11 items-center gap-3 text-sm">
+          <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-3 rounded-md border border-dashed border-input bg-background px-4 py-2 text-sm">
             <input
               type="checkbox"
               checked={input.value === null}

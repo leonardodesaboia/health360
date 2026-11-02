@@ -37,6 +37,7 @@ const pairs = [
   ["ring", "background"],
   ["ring", "card"],
   ["input", "card"],
+  ["brand-cyan-foreground", "brand-cyan"],
 ];
 for (const [fg, bg] of pairs) {
   const values = [luminance(tokens[fg]), luminance(tokens[bg])].sort(

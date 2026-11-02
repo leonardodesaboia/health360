@@ -2,7 +2,7 @@
 
 ## Direction
 
-Clinical, calm and precise. Ink text, teal actions, mint context surfaces and a cool
+Clinical, calm and precise. Ink text, navy actions, cyan accents, pale blue context surfaces and a cool
 canvas support patient comprehension and physician traceability. No gradients,
 glass effects, invented metrics, robot imagery or decorative charts.
 The patient screen emphasizes the next step; the review workspace separates
@@ -15,27 +15,29 @@ declared context from proposals and decisions in two columns on wide screens.
 No raw palette classes or hex values outside this file. Light theme only; future
 theme overrides can change variables without changing components.
 
-| Semantic role                  | Value             | Use                        |
-| ------------------------------ | ----------------- | -------------------------- |
-| background / foreground        | #F8FAF9 / #163B44 | Canvas and ink             |
-| card / card-foreground         | #FFFFFF / #163B44 | Content surfaces           |
-| primary / primary-foreground   | #167D75 / #FFFFFF | Main action                |
-| secondary, accent / foreground | #EAF3EF / #163B44 | Calm emphasis              |
-| muted / muted-foreground       | #F0F4F2 / #52655F | Supporting text            |
-| border                         | #D9E2DF           | Decorative separators      |
-| input                          | #71847E           | Control boundary           |
-| ring                           | #167D75           | Focus outline              |
-| destructive / foreground       | #A52B36 / #FFFFFF | Errors/destructive action  |
-| success / foreground           | #EAF3EF / #236349 | Successful format feedback |
-| warning / foreground           | #FFF4DB / #795012 | Missing information        |
-| information / foreground       | #EDF3F8 / #305A7D | Prototype context          |
-| sidebar / foreground           | #FFFFFF / #163B44 | Shell navigation           |
-| navigation-active / foreground | #EAF3EF / #163B44 | Current route              |
-| navigation-hover               | #F0F4F2           | Hover surface              |
+| Semantic role                      | Value             | Use                           |
+| ---------------------------------- | ----------------- | ----------------------------- |
+| background / foreground            | #F7FAFC / #081521 | Canvas and ink                |
+| card / card-foreground             | #FFFFFF / #081521 | Content surfaces              |
+| primary / primary-foreground       | #0B1C3D / #FFFFFF | Main action                   |
+| secondary, accent / foreground     | #E6F7FB / #081521 | Calm emphasis                 |
+| muted / muted-foreground           | #EEF4F8 / #3B5064 | Supporting text               |
+| border                             | #D5E6EF           | Decorative separators         |
+| input                              | #526980           | Control boundary              |
+| ring                               | #0C6996           | Focus outline                 |
+| destructive / foreground           | #A52B36 / #FFFFFF | Errors/destructive action     |
+| success / foreground               | #E0F6FC / #07475B | Successful format feedback    |
+| warning / foreground               | #FFF4DB / #795012 | Missing information           |
+| information / foreground           | #E6F4FA / #0B3C5D | Prototype context             |
+| sidebar / foreground               | #FFFFFF / #081521 | Shell navigation              |
+| navigation-active / foreground     | #0B1C3D / #FFFFFF | Current route                 |
+| navigation-hover                   | #E6F7FB           | Hover surface                 |
+| brand-cyan / brand-cyan-foreground | #1AB8E3 / #081521 | Decorative brand accent / ink |
 
-Secondary text was darkened from the initial #62746F direction for stronger
-small-text contrast across surfaces. Decorative borders are not control boundaries;
-interactive outlines use the stronger `input` token.
+The Precision palette is ported from PR #46 by Gilberto Egypto (@EgyptoNT).
+Cyan is a decorative accent, not a small-text or control-boundary color; use its
+ink foreground pair if placed behind text. Decorative borders are not control
+boundaries; interactive outlines use the stronger `input` token.
 
 ## Computed contrast
 
@@ -46,24 +48,25 @@ explanation of an unavailable action.
 
 | Pair (foreground / background)        |   Ratio |
 | ------------------------------------- | ------: |
-| foreground / canvas                   | 11.49:1 |
-| card-foreground / card                | 12.05:1 |
-| white / teal primary                  |  4.97:1 |
-| secondary-foreground / mint           | 10.65:1 |
-| muted-foreground / canvas             |  5.92:1 |
-| muted-foreground / muted              |  5.59:1 |
-| accent-foreground / accent            | 10.65:1 |
+| foreground / canvas                   | 17.58:1 |
+| card-foreground / card                | 18.43:1 |
+| white / navy primary                  | 16.83:1 |
+| secondary-foreground / pale blue      | 16.73:1 |
+| muted-foreground / canvas             |  7.96:1 |
+| muted-foreground / muted              |  7.52:1 |
+| accent-foreground / accent            | 16.73:1 |
 | white / destructive                   |  7.00:1 |
-| success-foreground / success          |  6.29:1 |
+| success-foreground / success          |  9.10:1 |
 | warning-foreground / warning          |  6.47:1 |
-| information-foreground / information  |  6.51:1 |
-| sidebar-foreground / sidebar          | 12.05:1 |
-| active-foreground / navigation-active | 10.65:1 |
-| teal text / canvas                    |  4.74:1 |
-| teal text / card                      |  4.97:1 |
-| focus ring / canvas                   |  4.74:1 |
-| focus ring / card                     |  4.97:1 |
-| input boundary / card                 |  3.96:1 |
+| information-foreground / information  | 10.27:1 |
+| sidebar-foreground / sidebar          | 18.43:1 |
+| active-foreground / navigation-active | 16.83:1 |
+| navy text / canvas                    | 16.06:1 |
+| navy text / card                      | 16.83:1 |
+| focus ring / canvas                   |  5.76:1 |
+| focus ring / card                     |  6.04:1 |
+| input boundary / card                 |  5.69:1 |
+| brand-cyan-foreground / brand-cyan    |  7.91:1 |
 
 Ratios describe opaque token pairs, not a full rendered-page audit. Recompute and
 inspect whenever adding colored text, opacity, states or surfaces.

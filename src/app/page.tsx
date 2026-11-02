@@ -30,7 +30,7 @@ export default function Entry() {
         Skip to content
       </a>
       <DemoBanner />
-      <header className="border-b bg-sidebar text-sidebar-foreground">
+      <header className="border-b-2 border-brand-cyan bg-sidebar text-sidebar-foreground">
         <div className="mx-auto flex max-w-workspace items-center px-4 py-4 md:px-8">
           <BrandLink href="/" />
         </div>
@@ -38,7 +38,7 @@ export default function Entry() {
       <main id="main-content" tabIndex={-1}>
         <ContentContainer>
           <header className="max-w-form">
-            <p className="mb-3 text-sm font-medium text-muted-foreground">
+            <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
               Health360 · Preventive follow-up prototype
             </p>
             <h1>Better decisions, not more tests</h1>
@@ -66,7 +66,10 @@ export default function Entry() {
             <h2 id="next-steps-title">What happens next</h2>
             <ol className="mt-6 grid gap-6 md:grid-cols-3">
               {steps.map(([title, description], index) => (
-                <li key={title} className="border-t-2 pt-4">
+                <li
+                  key={title}
+                  className="rounded-lg border border-brand-cyan/30 bg-secondary p-6"
+                >
                   <span className="text-xs font-medium text-muted-foreground">
                     Step {index + 1}
                   </span>

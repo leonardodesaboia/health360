@@ -135,7 +135,7 @@ function ProfileDetails({ profile, examinations, answers }: StoredProfile) {
           System-structured from patient-reported answers. Software validation
           is not medical approval.
         </p>
-        <dl className="mt-4 space-y-3 text-sm">
+        <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-3">
           <div>
             <dt className="text-muted-foreground">Profile version</dt>
             <dd className="tabular-nums">{profile.version}</dd>
@@ -173,7 +173,7 @@ function ProfileDetails({ profile, examinations, answers }: StoredProfile) {
           </p>
         ) : (
           examinations.map((exam) => (
-            <div key={exam.id} className="mt-4 space-y-2 text-sm">
+            <div key={exam.id} className="mt-4 space-y-2 border-t pt-4 text-sm">
               <h3>{exam.name}</h3>
               <p>
                 Date:{" "}

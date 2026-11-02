@@ -23,7 +23,7 @@ export function PlanContent({
         <p className="mt-2">
           Demo reviewer decisions are not clinical validation.
         </p>
-        <dl className="mt-4 grid gap-2 text-sm">
+        <dl className="mt-4 grid gap-4 border-t border-current/25 pt-4 text-sm sm:grid-cols-3">
           <div>
             <dt className="inline font-medium">Plan version: </dt>
             <dd className="inline tabular-nums">{plan.version}</dd>
@@ -54,8 +54,11 @@ export function PlanContent({
         {plan.actions.length ? (
           <ul className="mt-4 space-y-4">
             {plan.actions.map((action) => (
-              <li key={action.proposalId}>
-                <p>{action.text}</p>
+              <li
+                key={action.proposalId}
+                className="border-l-2 border-brand-cyan bg-background p-4"
+              >
+                <p className="font-semibold">{action.text}</p>
                 <p className="text-sm text-muted-foreground">
                   {
                     {

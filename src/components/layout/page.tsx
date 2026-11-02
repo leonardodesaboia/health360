@@ -33,10 +33,14 @@ export function PageHeader({
   return (
     <header className="flex flex-wrap items-end justify-between gap-4">
       <div className="max-w-form">
-        <p className="mb-3 text-sm font-medium text-muted-foreground">
+        <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
           {eyebrow}
         </p>
         <h1>{title}</h1>
+        <div
+          aria-hidden="true"
+          className="mt-3 h-1 w-14 rounded-sm bg-brand-cyan"
+        />
         <p className="mt-3 text-muted-foreground">{description}</p>
       </div>
       {action}
