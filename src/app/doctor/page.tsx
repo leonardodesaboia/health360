@@ -84,7 +84,7 @@ export default async function Queue() {
               state.latestAnalysis.profileVersion === state.profile.version ? (
                 <Button asChild variant="outline">
                   <Link
-                    href={`/doctor/reviews/${encodeURIComponent(state.latestAnalysis.id)}`}
+                    href={`/doctor/reviews/scenario-${encodeURIComponent(state.caseId)}`}
                   >
                     Open review
                     <ArrowUpRight aria-hidden="true" />

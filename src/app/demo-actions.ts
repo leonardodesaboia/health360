@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import {
   buildFallbackScenarioState,
   LOCAL_DEMO_COOKIE,
+  resetLocalFallbackCase,
 } from "@/server/clinical-review/service";
 import { demoCaseIdSchema } from "@/server/demo/contracts";
 import {
@@ -34,11 +35,15 @@ export async function selectDemoCase(formData: FormData) {
 
 export async function resetDemo() {
   const cookieStore = await cookies();
-  cookieStore.delete(LOCAL_DEMO_COOKIE);
+  const raw = cookieStore.get(LOCAL_DEMO_COOKIE)?.value;
+  const parsed = demoCaseIdSchema.safeParse(raw);
+  if (parsed.success) {
+    await resetLocalFallbackCase(parsed.data);
+  }
   try {
     await resetDemoSession();
   } catch {
-    // Handled via local fallback cookie deletion when PostgreSQL is offline
+    // Handled via local fallback reset when PostgreSQL is offline
   }
   revalidatePath("/", "layout");
 }

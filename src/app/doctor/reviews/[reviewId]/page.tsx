@@ -17,7 +17,17 @@ import {
   demoReview,
 } from "@/features/patients/fixtures";
 import { loadDoctorReview } from "@/server/clinical-review/service";
-import { getDemoSession } from "@/server/demo/session";
+
+// Only the known synthetic cases exist in this prototype. Resolve unknown IDs before streaming so unknown routes return HTTP 404.
+export const dynamicParams = false;
+export function generateStaticParams() {
+  return [
+    { reviewId: demoReview.id },
+    { reviewId: "scenario-daniel-pitch" },
+    { reviewId: "scenario-first-screening" },
+    { reviewId: "scenario-repeat-screening" },
+  ];
+}
 
 export default async function Review({
   params,
@@ -25,13 +35,7 @@ export default async function Review({
   params: Promise<{ reviewId: string }>;
 }) {
   const { reviewId } = await params;
-  let session = null;
-  try {
-    session = await getDemoSession();
-  } catch {
-    session = null;
-  }
-  const state = await loadDoctorReview(session, reviewId);
+  const state = await loadDoctorReview(null, reviewId);
   if (!state) notFound();
 
   if (state.mode === "session") {

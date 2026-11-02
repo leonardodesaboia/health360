@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, ChevronDown, RotateCcw, Users } from "lucide-react";
 import { resetDemo, selectDemoCase } from "@/app/demo-actions";
@@ -18,8 +18,6 @@ export function DemoControlsClient({
   const router = useRouter();
   const [current, setCurrent] = useState<CurrentCase | null>(null);
   const [state, setState] = useState<LoadState>("loading");
-  const [open, setOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -38,21 +36,7 @@ export function DemoControlsClient({
     void refresh();
   }, [refresh]);
 
-  useEffect(() => {
-    function handleOutsideClick(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, []);
-
   async function run(action: () => Promise<void>) {
-    setOpen(false);
     try {
       await action();
     } catch {
@@ -62,8 +46,6 @@ export function DemoControlsClient({
     await refresh();
     router.refresh();
   }
-
-  const triggerLabel = current ? `Case: ${current.displayName}` : "Demo cases";
 
   return (
     <section
@@ -91,102 +73,58 @@ export function DemoControlsClient({
           </p>
         </div>
 
-        <div
-          ref={dropdownRef}
-          className="group relative"
-          onMouseEnter={() => setOpen(true)}
-          onMouseLeave={() => setOpen(false)}
-        >
-          <button
-            type="button"
-            aria-haspopup="true"
-            aria-expanded={open}
-            title="Switch demonstration case"
-            onClick={() => setOpen((prev) => !prev)}
-            className={cn(
-              "inline-flex min-h-9 items-center gap-0 rounded-full border border-transparent bg-transparent px-2.5 text-xs font-medium text-muted-foreground transition-all duration-200 hover:min-h-10 hover:gap-2 hover:rounded-md hover:border-border hover:bg-secondary hover:px-3 hover:text-secondary-foreground focus-visible:min-h-10 focus-visible:gap-2 focus-visible:rounded-md focus-visible:border-border focus-visible:bg-secondary focus-visible:px-3 focus-visible:text-secondary-foreground",
-              open &&
-                "min-h-10 gap-2 rounded-md border-border bg-secondary px-3 text-secondary-foreground",
-            )}
+        <div className="group relative flex items-center justify-end">
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute right-0 inline-flex min-h-9 items-center gap-1 rounded-full border border-transparent bg-transparent px-2.5 text-xs font-medium text-muted-foreground opacity-100 transition-opacity duration-150 group-focus-within:opacity-0 group-hover:opacity-0"
           >
-            <Users
-              aria-hidden="true"
-              className="size-4 shrink-0 transition-transform duration-200 group-hover:scale-110"
-            />
-            <span
-              className={cn(
-                "max-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-all duration-200 group-focus-within:max-w-48 group-focus-within:opacity-100 group-hover:max-w-48 group-hover:opacity-100",
-                open && "max-w-48 opacity-100",
-              )}
-            >
-              {triggerLabel}
-            </span>
-            <ChevronDown
-              aria-hidden="true"
-              className={cn(
-                "size-3.5 max-w-0 shrink-0 overflow-hidden opacity-0 transition-all duration-200 group-focus-within:max-w-4 group-focus-within:opacity-100 group-hover:max-w-4 group-hover:opacity-100",
-                open && "max-w-4 rotate-180 opacity-100",
-              )}
-            />
-          </button>
+            <Users aria-hidden="true" className="size-4 shrink-0" />
+            <ChevronDown aria-hidden="true" className="size-3 shrink-0" />
+          </span>
 
-          <div
-            className={cn(
-              "absolute top-0 right-0 z-50 h-9 w-9 overflow-hidden opacity-0 transition-all duration-150 group-focus-within:top-full group-focus-within:h-auto group-focus-within:w-56 group-focus-within:overflow-visible group-focus-within:pt-1.5 group-focus-within:opacity-100 group-hover:top-full group-hover:h-auto group-hover:w-56 group-hover:overflow-visible group-hover:pt-1.5 group-hover:opacity-100",
-              open &&
-                "top-full h-auto w-56 overflow-visible pt-1.5 opacity-100",
-            )}
-          >
-            <div className="rounded-lg border bg-card p-1.5 shadow-md">
-              <p className="px-2.5 py-1.5 text-xs font-semibold text-muted-foreground">
-                Choose demo case
-              </p>
-              <form
-                action={(formData) => run(() => selectDemoCase(formData))}
-                aria-label="Choose demo case"
-                className="flex flex-col gap-1"
-              >
-                {cases.map(({ id, displayName }) => {
-                  const selected = current?.caseId === id;
-                  return (
-                    <PendingButton
-                      key={id}
-                      name="caseId"
-                      value={id}
-                      variant="ghost"
-                      aria-pressed={selected}
-                      disabled={state === "loading"}
-                      className={cn(
-                        "min-h-9 w-full justify-between px-2.5 py-1.5 text-xs font-medium",
-                        selected && "bg-secondary text-secondary-foreground",
-                      )}
-                    >
-                      <span>{displayName}</span>
-                      {selected && (
-                        <Check
-                          aria-hidden="true"
-                          className="size-3.5 text-primary"
-                        />
-                      )}
-                    </PendingButton>
-                  );
-                })}
-              </form>
-              {current ? (
-                <form
-                  action={() => run(resetDemo)}
-                  className="mt-1 border-t pt-1"
-                >
+          <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-transparent bg-transparent p-1 opacity-0 transition-all duration-150 group-focus-within:border-border group-focus-within:bg-card group-focus-within:opacity-100 group-focus-within:shadow-sm group-hover:border-border group-hover:bg-card group-hover:opacity-100 group-hover:shadow-sm">
+            <form
+              action={(formData) => run(() => selectDemoCase(formData))}
+              aria-label="Choose demo case"
+              className="flex flex-wrap gap-1"
+            >
+              {cases.map(({ id, displayName }) => {
+                const selected = current?.caseId === id;
+                return (
                   <PendingButton
+                    key={id}
+                    name="caseId"
+                    value={id}
                     variant="ghost"
-                    className="min-h-9 w-full justify-start px-2.5 py-1.5 text-xs text-muted-foreground"
+                    aria-pressed={selected}
+                    disabled={state === "loading"}
+                    className={cn(
+                      "min-h-8 gap-1.5 px-2.5 py-1 text-xs font-medium",
+                      selected && "bg-secondary text-secondary-foreground",
+                    )}
                   >
-                    <RotateCcw aria-hidden="true" className="size-3.5" />
-                    Reset demo
+                    <span>{displayName}</span>
+                    {selected && (
+                      <Check
+                        aria-hidden="true"
+                        className="size-3.5 text-primary"
+                      />
+                    )}
                   </PendingButton>
-                </form>
-              ) : null}
-            </div>
+                );
+              })}
+            </form>
+            {current ? (
+              <form action={() => run(resetDemo)}>
+                <PendingButton
+                  variant="ghost"
+                  className="min-h-8 px-2.5 py-1 text-xs text-muted-foreground"
+                >
+                  <RotateCcw aria-hidden="true" className="size-3.5" />
+                  Reset demo
+                </PendingButton>
+              </form>
+            ) : null}
           </div>
         </div>
       </div>

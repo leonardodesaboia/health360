@@ -140,6 +140,14 @@ function getFallbackStore(): Map<DemoCaseId, LocalFallbackRecord> {
   return (globalFallback.__h360LocalFallbackStore ??= new Map());
 }
 
+export async function resetLocalFallbackCase(
+  caseId: DemoCaseId,
+): Promise<LocalFallbackRecord> {
+  const store = getFallbackStore();
+  store.delete(caseId);
+  return buildFallbackScenarioState(caseId);
+}
+
 export function baselineAnswersForCase(caseId: DemoCaseId): IntakeAnswers {
   if (caseId === "daniel-pitch") {
     return {
