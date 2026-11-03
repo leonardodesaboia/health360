@@ -1,12 +1,13 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { ReactNode } from "react";
-import { Activity, ArrowLeftRight, ShieldCheck } from "lucide-react";
+import { ArrowLeftRight, ShieldCheck } from "lucide-react";
 import { DemoControls } from "./demo-controls";
 import { Navigation } from "./navigation";
 
 export function DemoBanner() {
   return (
-    <div className="border-b bg-secondary px-4 py-2 text-center text-xs leading-relaxed text-secondary-foreground">
+    <div className="border-b bg-muted px-4 py-2 text-center text-xs leading-relaxed text-muted-foreground">
       <strong>Demonstration environment</strong> · Synthetic data ·
       DEMONSTRATIVE — NOT CLINICALLY VALIDATED · Do not use for real care
     </div>
@@ -20,8 +21,13 @@ export function BrandLink({ href }: { href: string }) {
       aria-label="Health360 — home"
       className="flex items-center gap-2 text-xl font-semibold tracking-tight"
     >
-      <Activity aria-hidden="true" className="size-7 text-primary" />
-      health<span className="-ml-2 font-normal text-primary">360</span>
+      <Image
+        src="/logo.svg"
+        alt="health360"
+        width={182}
+        height={36}
+        className="h-9 w-auto object-contain"
+      />
     </Link>
   );
 }
@@ -42,7 +48,7 @@ function AppShell({
         Skip to content
       </a>
       <DemoBanner />
-      <header className="border-b bg-sidebar text-sidebar-foreground">
+      <header className="border-b-2 border-brand-cyan bg-sidebar text-sidebar-foreground">
         <div className="mx-auto flex max-w-workspace flex-wrap items-center justify-between gap-4 px-4 py-4 md:px-8">
           <BrandLink href={role === "patient" ? "/patient" : "/doctor"} />
           <p className="text-sm font-medium">
@@ -52,7 +58,7 @@ function AppShell({
           </p>
           <Link
             href={role === "patient" ? "/doctor" : "/patient"}
-            className="inline-flex min-h-11 items-center gap-2 rounded-md border px-3 text-xs font-medium hover:bg-navigation-hover"
+            className="inline-flex min-h-11 items-center gap-2 rounded-md border border-input bg-card px-3 text-xs font-medium text-muted-foreground hover:bg-navigation-hover hover:text-foreground"
           >
             <ArrowLeftRight aria-hidden="true" className="size-4" />
             {role === "patient" ? "View as physician" : "View as patient"}

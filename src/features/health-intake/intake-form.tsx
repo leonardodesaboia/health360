@@ -281,8 +281,8 @@ export function IntakeForm({
             <p className="text-sm font-medium">Next: You</p>
           </div>
           <fieldset disabled={busy} className="space-y-6">
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
+            <div className="space-y-3 rounded-lg border bg-card p-4">
+              <p className="text-sm font-medium text-muted-foreground tabular-nums">
                 Step {step + 1} of {steps.length}
               </p>
               <div
@@ -314,7 +314,7 @@ export function IntakeForm({
                       answers={getValues()}
                       onEdit={(target) => void save(target)}
                     />
-                    <label className="flex min-h-11 items-center gap-3 text-sm">
+                    <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-md border bg-background px-4 py-3 text-sm font-medium">
                       <input
                         id="confirm-intake"
                         type="checkbox"

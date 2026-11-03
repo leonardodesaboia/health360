@@ -41,7 +41,7 @@ export function Navigation({ role }: { role: "patient" | "doctor" }) {
             className={cn(
               "inline-flex min-h-11 items-center gap-2 rounded-md px-4 text-sm font-medium hover:bg-navigation-hover",
               active &&
-                "bg-navigation-active text-navigation-active-foreground",
+                "bg-navigation-active text-navigation-active-foreground hover:bg-primary hover:text-primary-foreground",
             )}
           >
             <Icon aria-hidden="true" className="size-4" />

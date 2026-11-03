@@ -26,8 +26,8 @@ export function Surface({
 }
 export function StatusIndicator({ status }: { status: WorkflowStatus }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-sm bg-secondary px-3 py-1 text-sm font-medium text-secondary-foreground">
-      <span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />
+    <span className="inline-flex items-center gap-2 rounded-sm border border-brand-cyan/30 bg-secondary px-3 py-1 text-xs font-semibold tracking-tight text-secondary-foreground">
+      <span aria-hidden="true" className="size-2 rounded-full bg-brand-cyan" />
       {statusLabels[status]}
     </span>
   );

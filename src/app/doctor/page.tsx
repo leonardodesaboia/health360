@@ -37,7 +37,7 @@ export default async function Queue() {
               <caption className="sr-only">
                 Synthetic analyses for physician review
               </caption>
-              <thead className="border-b bg-muted text-xs text-muted-foreground">
+              <thead className="border-b bg-secondary text-xs text-secondary-foreground">
                 <tr>
                   {[
                     "Patient",
@@ -90,7 +90,7 @@ export default async function Queue() {
             {rows.map((row) => (
               <li
                 key={workspaceId(row.analysis)}
-                className="space-y-4 rounded-lg border bg-card p-6"
+                className="space-y-4 rounded-lg border border-t-2 border-t-brand-cyan bg-card p-6"
               >
                 <h2 className="text-base">{row.patient.displayName}</h2>
                 <p className="text-sm tabular-nums">
