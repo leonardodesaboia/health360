@@ -105,9 +105,10 @@ wording; approved action titles therefore remain specific on the patient plan.
 
 ## Precision visual styling
 
-The shell uses the original PR #46 logo, a cyan brand separator, navy active
+The shell uses a faithful 546 × 108 lossless WebP export of the PR #46 logo, a cyan brand separator, navy active
 navigation and a pale blue semantic palette. Role and demonstrative labels stay
 visible, and role-switch controls retain 44 px targets. PageHeader uses a compact
 eyebrow and decorative cyan rule. StatusIndicator retains its exhaustive main
 status labels with a compact outlined style; cyan dots are decorative. Existing
 showcase examples exercise these shared styles without changing their APIs.
+The original SVG is retained as the design source; the shell serves its 31 KB visible crop through Next Image instead of loading the 447 KB embedded bitmap wrapper.

@@ -22,7 +22,7 @@ export function BrandLink({ href }: { href: string }) {
       className="flex items-center gap-2 text-xl font-semibold tracking-tight"
     >
       <Image
-        src="/logo.svg"
+        src="/logo.webp"
         alt="health360"
         width={182}
         height={36}
