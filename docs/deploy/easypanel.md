@@ -123,6 +123,7 @@ docker exec health360-deploy-db pg_isready -U health360 -d health360
 docker run -d --name health360-deploy-app --label "ao.session=$env:AO_SESSION_ID" --network health360-deploy-check -p 127.0.0.1:3241:3000 -e DATABASE_URL=postgresql://health360:local_check_only@health360-deploy-db:5432/health360 -e LLM_PROVIDER=mock health360-deploy
 docker logs health360-deploy-app
 Invoke-RestMethod http://127.0.0.1:3241/api/health
+Invoke-WebRequest http://127.0.0.1:3241/logo.svg # Expect HTTP 200 and Content-Type image/svg+xml.
 docker restart health360-deploy-app
 # Wait for readiness; logs should now show no pending migrations.
 docker logs health360-deploy-app
